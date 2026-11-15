@@ -1,6 +1,6 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.review.Review;
 import com.ssangtteongnip.domain.review.ReviewRepository;
 import com.ssangtteongnip.domain.schedule.Schedule;
@@ -23,13 +23,13 @@ import java.util.List;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
-    private final ApplicationService applicationService;
+    private final JobApplicationService jobApplicationService;
     private final ReviewRepository reviewRepository;
     private final Clock clock;
 
     @Transactional
     public Schedule register(Long userId, ScheduleRequest request) {
-        Application application = applicationService.findById(userId, request.applicationId());
+        JobApplication application = jobApplicationService.findById(userId, request.applicationId());
         Schedule schedule = scheduleRepository.save(
                 Schedule.create(application, request.title(), request.scheduledAt(),
                         request.type(), request.address(), request.note())
@@ -41,7 +41,7 @@ public class ScheduleService {
         return schedule;
     }
 
-    private void createReviewIfAbsent(Application application) {
+    private void createReviewIfAbsent(JobApplication application) {
         if (!reviewRepository.existsByApplicationId(application.getId())) {
             reviewRepository.save(Review.create(application));
         }

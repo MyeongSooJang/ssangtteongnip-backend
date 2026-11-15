@@ -1,7 +1,7 @@
 package com.ssangtteongnip.application.service.dto;
 
-import com.ssangtteongnip.domain.application.JobSite;
-import com.ssangtteongnip.domain.application.JobSiteStatistics;
+import com.ssangtteongnip.domain.jobapplication.JobSite;
+import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
 
 public record JobSiteStatisticsResponse(JobSite jobSite, long applicationCount, long documentPassedCount,
                                         double documentPassRate) {

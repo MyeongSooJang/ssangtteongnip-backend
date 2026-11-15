@@ -1,4 +1,4 @@
-package com.ssangtteongnip.domain.application;
+package com.ssangtteongnip.domain.jobapplication;
 
 // 구직 사이트 하나의 지원 건 집계. 서류 통과율은 (서류 통과 건 수) / (전체 지원 건 수)이다.
 public record JobSiteStatistics(JobSite jobSite, long applicationCount, long documentPassedCount) {

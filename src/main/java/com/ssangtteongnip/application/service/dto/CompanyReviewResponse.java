@@ -1,7 +1,7 @@
 package com.ssangtteongnip.application.service.dto;
 
-import com.ssangtteongnip.domain.application.Application;
-import com.ssangtteongnip.domain.application.ApplicationStatus;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
 import com.ssangtteongnip.domain.review.Review;
@@ -15,7 +15,7 @@ public record CompanyReviewResponse(
         int rating,
         String content,
         String position,
-        ApplicationStatus stage,
+        JobApplicationStatus stage,
         Integer difficulty,
         InterviewAtmosphere atmosphere,
         ApplyRoute route,
@@ -23,7 +23,7 @@ public record CompanyReviewResponse(
         LocalDateTime createdAt) {
 
     public static CompanyReviewResponse from(Review review) {
-        Application application = review.getApplication();
+        JobApplication application = review.getApplication();
         return new CompanyReviewResponse(
                 review.getId(),
                 review.getRating(),

@@ -63,7 +63,7 @@ erDiagram
         bigint user_id "FK 없음"
         bigint company_id FK
         varchar position
-        varchar status "ApplicationStatus"
+        varchar status "JobApplicationStatus"
         date applied_date
         varchar job_site "JobSite, 선택"
         timestamp document_passed_at "서류 통과(면접 일정 최초 등록) 시점, 서류 탈락이면 null"

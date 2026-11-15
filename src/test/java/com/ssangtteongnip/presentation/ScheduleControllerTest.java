@@ -2,7 +2,7 @@ package com.ssangtteongnip.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ScheduleService;
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.schedule.Schedule;
 import com.ssangtteongnip.domain.schedule.ScheduleType;
@@ -48,7 +48,7 @@ class ScheduleControllerTest {
     @Test
     void POST_schedules_일정을_등록한다() throws Exception {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application app = Application.create(1L, company, "백엔드 개발자", LocalDate.now());
+        JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.now());
         Schedule schedule = Schedule.create(app, "1차 면접", LocalDateTime.now(), ScheduleType.INTERVIEW, "경기도 성남시 판교역로 166", "");
         given(scheduleService.register(eq(1L), any())).willReturn(schedule);
 
@@ -68,7 +68,7 @@ class ScheduleControllerTest {
 
     private Schedule schedule(String address) {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application app = Application.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
+        JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
         return Schedule.create(app, "1차 면접", LocalDateTime.of(2026, 11, 10, 14, 0), ScheduleType.INTERVIEW, address, "");
     }
 
@@ -133,7 +133,7 @@ class ScheduleControllerTest {
     @Test
     void PATCH_schedules_address_주소를_수정한다() throws Exception {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application app = Application.create(1L, company, "백엔드 개발자", LocalDate.now());
+        JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.now());
         Schedule schedule = Schedule.create(app, "1차 면접", LocalDateTime.now(), ScheduleType.INTERVIEW, "서울시 강남구", "");
         given(scheduleService.updateAddress(eq(1L), eq(1L), any())).willReturn(schedule);
 

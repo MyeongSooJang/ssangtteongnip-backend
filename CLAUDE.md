@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `presentation/controller` — REST 컨트롤러 (`/api/**`)
 - `application/service` — 트랜잭션 서비스 (클래스 `@Transactional(readOnly = true)`, 쓰기 메서드만 `@Transactional`), 요청 DTO는 `service/dto`
-- `domain/<aggregate>` — 엔티티, enum, **Repository 인터페이스**. 비즈니스 규칙은 엔티티/enum이 담당 (예: `ApplicationStatus.canAdvanceTo`로 상태 전이 검증)
+- `domain/<aggregate>` — 엔티티, enum, **Repository 인터페이스**. 비즈니스 규칙은 엔티티/enum이 담당 (예: `JobApplicationStatus.canAdvanceTo`로 상태 전이 검증)
 - `infrastructure/persistence` — `XxxJpaRepository`가 `JpaRepository`와 도메인 `XxxRepository` 인터페이스를 **함께 상속**하는 구조 (별도 어댑터 구현 없음)
 - `global` — 오류는 `BusinessException` + `ErrorCode`로 던지고 `GlobalExceptionHandler`가 응답으로 바꾼다
 

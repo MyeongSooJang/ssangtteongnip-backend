@@ -2,7 +2,7 @@ package com.ssangtteongnip.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ReviewService;
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
@@ -48,7 +48,7 @@ class ReviewControllerTest {
 
     private Review review() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application app = Application.create(1L, company, "백엔드 개발자", LocalDate.now());
+        JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.now());
         return Review.create(app);
     }
 

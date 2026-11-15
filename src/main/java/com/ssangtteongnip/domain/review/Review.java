@@ -1,6 +1,6 @@
 package com.ssangtteongnip.domain.review;
 
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import jakarta.persistence.*;
@@ -34,7 +34,7 @@ public class Review {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "application_id", nullable = false, unique = true)
-    private Application application;
+    private JobApplication application;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -63,7 +63,7 @@ public class Review {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public static Review create(Application application) {
+    public static Review create(JobApplication application) {
         Review review = new Review();
         review.application = application;
         return review;

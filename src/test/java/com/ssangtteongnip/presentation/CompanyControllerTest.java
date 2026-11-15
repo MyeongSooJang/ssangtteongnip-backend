@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.CompanyService;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
-import com.ssangtteongnip.domain.application.ApplicationStatus;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
@@ -105,7 +105,7 @@ class CompanyControllerTest {
     void GET_companies_id_reviews_회사의_후기를_작성자_정보_없이_조회한다() throws Exception {
         given(companyService.findReviews(1L)).willReturn(List.of(
                 new CompanyReviewResponse(10L, 5, "면접관이 친절했어요", "백엔드 개발자",
-                        ApplicationStatus.ACCEPTED, 3, InterviewAtmosphere.COMFORTABLE, ApplyRoute.REFERRAL,
+                        JobApplicationStatus.ACCEPTED, 3, InterviewAtmosphere.COMFORTABLE, ApplyRoute.REFERRAL,
                         List.of("자기소개"), LocalDateTime.of(2026, 10, 20, 9, 0))));
 
         mockMvc.perform(get("/api/companies/1/reviews")

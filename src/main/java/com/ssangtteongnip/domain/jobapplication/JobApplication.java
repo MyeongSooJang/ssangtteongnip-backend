@@ -1,4 +1,4 @@
-package com.ssangtteongnip.domain.application;
+package com.ssangtteongnip.domain.jobapplication;
 
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.global.exception.BusinessException;
@@ -20,7 +20,7 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Application {
+public class JobApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +37,7 @@ public class Application {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ApplicationStatus status;
+    private JobApplicationStatus status;
 
     private LocalDate appliedDate;
 
@@ -66,23 +66,23 @@ public class Application {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public static Application create(Long userId, Company company, String position, LocalDate appliedDate) {
+    public static JobApplication create(Long userId, Company company, String position, LocalDate appliedDate) {
         return create(userId, company, position, appliedDate, null);
     }
 
-    public static Application create(Long userId, Company company, String position, LocalDate appliedDate,
+    public static JobApplication create(Long userId, Company company, String position, LocalDate appliedDate,
                                      JobSite jobSite) {
         return create(userId, company, position, appliedDate, jobSite, null, ResumeView.NOT_VIEWED);
     }
 
-    public static Application create(Long userId, Company company, String position, LocalDate appliedDate,
+    public static JobApplication create(Long userId, Company company, String position, LocalDate appliedDate,
                                      JobSite jobSite, LocalDate deadline, ResumeView resumeView) {
-        Application application = new Application();
+        JobApplication application = new JobApplication();
         application.jobSite = jobSite;
         application.userId = userId;
         application.company = company;
         application.position = position;
-        application.status = ApplicationStatus.RESUME_SUBMITTED;
+        application.status = JobApplicationStatus.RESUME_SUBMITTED;
         application.appliedDate = appliedDate;
         application.deadline = deadline;
         application.resumeView = Objects.requireNonNull(resumeView);
@@ -117,20 +117,20 @@ public class Application {
 
     // 면접 일정이나 면접 기록이 등록됐을 때 호출한다. 서류 제출 상태일 때만 면접으로 전이하며 서류 통과 시점을 한 번만 기록한다.
     public void startInterview(LocalDateTime now) {
-        if (this.status.canAdvanceTo(ApplicationStatus.INTERVIEW)) {
-            this.status = ApplicationStatus.INTERVIEW;
+        if (this.status.canAdvanceTo(JobApplicationStatus.INTERVIEW)) {
+            this.status = JobApplicationStatus.INTERVIEW;
             this.documentPassedAt = now;
         }
     }
 
     // 최종 합격. 면접 중인 지원만 합격할 수 있다.
     public void accept() {
-        moveTo(ApplicationStatus.ACCEPTED);
+        moveTo(JobApplicationStatus.ACCEPTED);
     }
 
     // 불합격. 서류 탈락(서류 제출 상태)과 면접 후 불합격(면접 상태) 모두 가능하다.
     public void reject() {
-        moveTo(ApplicationStatus.REJECTED);
+        moveTo(JobApplicationStatus.REJECTED);
     }
 
     // 서류 제출 상태로 마감일의 한 달 뒤 날짜가 지난 지원을 자동 불합격으로 바꾼다.
@@ -139,18 +139,18 @@ public class Application {
         if (!isDeadlineExpired(now.toLocalDate())) {
             return false;
         }
-        moveTo(ApplicationStatus.REJECTED);
+        moveTo(JobApplicationStatus.REJECTED);
         this.autoRejectedAt = now;
         return true;
     }
 
     private boolean isDeadlineExpired(LocalDate today) {
-        return status == ApplicationStatus.RESUME_SUBMITTED
+        return status == JobApplicationStatus.RESUME_SUBMITTED
                 && deadline != null
                 && today.isAfter(deadline.plusMonths(1));
     }
 
-    private void moveTo(ApplicationStatus next) {
+    private void moveTo(JobApplicationStatus next) {
         if (!this.status.canAdvanceTo(next)) {
             throw new BusinessException(ErrorCode.INVALID_STATUS_TRANSITION);
         }

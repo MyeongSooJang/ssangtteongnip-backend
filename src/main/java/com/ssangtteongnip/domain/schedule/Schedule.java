@@ -1,6 +1,6 @@
 package com.ssangtteongnip.domain.schedule;
 
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import jakarta.persistence.*;
@@ -25,7 +25,7 @@ public class Schedule {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "application_id")
-    private Application application;
+    private JobApplication application;
 
     @Column(nullable = false)
     private String title;
@@ -59,7 +59,7 @@ public class Schedule {
         this.address = address;
     }
 
-    public static Schedule create(Application application, String title,
+    public static Schedule create(JobApplication application, String title,
                                   LocalDateTime scheduledAt, ScheduleType type, String address, String note) {
         Schedule schedule = new Schedule();
         schedule.application = application;

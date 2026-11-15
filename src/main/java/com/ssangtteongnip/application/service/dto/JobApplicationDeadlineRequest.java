@@ -4,4 +4,4 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record ApplicationDeadlineRequest(@NotNull LocalDate deadline) {}
+public record JobApplicationDeadlineRequest(@NotNull LocalDate deadline) {}

@@ -1,24 +1,24 @@
 package com.ssangtteongnip.infrastructure.persistence;
 
-import com.ssangtteongnip.domain.application.Application;
-import com.ssangtteongnip.domain.application.ApplicationRepository;
-import com.ssangtteongnip.domain.application.ApplicationStatus;
-import com.ssangtteongnip.domain.application.JobSiteStatistics;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
+import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ApplicationJpaRepository extends JpaRepository<Application, Long>, ApplicationRepository {
-    List<Application> findByUserId(Long userId);
+public interface JobApplicationJpaRepository extends JpaRepository<JobApplication, Long>, JobApplicationRepository {
+    List<JobApplication> findByUserId(Long userId);
 
-    List<Application> findByUserIdAndStatus(Long userId, ApplicationStatus status);
+    List<JobApplication> findByUserIdAndStatus(Long userId, JobApplicationStatus status);
 
     @Override
     @Query("""
             select a.jobSite, count(a), count(a.documentPassedAt)
-            from Application a
+            from JobApplication a
             where a.userId = :userId
             group by a.jobSite
             order by count(a) desc, a.jobSite asc
@@ -27,9 +27,9 @@ public interface ApplicationJpaRepository extends JpaRepository<Application, Lon
 
     @Override
     @Query("""
-            select a from Application a
+            select a from JobApplication a
             where a.status = RESUME_SUBMITTED
               and a.deadline is not null
             """)
-    List<Application> findPendingWithDeadline();
+    List<JobApplication> findPendingWithDeadline();
 }

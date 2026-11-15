@@ -73,7 +73,7 @@ description: Use when creating, renaming, or changing a Java method or its signa
 
 ```java
 // 나쁨: 검사와 변경을 한 메서드가 함께 한다 (이름 moveTo에는 검사한다는 게 안 드러남)
-public void moveTo(ApplicationStatus next) { if (!status.canAdvanceTo(next)) throw ...; this.status = next; }
+public void moveTo(JobApplicationStatus next) { if (!status.canAdvanceTo(next)) throw ...; this.status = next; }
 
 // 좋음: 검사는 이름 있는 메서드로, 변경은 대입 한 줄로. 호출부에서 순서대로 읽힌다
 public void accept() {

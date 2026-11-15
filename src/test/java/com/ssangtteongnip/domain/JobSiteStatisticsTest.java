@@ -1,7 +1,7 @@
 package com.ssangtteongnip.domain;
 
-import com.ssangtteongnip.domain.application.JobSite;
-import com.ssangtteongnip.domain.application.JobSiteStatistics;
+import com.ssangtteongnip.domain.jobapplication.JobSite;
+import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

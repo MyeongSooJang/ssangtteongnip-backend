@@ -1,6 +1,6 @@
 package com.ssangtteongnip.domain;
 
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.schedule.Schedule;
 import com.ssangtteongnip.domain.schedule.ScheduleType;
@@ -22,7 +22,7 @@ class ScheduleTest {
 
     private Schedule interviewSchedule() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application application = Application.create(OWNER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
+        JobApplication application = JobApplication.create(OWNER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
         return Schedule.create(application, "1차 면접", SCHEDULED_AT, ScheduleType.INTERVIEW, "판교", "정장");
     }
 

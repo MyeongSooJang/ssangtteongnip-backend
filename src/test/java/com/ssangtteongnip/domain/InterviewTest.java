@@ -1,6 +1,6 @@
 package com.ssangtteongnip.domain;
 
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.domain.interview.InterviewQuestion;
@@ -18,7 +18,7 @@ class InterviewTest {
 
     private Interview interview() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application application = Application.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
+        JobApplication application = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
         return Interview.create(application, 1, INTERVIEW_DATE, "판교 본사", "1차 면접");
     }
 

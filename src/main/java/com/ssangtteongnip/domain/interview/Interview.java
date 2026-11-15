@@ -1,6 +1,6 @@
 package com.ssangtteongnip.domain.interview;
 
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public class Interview {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "application_id")
-    private Application application;
+    private JobApplication application;
 
     private int round;
 
@@ -46,7 +46,7 @@ public class Interview {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public static Interview create(Application application, int round,
+    public static Interview create(JobApplication application, int round,
                                    LocalDateTime interviewDate, String location, String note) {
         Interview interview = new Interview();
         interview.application = application;
