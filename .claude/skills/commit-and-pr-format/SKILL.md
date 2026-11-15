@@ -1,0 +1,167 @@
+---
+name: commit-and-pr-format
+description: Use when creating git commits, branches, or pull requests ("커밋해줘", "PR 만들어줘", "브랜치 따줘", "머지해줘"), or when instructing a coding agent to commit or open a PR after writing or refactoring code. Defines Conventional Commits 기반 커밋 양식, 브랜치 이름, PR 양식, 머지 절차.
+---
+
+# Commit & PR Format
+
+Conventional Commits 기반. 모든 메시지와 PR 본문은 한국어로 작성한다.
+
+## 협업 모드
+
+**현재 모드: `solo`** (팀으로 전환하면 이 값을 `team`으로 바꾼다)
+
+- 두 모드 모두 main 직접 커밋·푸시는 금지하고 항상 브랜치 + PR로 작업한다. solo는 리뷰 없이 머지할 수 있고, team은 리뷰어 승인이 있어야 머지한다.
+- team 모드의 "머지 금지"는 이 문서의 지침일 뿐이다. 실제 강제는 GitHub 브랜치 보호 규칙(Require a pull request before merging, 승인 1명 이상)으로 건다. team으로 전환할 때 함께 설정한다. 승인이 없으면 머지하지 않고 사용자에게 알린다.
+- 모드와 무관하게 main/master 직접 커밋·푸시는 `~/.claude/hooks/git-guard.py` 훅이 차단한다. 같은 훅이 커밋 첫 줄 형식(`type(scope): 한국어 설명`, 50자 이내)과 AI 서명(`Co-Authored-By` 등)도 검사한다.
+
+## 작업 흐름
+
+```
+main에서 브랜치 생성 → 테스트 실행 → 커밋 → PR 생성 → 검증(team은 리뷰 승인) → 사용자 확인 → main에 머지 → 브랜치 삭제
+```
+
+- **PR은 브랜치 하나(한 목적)당 하나**: 커밋과 push는 논리 단계마다 하지만, PR은 그 브랜치의 목적이 끝났을 때 한 번만 만든다. 커밋 요청 한 번이 PR 한 번을 뜻하지 않는다.
+  - 이미 열린 PR이 있거나 같은 목적으로 이어지는 작업(문서·`CLAUDE.md`·스킬 수정 포함)은 **같은 브랜치에 커밋·push만 하고** 새 PR을 만들지 않는다. 문서 한 줄 때문에 PR을 따로 만들지 않는다.
+  - 별도 PR은 아래 "PR 단위 판정"을 통과한 변경이거나 사용자가 분리를 지시한 경우다. 다른 목적의 변경을 발견하면 PR을 분리할지 사용자에게 먼저 묻는다.
+- **테스트 → PR 생성까지 자동 진행, 머지는 사용자 확인 후**: 브랜치의 목적이 끝나 PR을 만들 시점이면 사용자에게 다시 묻지 않고 PR 생성까지 진행한다. 머지는 사용자가 지시하거나 확인한 뒤에만 한다.
+  1. 커밋 전에 프로젝트의 전체 테스트를 실행한다 (프론트: `npx vitest run`, 백엔드: `./gradlew test` 등 프로젝트 표준 명령). 타입체크/린트가 설정돼 있으면 함께 실행한다.
+  2. 모두 통과하면 커밋 → 푸시까지 진행하고, 브랜치 목적이 끝났으면 PR을 생성한다. PR 링크와 "머지 전 확인" 결과를 사용자에게 알린 뒤 머지 여부를 기다린다. 사용자가 머지를 지시하면 `references/pr.md`의 "머지 전 확인"을 다시 확인하고 머지한다.
+  3. 테스트가 하나라도 실패하거나 "머지 전 확인"을 통과하지 못하면 **커밋/머지를 중단**하고 실패 출력과 원인을 사용자에게 보고한다. 테스트를 건너뛰거나 실패한 테스트를 지우고 진행하지 않는다.
+  4. team 모드는 리뷰어 승인이 없으면 PR 생성까지만 하고 머지하지 않는다.
+- 새 작업은 항상 최신 `main`에서 브랜치를 따서 시작한다 (`git fetch origin --prune && git fetch origin main:main && git switch -c <브랜치> main`).
+- 한 브랜치 = 한 목적. 목적이 하나인지는 아래 "PR 단위 판정"으로 정한다.
+- 머지는 **merge commit**(`--merge`)을 기본으로 한다. squash/rebase는 PR 안의 커밋을 합치거나 일렬로 펴서 변경 흐름이 사라지므로 쓰지 않는다. (PR 단위는 `git log --first-parent`, 단계까지는 `git log --graph`로 본다. 다른 방식이 필요하면 사용자가 지시한다.)
+- 머지 후 작업 브랜치를 삭제한다 (`gh pr merge --merge --delete-branch`).
+- 머지 커밋으로 PR 안의 커밋이 그대로 main에 남으므로, 작업 중 **논리 단계가 끝날 때마다 바로 커밋**한다. 작업을 끝낸 뒤 한꺼번에 나누지 않고, 한 커밋에는 하나의 변경 이유만 담아 `git log`로 변경 흐름이 읽히게 한다. 이미 지나간 작업의 흐름을 사후에 꾸며서 만들지 않는다.
+
+## PR 단위 판정
+
+PR 하나는 **목적 하나**다. 줄 수나 파일 수로 정하지 않고 아래 질문으로 판정한다.
+
+1. **한 문장 테스트**: 제목을 "A를 위해 B한다" 한 문장으로 쓸 수 있는가? "및"으로 서로 다른 동사를 이어야 하면 목적이 둘이므로 나눈다.
+2. **반으로 나누기 테스트**: 반으로 쪼개 따로 머지해도 각각 의미가 있으면 나눈다. 한쪽만 머지하면 깨지거나 의미가 없으면 한 PR이다.
+3. **부속 테스트**: 이 변경이 다른 변경의 설명·규칙·도구일 뿐이라 혼자서는 머지할 이유가 없으면 그 변경의 브랜치에 합친다. 문서·훅·스킬 수정이 이에 해당하는 경우가 많다.
+
+- 판정이 애매하면 PR을 마음대로 만들거나 합치지 말고 사용자에게 한 줄로 묻는다.
+- 수치는 판정 기준이 아니라 이상 징후 신호다. 변경이 400줄을 넘거나 100줄에 못 미치면 위 질문을 다시 확인한다. 크더라도 목적이 하나면 한 PR이다.
+- 이 저장소 이력의 사례:
+  - 합칠 수 있었다: 같은 날 연달아 올라온 훅 보완 PR #35(훅 범위 제한)와 #38(안내 훅 추가)은 부속 테스트에서 하나로 합쳐진다.
+  - 나눠야 했다: #41은 "회사 후기 평점 이름 정리"와 "making-method 스킬 추가"가 한 PR에 섞였다. 한 문장 테스트에서 걸린다.
+  - 커도 한 PR이다: #29는 168개 파일을 건드리지만 목적은 이름 변경 하나다.
+
+## 브랜치 이름
+
+```
+<type>/<짧은-설명-kebab-case>
+```
+
+- type 접두어: `feature`(feat), `fix`, `refactor`, `chore`, `docs`, `test`, `perf`
+- 설명은 영문 소문자와 하이픈 (예: `feature/interview-question-api`, `fix/lazy-loading-error`)
+- 이슈가 있으면 번호를 붙인다 (예: `fix/12-cors-error`)
+
+---
+
+## 커밋 양식
+
+### 구조
+```
+type(scope): 한국어 설명
+
+body (선택)
+
+footer (선택)
+```
+
+### type — 아래 중 하나만 사용
+| type | 사용 상황 |
+|------|-----------|
+| feat | 새 기능 추가 |
+| fix | 버그 수정 |
+| refactor | 동작 변경 없는 코드 개선 |
+| perf | 성능 개선 |
+| test | 테스트 추가/수정 |
+| docs | 문서 변경 |
+| style | 포맷팅 등 동작과 무관한 변경 (공백, 세미콜론) |
+| build | 빌드 설정, 의존성 변경 |
+| ci | CI/CD 설정 변경 |
+| chore | 위에 해당하지 않는 잡무 (.gitignore 등) |
+| revert | 이전 커밋 되돌리기 |
+
+### scope — 선택
+- 변경 대상 모듈/도메인이 뚜렷할 때만 작성한다 (예: `order`, `auth`, `schedule`).
+- 쓰기로 했다면 프로젝트 안에서 같은 이름을 일관되게 쓴다.
+- 전체에 걸친 변경이거나 모호하면 생략한다.
+
+### subject (첫 줄)
+- 50자 이내. 마침표를 붙이지 않는다.
+- 명사형으로 끝낸다 (예: "~추가", "~수정", "~제거").
+- "무엇을 했는지"가 한눈에 보이게 쓴다.
+
+### body
+- **무엇보다 왜**를 쓴다. 코드를 보면 알 수 있는 "무엇"은 반복하지 않는다.
+- subject로 충분한 사소한 변경은 body를 생략한다.
+- 쓸 때는 빈 줄로 subject와 구분하고, 변경 내용은 bullet로 정리한다.
+- fix/refactor는 첫 줄에 문제(원인)를 한 줄로 정의한 뒤 bullet로 변경 내용을 쓴다.
+
+### footer
+- 허용: 이슈 연결 (`Closes #12`, `Refs #7`), `BREAKING CHANGE: 설명`
+- 금지: `Co-Authored-By`, `Generated with Claude Code` 등 AI 서명류
+
+### Breaking Change
+하위 호환이 깨지면 type/scope 뒤에 `!`를 붙이고 footer에 설명한다.
+```
+feat(api)!: 지원 현황 응답 필드명 변경
+
+BREAKING CHANGE: status 필드가 state로 변경됨
+```
+
+### 커밋 단위
+- 하나의 논리적 변경 = 하나의 커밋. 서로 다른 목적(기능 + 포맷팅 등)을 섞지 않는다.
+- 각 커밋은 빌드와 테스트가 깨지지 않는 상태로 남긴다.
+- 논리 단위의 최종 판정은 수치가 아니라 의미 기준이다. 커밋 크기, 변경 파일 수 같은 수치는 이상 징후를 찾는 용도로만 쓴다.
+  - 이 커밋만 revert해도 시스템이 일관된가
+  - 리뷰어가 이 커밋만 보고 이해할 수 있는가
+
+### 예시
+
+**feat**
+```
+feat(order): 주문 할인 정책 추가
+
+주문 금액에 따라 할인율이 달라지는 요구사항 대응.
+- DiscountPolicy 인터페이스 및 RateDiscountPolicy 구현
+- OrderService에 정책 적용 로직 연결
+```
+
+**fix**
+```
+fix(auth): 로그인 실패 시 토큰이 초기화되지 않는 버그 수정
+
+JwtFilter 예외 처리 블록에서 SecurityContext 초기화 누락.
+- doFilterInternal 예외 경로에 SecurityContextHolder.clearContext() 추가
+- 인증 실패 응답 코드 401로 통일
+
+Closes #12
+```
+
+**refactor**
+```
+refactor(ai): KafkaProducerConfig 제거 및 common-messaging 모듈로 통합
+
+spring-boot-starter-kafka가 ai 모듈에 중복 선언되어 설정 충돌 발생.
+- ai 모듈에서 spring-boot-starter-kafka 의존성 제거
+- KafkaProducerConfig 클래스 삭제
+- common-messaging 의존성 추가
+```
+
+**body 생략 (사소한 변경)**
+```
+fix: CORS에 Vercel 도메인 추가
+```
+
+---
+
+## PR 양식·머지
+
+PR 제목·본문 양식, 작성 규칙, 머지 전 확인은 `references/pr.md`에 있다. PR을 만들거나 머지하기 직전에 읽는다.

@@ -83,8 +83,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 작업 규칙
 
-- 브랜치·커밋·PR·머지 방식과 형식은 전역 `commit-and-pr-format` 스킬을 따른다. 커밋·PR 작업 전에 스킬을 호출한다.
-- 기능 하나가 끝나고 `./gradlew test`가 통과하면 별도 확인 없이 커밋·push·PR 생성까지 하고, 머지는 사용자가 지시하거나 확인한 뒤에 한다. 테스트가 실패하면 커밋/push하지 않는다.
+- 작업을 시작하기 전에 항상 `git fetch origin --prune`으로 원격을 받고, 로컬 `main`이 `origin/main`보다 뒤처졌는지 확인한다. 뒤처졌으면 `git fetch origin main:main`으로 최신화한 뒤 그 `main`에서 브랜치를 딴다. 이미 있는 브랜치에서 이어 작업할 때도 `origin/main`과의 차이를 먼저 확인해, 뒤처졌으면 알리고 반영 방법을 정한다. 오래된 `main`이나 `CLAUDE.md`를 보고 작업하지 않기 위해서다.
+- 브랜치·커밋·PR·머지 방식과 형식은 프로젝트 `.claude/skills/commit-and-pr-format` 스킬을 따른다. 커밋·PR 작업 전에 스킬을 호출한다.
+- 브랜치의 목적(기능·리팩터링 한 건)이 끝나고 `./gradlew test`가 통과하면 별도 확인 없이 push·PR 생성까지 하고, 머지는 사용자가 지시하거나 확인한 뒤에 한다. 테스트가 실패하면 커밋/push하지 않는다.
+- PR은 브랜치당 1개다. 같은 목적에 딸린 문서·`CLAUDE.md`·스킬 수정은 그 브랜치에 커밋만 하고 별도 PR을 만들지 않는다.
 - 커밋 메시지에 `Co-Authored-By` 등 Claude 관련 attribution 줄을 넣지 않는다.
 - 작업 중 내용이 바뀔 때마다 그 자리에서 커밋한다. 특히 스킬을 만들거나 고칠 때는 초안, 테스트 후 수정 1회마다 각각 커밋하고, 본문에 "무엇이 잘못 나왔고 왜 바꿨는지"를 적는다. 끝난 뒤 한 번에 커밋하지 않는다. 문제가 자주 생기는 지점을 커밋 이력에서 찾아 개선하기 위해서다.
 - 엔티티(`@Entity`/`@Embeddable`)의 테이블·컬럼·관계를 바꾸면 같은 커밋에서 `docs/ERD.md`도 고친다. `.claude/hooks/erd-guard.py`가 엔티티 수정 시 알려주고, ERD 없이 엔티티만 커밋하려 하면 차단한다. `ddl-auto: update`는 컬럼 추가만 하므로 운영 DB에 직접 DDL이 필요한지도 함께 확인한다.
