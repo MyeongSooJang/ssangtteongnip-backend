@@ -128,16 +128,19 @@ class ReviewControllerTest {
     }
 
     @Test
-    void PATCH_reviews_평점과_난이도를_구분해_서비스에_전달한다() throws Exception {
+    void PATCH_reviews_본문_필드를_구분해_서비스에_전달한다() throws Exception {
         given(reviewService.write(eq(1L), eq(1L), any())).willReturn(review());
 
         mockMvc.perform(patch("/api/reviews/1")
                         .header("Authorization", BEARER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                Map.of("content", "분위기가 좋았다", "rating", 4, "difficulty", 2))))
+                                Map.of("content", "분위기가 좋았다", "rating", 4, "difficulty", 2,
+                                        "atmosphere", "COMFORTABLE", "route", "REFERRAL",
+                                        "questions", List.of("자기소개", "프로젝트 경험")))))
                 .andExpect(status().isOk());
 
-        verify(reviewService).write(1L, 1L, new WriteReviewCommand("분위기가 좋았다", 4, 2, null, null, null));
+        verify(reviewService).write(1L, 1L, new WriteReviewCommand("분위기가 좋았다", 4, 2,
+                InterviewAtmosphere.COMFORTABLE, ApplyRoute.REFERRAL, List.of("자기소개", "프로젝트 경험")));
     }
 }

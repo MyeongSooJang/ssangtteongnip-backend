@@ -1,5 +1,10 @@
 package com.ssangtteongnip.web.profile;
 
+import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.mockito.ArgumentCaptor;
+import com.ssangtteongnip.domain.profile.PersonalInfo;
+import com.ssangtteongnip.application.service.command.ReviseProfileCommand;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ProfileService;
 import com.ssangtteongnip.application.service.dto.ProfileResponse;
@@ -164,5 +169,37 @@ class ProfileControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", "홍길동"))))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void PUT_me_profile_인적_사항_필드를_구분해_서비스에_전달한다() throws Exception {
+        given(profileService.reviseMyProfile(eq(1L), any())).willReturn(profileResponse(null));
+
+        mockMvc.perform(put("/api/me/profile")
+                        .header("Authorization", BEARER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.ofEntries(
+                                Map.entry("name", "홍길동"),
+                                Map.entry("phone", "010-1234-5678"),
+                                Map.entry("birthDate", "1998-04-27"),
+                                Map.entry("address", "서울시"),
+                                Map.entry("githubUrl", "https://github.com/hong"),
+                                Map.entry("blogUrl", "https://blog.example.com"),
+                                Map.entry("portfolioUrl", "https://portfolio.example.com"),
+                                Map.entry("education", "OO대 컴퓨터공학"),
+                                Map.entry("career", "인턴 6개월"),
+                                Map.entry("desiredJob", "백엔드 개발자"),
+                                Map.entry("introduction", "안녕하세요"),
+                                Map.entry("jobSearchStartDate", "2025-03-01")))))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ReviseProfileCommand> captor = ArgumentCaptor.forClass(ReviseProfileCommand.class);
+        verify(profileService).reviseMyProfile(eq(1L), captor.capture());
+        assertThat(captor.getValue().name()).isEqualTo("홍길동");
+        assertThat(captor.getValue().personalInfo()).usingRecursiveComparison().isEqualTo(PersonalInfo.of(
+                "010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
+                "https://github.com/hong", "https://blog.example.com", "https://portfolio.example.com",
+                "OO대 컴퓨터공학", "인턴 6개월", "백엔드 개발자", "안녕하세요",
+                LocalDate.of(2025, 3, 1)));
     }
 }
