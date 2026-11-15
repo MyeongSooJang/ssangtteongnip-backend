@@ -84,7 +84,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 작업 규칙
 
 - 작업을 시작하기 전에 항상 `git fetch origin --prune`으로 원격을 받고, 로컬 `main`이 `origin/main`보다 뒤처졌는지 확인한다. 뒤처졌으면 `git fetch origin main:main`으로 최신화한 뒤 그 `main`에서 브랜치를 딴다. 이미 있는 브랜치에서 이어 작업할 때도 `origin/main`과의 차이를 먼저 확인해, 뒤처졌으면 알리고 반영 방법을 정한다. 오래된 `main`이나 `CLAUDE.md`를 보고 작업하지 않기 위해서다.
-- 브랜치·커밋·PR·머지 방식과 형식은 전역 `commit-and-pr-format` 스킬을 따른다. 커밋·PR 작업 전에 스킬을 호출한다.
+- 브랜치·커밋·PR·머지 방식과 형식은 프로젝트 `.claude/skills/commit-and-pr-format` 스킬을 따른다. 커밋·PR 작업 전에 스킬을 호출한다.
 - 브랜치의 목적(기능·리팩터링 한 건)이 끝나고 `./gradlew test`가 통과하면 별도 확인 없이 push·PR 생성까지 하고, 머지는 사용자가 지시하거나 확인한 뒤에 한다. 테스트가 실패하면 커밋/push하지 않는다.
 - PR은 브랜치당 1개다. 같은 목적에 딸린 문서·`CLAUDE.md`·스킬 수정은 그 브랜치에 커밋만 하고 별도 PR을 만들지 않는다.
 - 커밋 메시지에 `Co-Authored-By` 등 Claude 관련 attribution 줄을 넣지 않는다.
