@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation;
+package com.ssangtteongnip.web.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.AuthService;
@@ -8,7 +8,6 @@ import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.config.SecurityConfig;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
-import com.ssangtteongnip.presentation.controller.AuthController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation;
+package com.ssangtteongnip.web.profile;
 
 import com.ssangtteongnip.application.service.UserFileService;
 import com.ssangtteongnip.application.service.dto.FileDownload;
@@ -8,7 +8,6 @@ import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.config.SecurityConfig;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
-import com.ssangtteongnip.presentation.controller.UserFileController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

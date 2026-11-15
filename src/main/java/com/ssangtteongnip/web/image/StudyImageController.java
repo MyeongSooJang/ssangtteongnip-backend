@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.image;
 
 import com.ssangtteongnip.application.service.StudyImageService;
 import com.ssangtteongnip.application.service.dto.StudyImageResponse;

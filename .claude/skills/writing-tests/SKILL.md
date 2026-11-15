@@ -28,7 +28,7 @@ description: Use when writing, modifying, or reviewing test code in this project
 | 대상 | 방식 | 비중 |
 |---|---|---|
 | `domain/*` 엔티티·enum (비즈니스 규칙) | Spring 없는 순수 단위 테스트. 실제 협력 객체 사용 | **가장 많이** |
-| `presentation/controller` | `@WebMvcTest` + `@MockitoBean` 서비스. 요청 매핑, 검증, 상태코드, 에러 응답 | 적당히 |
+| `web/<기능>` | `@WebMvcTest` + `@MockitoBean` 서비스. 요청 매핑, 검증, 상태코드, 에러 응답 | 적당히 |
 | `application/service` | `@ExtendWith(MockitoExtension.class)`. 도메인 호출과 협력 흐름 위주 (로직은 도메인에 있으므로 얇게) | 적게 |
 | `infrastructure/persistence` | 쿼리 메서드가 직접 정의된 경우에만 | 필요한 만큼 |
 | 전체 연동 `@SpringBootTest` | 핵심 흐름 소수만. 컨텍스트가 새로 뜨므로 느리다 | 아주 적게 |

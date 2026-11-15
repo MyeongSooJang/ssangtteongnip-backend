@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.auth;
 
 import com.ssangtteongnip.application.service.AuthService;
 import com.ssangtteongnip.application.service.EmailVerificationService;

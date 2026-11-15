@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.review;
 
 import com.ssangtteongnip.application.service.ReviewService;
 import com.ssangtteongnip.application.service.dto.ReviewRequest;

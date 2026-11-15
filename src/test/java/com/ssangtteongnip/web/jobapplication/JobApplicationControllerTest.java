@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation;
+package com.ssangtteongnip.web.jobapplication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.JobApplicationService;
@@ -12,7 +12,6 @@ import com.ssangtteongnip.domain.jobapplication.ResumeView;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
-import com.ssangtteongnip.presentation.controller.JobApplicationController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

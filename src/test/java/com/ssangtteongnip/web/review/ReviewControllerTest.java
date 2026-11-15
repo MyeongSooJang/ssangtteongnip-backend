@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation;
+package com.ssangtteongnip.web.review;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ReviewService;
@@ -7,7 +7,6 @@ import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
 import com.ssangtteongnip.domain.review.Review;
-import com.ssangtteongnip.presentation.controller.ReviewController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

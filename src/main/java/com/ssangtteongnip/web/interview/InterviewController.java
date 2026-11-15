@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.interview;
 
 import com.ssangtteongnip.application.service.InterviewService;
 import com.ssangtteongnip.domain.interview.Interview;

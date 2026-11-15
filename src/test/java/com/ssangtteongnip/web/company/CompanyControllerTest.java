@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation;
+package com.ssangtteongnip.web.company;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.CompanyService;
@@ -10,7 +10,6 @@ import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
-import com.ssangtteongnip.presentation.controller.CompanyController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

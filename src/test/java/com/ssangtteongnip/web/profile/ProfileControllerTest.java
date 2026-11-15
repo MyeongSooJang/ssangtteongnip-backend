@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation;
+package com.ssangtteongnip.web.profile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ProfileService;
@@ -7,7 +7,6 @@ import com.ssangtteongnip.application.service.dto.UserFileResponse;
 import com.ssangtteongnip.domain.profile.FileType;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.config.SecurityConfig;
-import com.ssangtteongnip.presentation.controller.ProfileController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.jobapplication;
 
 import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.dto.JobApplicationDeadlineRequest;

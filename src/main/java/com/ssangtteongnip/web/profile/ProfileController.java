@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.profile;
 
 import com.ssangtteongnip.application.service.ProfileService;
 import com.ssangtteongnip.application.service.dto.ProfileRequest;

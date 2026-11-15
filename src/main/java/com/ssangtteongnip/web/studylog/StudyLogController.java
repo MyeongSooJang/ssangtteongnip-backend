@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.studylog;
 
 import com.ssangtteongnip.application.service.StudyLogService;
 import com.ssangtteongnip.application.service.dto.HeatmapDayResponse;

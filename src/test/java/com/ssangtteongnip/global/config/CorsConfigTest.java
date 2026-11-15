@@ -2,7 +2,7 @@ package com.ssangtteongnip.global.config;
 
 import com.ssangtteongnip.application.service.CompanyService;
 import com.ssangtteongnip.domain.user.TokenProvider;
-import com.ssangtteongnip.presentation.controller.CompanyController;
+import com.ssangtteongnip.web.company.CompanyController;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;

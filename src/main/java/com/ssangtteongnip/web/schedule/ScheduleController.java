@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.schedule;
 
 import com.ssangtteongnip.application.service.ScheduleService;
 import com.ssangtteongnip.domain.schedule.Schedule;

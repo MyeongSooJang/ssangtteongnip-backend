@@ -1,4 +1,4 @@
-package com.ssangtteongnip.presentation.controller;
+package com.ssangtteongnip.web.company;
 
 import com.ssangtteongnip.application.service.CompanyService;
 import com.ssangtteongnip.application.service.dto.CompanyRequest;

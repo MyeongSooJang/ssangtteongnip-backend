@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 패키지는 `com.ssangtteongnip` 아래 계층형 + DDD 풍으로 나뉜다.
 
-- `presentation/controller` — REST 컨트롤러 (`/api/**`)
+- `web/<기능>` — REST 컨트롤러 (`/api/**`)
 - `application/service` — 트랜잭션 서비스 (클래스 `@Transactional(readOnly = true)`, 쓰기 메서드만 `@Transactional`), 요청 DTO는 `service/dto`
 - `domain/<aggregate>` — 엔티티, enum, **Repository 인터페이스**. 비즈니스 규칙은 엔티티/enum이 담당 (예: `JobApplicationStatus.canAdvanceTo`로 상태 전이 검증)
 - `infrastructure/persistence` — `XxxJpaRepository`가 `JpaRepository`와 도메인 `XxxRepository` 인터페이스를 **함께 상속**하는 구조 (별도 어댑터 구현 없음)
