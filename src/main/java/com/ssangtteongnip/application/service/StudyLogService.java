@@ -1,8 +1,8 @@
 package com.ssangtteongnip.application.service;
 
 import com.ssangtteongnip.application.service.dto.HeatmapDayResponse;
-import com.ssangtteongnip.application.service.dto.StudyLogCreateRequest;
-import com.ssangtteongnip.application.service.dto.StudyLogRequest;
+import com.ssangtteongnip.application.service.command.CreateStudyLogCommand;
+import com.ssangtteongnip.application.service.command.RewriteStudyLogCommand;
 import com.ssangtteongnip.application.service.dto.StudyLogResponse;
 import com.ssangtteongnip.application.service.dto.StudyStatsResponse;
 import com.ssangtteongnip.domain.studylog.StudyLog;
@@ -36,17 +36,17 @@ public class StudyLogService {
     private final Clock clock;
 
     @Transactional
-    public StudyLogResponse create(Long userId, StudyLogCreateRequest request) {
-        StudyLog created = StudyLog.create(userId, request.studyDate(), request.title(), request.content(),
-                request.minutesOrZero(), today());
+    public StudyLogResponse create(Long userId, CreateStudyLogCommand command) {
+        StudyLog created = StudyLog.create(userId, command.studyDate(), command.title(), command.content(),
+                command.studyMinutes(), today());
         return StudyLogResponse.from(studyLogRepository.save(created));
     }
 
     @Transactional
-    public StudyLogResponse rewrite(Long userId, Long id, StudyLogRequest request) {
+    public StudyLogResponse rewrite(Long userId, Long id, RewriteStudyLogCommand command) {
         StudyLog studyLog = findOrThrow(userId, id);
-        Set<UUID> removedImages = studyLog.imageIdsRemovedBy(request.content());
-        studyLog.write(request.title(), request.content(), request.minutesOrZero());
+        Set<UUID> removedImages = studyLog.imageIdsRemovedBy(command.content());
+        studyLog.write(command.title(), command.content(), command.studyMinutes());
         studyImageService.deleteUnused(userId, removedImages);
         return StudyLogResponse.from(studyLog);
     }

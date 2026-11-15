@@ -1,5 +1,6 @@
-package com.ssangtteongnip.application.service.dto;
+package com.ssangtteongnip.web.review;
 
+import com.ssangtteongnip.application.service.command.WriteReviewCommand;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
 import jakarta.validation.constraints.Max;
@@ -16,4 +17,9 @@ public record ReviewRequest(
         @Min(1) @Max(5) Integer difficulty,
         InterviewAtmosphere atmosphere,
         ApplyRoute route,
-        List<String> questions) {}
+        List<String> questions) {
+
+    public WriteReviewCommand toCommand() {
+        return new WriteReviewCommand(content, rating, difficulty, atmosphere, route, questions);
+    }
+}

@@ -1,4 +1,4 @@
-package com.ssangtteongnip.application.service.dto;
+package com.ssangtteongnip.web.interview;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

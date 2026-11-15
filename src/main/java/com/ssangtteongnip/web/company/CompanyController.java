@@ -1,7 +1,6 @@
 package com.ssangtteongnip.web.company;
 
 import com.ssangtteongnip.application.service.CompanyService;
-import com.ssangtteongnip.application.service.dto.CompanyRequest;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
 import com.ssangtteongnip.domain.company.Company;
@@ -22,7 +21,7 @@ public class CompanyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Company register(@RequestBody @Valid CompanyRequest request) {
-        return companyService.register(request);
+        return companyService.register(request.toCommand());
     }
 
     @GetMapping

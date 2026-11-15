@@ -1,7 +1,6 @@
 package com.ssangtteongnip.web.review;
 
 import com.ssangtteongnip.application.service.ReviewService;
-import com.ssangtteongnip.application.service.dto.ReviewRequest;
 import com.ssangtteongnip.domain.review.Review;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +25,6 @@ public class ReviewController {
     public Review write(@AuthenticationPrincipal Long userId,
                         @PathVariable Long id,
                         @RequestBody @Valid ReviewRequest request) {
-        return reviewService.write(userId, id, request);
+        return reviewService.write(userId, id, request.toCommand());
     }
 }

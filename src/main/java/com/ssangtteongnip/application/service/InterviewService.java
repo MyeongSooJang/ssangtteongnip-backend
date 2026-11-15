@@ -5,9 +5,8 @@ import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.domain.interview.InterviewRepository;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
-import com.ssangtteongnip.application.service.dto.InterviewQuestionRequest;
-import com.ssangtteongnip.application.service.dto.InterviewRequest;
-import com.ssangtteongnip.application.service.dto.InterviewScoreRequest;
+import com.ssangtteongnip.application.service.command.AddInterviewQuestionCommand;
+import com.ssangtteongnip.application.service.command.RegisterInterviewCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,19 +25,19 @@ public class InterviewService {
     private final Clock clock;
 
     @Transactional
-    public Interview register(Long userId, Long applicationId, InterviewRequest request) {
+    public Interview register(Long userId, Long applicationId, RegisterInterviewCommand command) {
         JobApplication application = jobApplicationService.findById(userId, applicationId);
-        Interview interview = Interview.create(application, request.round(), request.interviewDate(),
-                request.location(), request.note());
-        interview.evaluate(request.score());
+        Interview interview = Interview.create(application, command.round(), command.interviewDate(),
+                command.location(), command.note());
+        interview.evaluate(command.score());
         application.startInterview(LocalDateTime.now(clock));
         return interviewRepository.save(interview);
     }
 
     @Transactional
-    public Interview evaluate(Long userId, Long applicationId, Long interviewId, InterviewScoreRequest request) {
+    public Interview evaluate(Long userId, Long applicationId, Long interviewId, Integer score) {
         Interview interview = findInterview(userId, applicationId, interviewId);
-        interview.evaluate(request.score());
+        interview.evaluate(score);
         return interview;
     }
 
@@ -48,9 +47,9 @@ public class InterviewService {
     }
 
     @Transactional
-    public Interview addQuestion(Long userId, Long applicationId, Long interviewId, InterviewQuestionRequest request) {
+    public Interview addQuestion(Long userId, Long applicationId, Long interviewId, AddInterviewQuestionCommand command) {
         Interview interview = findInterview(userId, applicationId, interviewId);
-        interview.addQuestion(request.question(), request.answer(), request.memo());
+        interview.addQuestion(command.question(), command.answer(), command.memo());
         return interview;
     }
 

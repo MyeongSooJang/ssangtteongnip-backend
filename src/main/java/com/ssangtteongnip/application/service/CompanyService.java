@@ -1,6 +1,6 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.application.service.dto.CompanyRequest;
+import com.ssangtteongnip.application.service.command.RegisterCompanyCommand;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
 import com.ssangtteongnip.domain.company.Company;
@@ -25,12 +25,12 @@ public class CompanyService {
     private final ReviewRepository reviewRepository;
 
     @Transactional
-    public Company register(CompanyRequest request) {
-        if (companyRepository.existsByName(request.name())) {
+    public Company register(RegisterCompanyCommand command) {
+        if (companyRepository.existsByName(command.name())) {
             throw new BusinessException(ErrorCode.COMPANY_ALREADY_EXISTS);
         }
         return companyRepository.save(
-                Company.create(request.name(), request.industry(), request.website())
+                Company.create(command.name(), command.industry(), command.website())
         );
     }
 

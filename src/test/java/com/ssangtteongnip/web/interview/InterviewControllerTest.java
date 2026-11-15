@@ -2,6 +2,8 @@ package com.ssangtteongnip.web.interview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.InterviewService;
+import com.ssangtteongnip.application.service.command.AddInterviewQuestionCommand;
+import com.ssangtteongnip.application.service.command.RegisterInterviewCommand;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.interview.Interview;
@@ -24,6 +26,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -136,5 +139,36 @@ class InterviewControllerTest {
                         .content(objectMapper.writeValueAsString(Map.of("question", " "))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void POST_interviews_장소와_메모를_구분해_서비스에_전달한다() throws Exception {
+        given(interviewService.register(eq(1L), eq(1L), any())).willReturn(interview());
+
+        mockMvc.perform(post("/api/applications/1/interviews")
+                        .header("Authorization", BEARER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("round", 2, "interviewDate", "2026-11-10T14:00:00",
+                                        "location", "판교", "note", "2차 면접", "score", 80))))
+                .andExpect(status().isCreated());
+
+        verify(interviewService).register(1L, 1L, new RegisterInterviewCommand(
+                2, LocalDateTime.of(2026, 11, 10, 14, 0), "판교", "2차 면접", 80));
+    }
+
+    @Test
+    void 면접_질문의_질문_답변_메모를_구분해_서비스에_전달한다() throws Exception {
+        given(interviewService.addQuestion(eq(1L), eq(1L), eq(1L), any())).willReturn(interview());
+
+        mockMvc.perform(post("/api/applications/1/interviews/1/questions")
+                        .header("Authorization", BEARER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("question", "자기소개 해주세요", "answer", "저는...", "memo", "잘 대답했음"))))
+                .andExpect(status().isCreated());
+
+        verify(interviewService).addQuestion(1L, 1L, 1L,
+                new AddInterviewQuestionCommand("자기소개 해주세요", "저는...", "잘 대답했음"));
     }
 }

@@ -1,11 +1,6 @@
 package com.ssangtteongnip.web.jobapplication;
 
 import com.ssangtteongnip.application.service.JobApplicationService;
-import com.ssangtteongnip.application.service.dto.JobApplicationDeadlineRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationJobSiteRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationResumeViewRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationStatusRequest;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
@@ -28,7 +23,7 @@ public class JobApplicationController {
     @ResponseStatus(HttpStatus.CREATED)
     public JobApplication register(@AuthenticationPrincipal Long userId,
                                @RequestBody @Valid JobApplicationRequest request) {
-        return jobApplicationService.register(userId, request);
+        return jobApplicationService.register(userId, request.toCommand());
     }
 
     @GetMapping
@@ -53,27 +48,27 @@ public class JobApplicationController {
     public JobApplication changeJobSite(@AuthenticationPrincipal Long userId,
                                      @PathVariable Long id,
                                      @RequestBody @Valid JobApplicationJobSiteRequest request) {
-        return jobApplicationService.changeJobSite(userId, id, request);
+        return jobApplicationService.changeJobSite(userId, id, request.jobSite());
     }
 
     @PatchMapping("/{id}/deadline")
     public JobApplication changeDeadline(@AuthenticationPrincipal Long userId,
                                       @PathVariable Long id,
                                       @RequestBody @Valid JobApplicationDeadlineRequest request) {
-        return jobApplicationService.changeDeadline(userId, id, request);
+        return jobApplicationService.changeDeadline(userId, id, request.deadline());
     }
 
     @PatchMapping("/{id}/resume-view")
     public JobApplication changeResumeView(@AuthenticationPrincipal Long userId,
                                         @PathVariable Long id,
                                         @RequestBody @Valid JobApplicationResumeViewRequest request) {
-        return jobApplicationService.changeResumeView(userId, id, request);
+        return jobApplicationService.changeResumeView(userId, id, request.resumeView());
     }
 
     @PatchMapping("/{id}/status")
     public JobApplication decideResult(@AuthenticationPrincipal Long userId,
                                     @PathVariable Long id,
                                     @RequestBody @Valid JobApplicationStatusRequest request) {
-        return jobApplicationService.decideResult(userId, id, request);
+        return jobApplicationService.decideResult(userId, id, request.status());
     }
 }

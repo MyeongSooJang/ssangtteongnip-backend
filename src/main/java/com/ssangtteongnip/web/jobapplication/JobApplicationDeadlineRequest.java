@@ -1,4 +1,4 @@
-package com.ssangtteongnip.application.service.dto;
+package com.ssangtteongnip.web.jobapplication;
 
 import jakarta.validation.constraints.NotNull;
 

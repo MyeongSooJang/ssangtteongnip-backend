@@ -1,4 +1,4 @@
-package com.ssangtteongnip.application.service.dto;
+package com.ssangtteongnip.web.auth;
 
 import jakarta.validation.constraints.NotBlank;
 

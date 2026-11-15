@@ -2,11 +2,7 @@ package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.CompanyService;
-import com.ssangtteongnip.application.service.dto.JobApplicationDeadlineRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationJobSiteRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationResumeViewRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationStatusRequest;
+import com.ssangtteongnip.application.service.command.RegisterJobApplicationCommand;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
@@ -61,7 +57,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
+                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, ResumeView.NOT_VIEWED));
 
         assertThat(saved.isOwnedBy(7L)).isTrue();
         assertThat(saved.getCompany()).isSameAs(company);
@@ -70,15 +66,14 @@ class JobApplicationServiceTest {
     }
 
     @Test
-    void 마감일과_열람_여부를_생략하면_마감일은_비고_미열람으로_등록된다() {
+    void 마감일을_생략하면_마감일이_빈_지원_건으로_등록된다() {
         given(companyService.findById(1L)).willReturn(Company.create("카카오", "IT", "https://kakao.com"));
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
+                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, ResumeView.NOT_VIEWED));
 
         assertThat(saved.getDeadline()).isNull();
-        assertThat(saved.getResumeView()).isEqualTo(ResumeView.NOT_VIEWED);
     }
 
     @Test
@@ -87,7 +82,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN,
+                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN,
                         LocalDate.of(2026, 11, 30), ResumeView.VIEWED));
 
         assertThat(saved.getDeadline()).isEqualTo(LocalDate.of(2026, 11, 30));
@@ -100,7 +95,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(app));
 
         jobApplicationService.changeDeadline(OWNER_ID, APPLICATION_ID,
-                new JobApplicationDeadlineRequest(LocalDate.of(2026, 11, 30)));
+                LocalDate.of(2026, 11, 30));
 
         assertThat(app.getDeadline()).isEqualTo(LocalDate.of(2026, 11, 30));
     }
@@ -112,7 +107,7 @@ class JobApplicationServiceTest {
 
         assertErrorCode(
                 () -> jobApplicationService.changeDeadline(OTHER_USER_ID, APPLICATION_ID,
-                        new JobApplicationDeadlineRequest(LocalDate.of(2026, 11, 30))),
+                        LocalDate.of(2026, 11, 30)),
                 ErrorCode.APPLICATION_NOT_FOUND);
         assertThat(app.getDeadline()).isNull();
     }
@@ -122,7 +117,7 @@ class JobApplicationServiceTest {
         JobApplication app = application();
         given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(app));
 
-        jobApplicationService.changeResumeView(OWNER_ID, APPLICATION_ID, new JobApplicationResumeViewRequest(ResumeView.VIEWED));
+        jobApplicationService.changeResumeView(OWNER_ID, APPLICATION_ID, ResumeView.VIEWED);
 
         assertThat(app.getResumeView()).isEqualTo(ResumeView.VIEWED);
     }
@@ -134,7 +129,7 @@ class JobApplicationServiceTest {
 
         assertErrorCode(
                 () -> jobApplicationService.changeResumeView(OTHER_USER_ID, APPLICATION_ID,
-                        new JobApplicationResumeViewRequest(ResumeView.VIEWED)),
+                        ResumeView.VIEWED),
                 ErrorCode.APPLICATION_NOT_FOUND);
         assertThat(app.getResumeView()).isEqualTo(ResumeView.NOT_VIEWED);
     }
@@ -177,7 +172,7 @@ class JobApplicationServiceTest {
         JobApplication app = application();
         given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(app));
 
-        jobApplicationService.changeJobSite(OWNER_ID, APPLICATION_ID, new JobApplicationJobSiteRequest(JobSite.GROUPBY));
+        jobApplicationService.changeJobSite(OWNER_ID, APPLICATION_ID, JobSite.GROUPBY);
 
         assertThat(app.getJobSite()).isEqualTo(JobSite.GROUPBY);
     }
@@ -189,7 +184,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(app));
 
         assertErrorCode(
-                () -> jobApplicationService.changeJobSite(OTHER_USER_ID, APPLICATION_ID, new JobApplicationJobSiteRequest(JobSite.OTHER)),
+                () -> jobApplicationService.changeJobSite(OTHER_USER_ID, APPLICATION_ID, JobSite.OTHER),
                 ErrorCode.APPLICATION_NOT_FOUND);
         assertThat(app.getJobSite()).isEqualTo(JobSite.WANTED);
     }
@@ -226,7 +221,7 @@ class JobApplicationServiceTest {
         JobApplication app = application();
         given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(app));
 
-        jobApplicationService.decideResult(OWNER_ID, APPLICATION_ID, new JobApplicationStatusRequest(JobApplicationStatus.REJECTED));
+        jobApplicationService.decideResult(OWNER_ID, APPLICATION_ID, JobApplicationStatus.REJECTED);
 
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.REJECTED);
     }
@@ -237,7 +232,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(app));
 
         assertErrorCode(
-                () -> jobApplicationService.decideResult(OWNER_ID, APPLICATION_ID, new JobApplicationStatusRequest(JobApplicationStatus.INTERVIEW)),
+                () -> jobApplicationService.decideResult(OWNER_ID, APPLICATION_ID, JobApplicationStatus.INTERVIEW),
                 ErrorCode.INTERVIEW_SCHEDULE_REQUIRED);
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.RESUME_SUBMITTED);
     }
@@ -248,7 +243,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(app));
 
         assertErrorCode(
-                () -> jobApplicationService.decideResult(OTHER_USER_ID, APPLICATION_ID, new JobApplicationStatusRequest(JobApplicationStatus.REJECTED)),
+                () -> jobApplicationService.decideResult(OTHER_USER_ID, APPLICATION_ID, JobApplicationStatus.REJECTED),
                 ErrorCode.APPLICATION_NOT_FOUND);
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.RESUME_SUBMITTED);
     }

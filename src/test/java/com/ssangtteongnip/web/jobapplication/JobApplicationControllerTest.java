@@ -2,8 +2,7 @@ package com.ssangtteongnip.web.jobapplication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.JobApplicationService;
-import com.ssangtteongnip.application.service.dto.JobApplicationDeadlineRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationResumeViewRequest;
+import com.ssangtteongnip.application.service.command.RegisterJobApplicationCommand;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
@@ -30,6 +29,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -66,6 +66,22 @@ class JobApplicationControllerTest {
                                         "jobSite", "OTHER"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("RESUME_SUBMITTED"));
+    }
+
+    @Test
+    void POST_applications_열람_여부를_생략하면_미열람으로_서비스에_전달한다() throws Exception {
+        given(jobApplicationService.register(eq(1L), any())).willReturn(sampleApplication());
+
+        mockMvc.perform(post("/api/applications")
+                        .header("Authorization", BEARER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("companyId", 1, "position", "백엔드 개발자", "appliedDate", "2026-11-01",
+                                        "jobSite", "OTHER"))))
+                .andExpect(status().isCreated());
+
+        verify(jobApplicationService).register(1L, new RegisterJobApplicationCommand(
+                1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.OTHER, null, ResumeView.NOT_VIEWED));
     }
 
     @Test
@@ -232,7 +248,7 @@ class JobApplicationControllerTest {
         JobApplication app = sampleApplication();
         app.changeDeadline(LocalDate.of(2026, 11, 30));
         given(jobApplicationService.changeDeadline(eq(1L), eq(1L),
-                eq(new JobApplicationDeadlineRequest(LocalDate.of(2026, 11, 30))))).willReturn(app);
+                eq(LocalDate.of(2026, 11, 30)))).willReturn(app);
 
         mockMvc.perform(patch("/api/applications/1/deadline")
                         .header("Authorization", BEARER)
@@ -265,7 +281,7 @@ class JobApplicationControllerTest {
         JobApplication app = sampleApplication();
         app.changeResumeView(ResumeView.VIEWED);
         given(jobApplicationService.changeResumeView(eq(1L), eq(1L),
-                eq(new JobApplicationResumeViewRequest(ResumeView.VIEWED)))).willReturn(app);
+                eq(ResumeView.VIEWED))).willReturn(app);
 
         mockMvc.perform(patch("/api/applications/1/resume-view")
                         .header("Authorization", BEARER)

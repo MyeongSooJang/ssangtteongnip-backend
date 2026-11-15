@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.schedule;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ScheduleService;
+import com.ssangtteongnip.application.service.command.RegisterScheduleCommand;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.schedule.Schedule;
@@ -25,6 +26,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -142,5 +144,26 @@ class ScheduleControllerTest {
                         .content(objectMapper.writeValueAsString(Map.of("address", "서울시 강남구"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.address").value("서울시 강남구"));
+    }
+
+    @Test
+    void POST_schedules_제목_주소_메모를_구분해_서비스에_전달한다() throws Exception {
+        given(scheduleService.register(eq(1L), any())).willReturn(schedule("경기도 성남시 판교역로 166"));
+
+        mockMvc.perform(post("/api/schedules")
+                        .header("Authorization", BEARER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "applicationId", 1,
+                                "title", "1차 면접",
+                                "scheduledAt", "2026-11-10T14:00:00",
+                                "type", "INTERVIEW",
+                                "address", "경기도 성남시 판교역로 166",
+                                "note", "정장 착용"))))
+                .andExpect(status().isCreated());
+
+        verify(scheduleService).register(1L, new RegisterScheduleCommand(
+                1L, "1차 면접", LocalDateTime.of(2026, 11, 10, 14, 0), ScheduleType.INTERVIEW,
+                "경기도 성남시 판교역로 166", "정장 착용"));
     }
 }

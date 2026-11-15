@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.company;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.CompanyService;
+import com.ssangtteongnip.application.service.command.RegisterCompanyCommand;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -59,6 +61,8 @@ class CompanyControllerTest {
                                 Map.of("name", "카카오", "industry", "IT", "website", "https://kakao.com"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("카카오"));
+
+        verify(companyService).register(new RegisterCompanyCommand("카카오", "IT", "https://kakao.com"));
     }
 
     @Test

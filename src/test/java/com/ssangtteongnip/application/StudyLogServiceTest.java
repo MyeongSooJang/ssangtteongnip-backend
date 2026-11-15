@@ -3,8 +3,8 @@ package com.ssangtteongnip.application;
 import com.ssangtteongnip.application.service.StudyImageService;
 import com.ssangtteongnip.application.service.StudyLogService;
 import com.ssangtteongnip.application.service.dto.HeatmapDayResponse;
-import com.ssangtteongnip.application.service.dto.StudyLogCreateRequest;
-import com.ssangtteongnip.application.service.dto.StudyLogRequest;
+import com.ssangtteongnip.application.service.command.CreateStudyLogCommand;
+import com.ssangtteongnip.application.service.command.RewriteStudyLogCommand;
 import com.ssangtteongnip.application.service.dto.StudyLogResponse;
 import com.ssangtteongnip.application.service.dto.StudyStatsResponse;
 import com.ssangtteongnip.domain.studylog.StudyLog;
@@ -63,7 +63,7 @@ class StudyLogServiceTest {
         given(studyLogRepository.save(any(StudyLog.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         StudyLogResponse response = studyLogService.create(USER_ID,
-                new StudyLogCreateRequest(TODAY, "JPA 정리", "JPA 공부", 90));
+                new CreateStudyLogCommand(TODAY, "JPA 정리", "JPA 공부", 90));
 
         assertThat(response.studyDate()).isEqualTo(TODAY);
         assertThat(response.title()).isEqualTo("JPA 정리");
@@ -72,21 +72,11 @@ class StudyLogServiceTest {
     }
 
     @Test
-    void 공부_시간을_생략하면_0분으로_저장한다() {
-        given(studyLogRepository.save(any(StudyLog.class))).willAnswer(invocation -> invocation.getArgument(0));
-
-        StudyLogResponse response = studyLogService.create(USER_ID,
-                new StudyLogCreateRequest(TODAY, "JPA 정리", "JPA 공부", null));
-
-        assertThat(response.studyMinutes()).isZero();
-    }
-
-    @Test
     void 같은_날짜에_글을_또_작성해도_기존_글을_건드리지_않고_새로_저장한다() {
         given(studyLogRepository.save(any(StudyLog.class))).willAnswer(invocation -> invocation.getArgument(0));
 
-        studyLogService.create(USER_ID, new StudyLogCreateRequest(TODAY, "아침", "내용1", 30));
-        studyLogService.create(USER_ID, new StudyLogCreateRequest(TODAY, "저녁", "내용2", 30));
+        studyLogService.create(USER_ID, new CreateStudyLogCommand(TODAY, "아침", "내용1", 30));
+        studyLogService.create(USER_ID, new CreateStudyLogCommand(TODAY, "저녁", "내용2", 30));
 
         verify(studyLogRepository, times(2)).save(any(StudyLog.class));
     }
@@ -95,7 +85,7 @@ class StudyLogServiceTest {
     void 오늘_이후_날짜에는_작성할_수_없다() {
         assertErrorCode(
                 () -> studyLogService.create(USER_ID,
-                        new StudyLogCreateRequest(TODAY.plusDays(1), "미리", "미리 쓴 기록", 30)),
+                        new CreateStudyLogCommand(TODAY.plusDays(1), "미리", "미리 쓴 기록", 30)),
                 ErrorCode.FUTURE_STUDY_DATE);
         verify(studyLogRepository, never()).save(any());
     }
@@ -105,7 +95,7 @@ class StudyLogServiceTest {
         StudyLog existing = log(TODAY, 30);
         given(studyLogRepository.findByIdAndUserId(LOG_ID, USER_ID)).willReturn(Optional.of(existing));
 
-        StudyLogResponse response = studyLogService.rewrite(USER_ID, LOG_ID, new StudyLogRequest("새 제목", "내용 보강", 120));
+        StudyLogResponse response = studyLogService.rewrite(USER_ID, LOG_ID, new RewriteStudyLogCommand("새 제목", "내용 보강", 120));
 
         assertThat(response.title()).isEqualTo("새 제목");
         assertThat(existing.getContent()).isEqualTo("내용 보강");
@@ -118,7 +108,7 @@ class StudyLogServiceTest {
         given(studyLogRepository.findByIdAndUserId(LOG_ID, USER_ID)).willReturn(Optional.empty());
 
         assertErrorCode(
-                () -> studyLogService.rewrite(USER_ID, LOG_ID, new StudyLogRequest("제목", "내용", 30)),
+                () -> studyLogService.rewrite(USER_ID, LOG_ID, new RewriteStudyLogCommand("제목", "내용", 30)),
                 ErrorCode.STUDY_LOG_NOT_FOUND);
     }
 
@@ -175,7 +165,7 @@ class StudyLogServiceTest {
         StudyLog existing = StudyLog.create(USER_ID, TODAY, "제목", image(kept) + image(removed), 30, TODAY);
         given(studyLogRepository.findByIdAndUserId(LOG_ID, USER_ID)).willReturn(Optional.of(existing));
 
-        studyLogService.rewrite(USER_ID, LOG_ID, new StudyLogRequest("제목", "새 내용 " + image(kept), 30));
+        studyLogService.rewrite(USER_ID, LOG_ID, new RewriteStudyLogCommand("제목", "새 내용 " + image(kept), 30));
 
         assertThat(existing.getContent()).contains(kept.toString()).doesNotContain(removed.toString());
         verify(studyImageService).deleteUnused(USER_ID, Set.of(removed));
@@ -186,7 +176,7 @@ class StudyLogServiceTest {
         StudyLog existing = StudyLog.create(USER_ID, TODAY, "제목", image(UUID.randomUUID()), 30, TODAY);
         given(studyLogRepository.findByIdAndUserId(LOG_ID, USER_ID)).willReturn(Optional.of(existing));
 
-        assertErrorCode(() -> studyLogService.rewrite(USER_ID, LOG_ID, new StudyLogRequest("제목", " ", 30)),
+        assertErrorCode(() -> studyLogService.rewrite(USER_ID, LOG_ID, new RewriteStudyLogCommand("제목", " ", 30)),
                 ErrorCode.STUDY_CONTENT_REQUIRED);
 
         verifyNoInteractions(studyImageService);

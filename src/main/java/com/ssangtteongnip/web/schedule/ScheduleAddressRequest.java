@@ -1,4 +1,4 @@
-package com.ssangtteongnip.application.service.dto;
+package com.ssangtteongnip.web.schedule;
 
 import jakarta.validation.constraints.NotBlank;
 

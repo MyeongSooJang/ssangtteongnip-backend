@@ -5,8 +5,7 @@ import com.ssangtteongnip.domain.review.Review;
 import com.ssangtteongnip.domain.review.ReviewRepository;
 import com.ssangtteongnip.domain.schedule.Schedule;
 import com.ssangtteongnip.domain.schedule.ScheduleRepository;
-import com.ssangtteongnip.application.service.dto.ScheduleAddressRequest;
-import com.ssangtteongnip.application.service.dto.ScheduleRequest;
+import com.ssangtteongnip.application.service.command.RegisterScheduleCommand;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +27,11 @@ public class ScheduleService {
     private final Clock clock;
 
     @Transactional
-    public Schedule register(Long userId, ScheduleRequest request) {
-        JobApplication application = jobApplicationService.findById(userId, request.applicationId());
+    public Schedule register(Long userId, RegisterScheduleCommand command) {
+        JobApplication application = jobApplicationService.findById(userId, command.applicationId());
         Schedule schedule = scheduleRepository.save(
-                Schedule.create(application, request.title(), request.scheduledAt(),
-                        request.type(), request.address(), request.note())
+                Schedule.create(application, command.title(), command.scheduledAt(),
+                        command.type(), command.address(), command.note())
         );
         if (schedule.isInterview()) {
             application.startInterview(LocalDateTime.now(clock));
@@ -48,11 +47,11 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Schedule updateAddress(Long userId, Long id, ScheduleAddressRequest request) {
+    public Schedule updateAddress(Long userId, Long id, String address) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
         schedule.verifyOwner(userId);
-        schedule.changeAddress(request.address());
+        schedule.changeAddress(address);
         return schedule;
     }
 

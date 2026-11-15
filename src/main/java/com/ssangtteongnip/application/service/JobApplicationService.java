@@ -1,14 +1,12 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.application.service.dto.JobApplicationDeadlineRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationJobSiteRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationResumeViewRequest;
-import com.ssangtteongnip.application.service.dto.JobApplicationStatusRequest;
+import com.ssangtteongnip.application.service.command.RegisterJobApplicationCommand;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
+import com.ssangtteongnip.domain.jobapplication.JobSite;
+import com.ssangtteongnip.domain.jobapplication.ResumeView;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
@@ -16,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,11 +27,11 @@ public class JobApplicationService {
     private final CompanyService companyService;
 
     @Transactional
-    public JobApplication register(Long userId, JobApplicationRequest request) {
-        Company company = companyService.findById(request.companyId());
+    public JobApplication register(Long userId, RegisterJobApplicationCommand command) {
+        Company company = companyService.findById(command.companyId());
         return jobApplicationRepository.save(
-                JobApplication.create(userId, company, request.position(), request.appliedDate(),
-                        request.jobSite(), request.deadline(), request.resumeView())
+                JobApplication.create(userId, company, command.position(), command.appliedDate(),
+                        command.jobSite(), command.deadline(), command.resumeView())
         );
     }
 
@@ -58,30 +57,30 @@ public class JobApplicationService {
     }
 
     @Transactional
-    public JobApplication changeJobSite(Long userId, Long id, JobApplicationJobSiteRequest request) {
+    public JobApplication changeJobSite(Long userId, Long id, JobSite jobSite) {
         JobApplication application = findById(userId, id);
-        application.changeJobSite(request.jobSite());
+        application.changeJobSite(jobSite);
         return application;
     }
 
     @Transactional
-    public JobApplication changeDeadline(Long userId, Long id, JobApplicationDeadlineRequest request) {
+    public JobApplication changeDeadline(Long userId, Long id, LocalDate deadline) {
         JobApplication application = findById(userId, id);
-        application.changeDeadline(request.deadline());
+        application.changeDeadline(deadline);
         return application;
     }
 
     @Transactional
-    public JobApplication changeResumeView(Long userId, Long id, JobApplicationResumeViewRequest request) {
+    public JobApplication changeResumeView(Long userId, Long id, ResumeView resumeView) {
         JobApplication application = findById(userId, id);
-        application.changeResumeView(request.resumeView());
+        application.changeResumeView(resumeView);
         return application;
     }
 
     @Transactional
-    public JobApplication decideResult(Long userId, Long id, JobApplicationStatusRequest request) {
+    public JobApplication decideResult(Long userId, Long id, JobApplicationStatus status) {
         JobApplication application = findById(userId, id);
-        request.status().applyTo(application);
+        status.applyTo(application);
         return application;
     }
 

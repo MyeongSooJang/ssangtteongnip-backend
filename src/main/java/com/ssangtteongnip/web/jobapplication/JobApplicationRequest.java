@@ -1,5 +1,6 @@
-package com.ssangtteongnip.application.service.dto;
+package com.ssangtteongnip.web.jobapplication;
 
+import com.ssangtteongnip.application.service.command.RegisterJobApplicationCommand;
 import com.ssangtteongnip.domain.jobapplication.JobSite;
 import com.ssangtteongnip.domain.jobapplication.ResumeView;
 import jakarta.validation.constraints.NotBlank;
@@ -18,5 +19,9 @@ public record JobApplicationRequest(
     // 열람 여부를 생략하면 미열람으로 등록한다.
     public JobApplicationRequest {
         resumeView = resumeView == null ? ResumeView.NOT_VIEWED : resumeView;
+    }
+
+    public RegisterJobApplicationCommand toCommand() {
+        return new RegisterJobApplicationCommand(companyId, position, appliedDate, jobSite, deadline, resumeView);
     }
 }

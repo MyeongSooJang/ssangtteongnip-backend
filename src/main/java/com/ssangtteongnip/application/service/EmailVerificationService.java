@@ -1,5 +1,6 @@
 package com.ssangtteongnip.application.service;
 
+import com.ssangtteongnip.application.service.command.ConfirmEmailVerificationCommand;
 import com.ssangtteongnip.domain.user.CodeGenerator;
 import com.ssangtteongnip.domain.user.EmailVerificationStore;
 import com.ssangtteongnip.domain.user.MailSender;
@@ -40,8 +41,8 @@ public class EmailVerificationService {
         }
     }
 
-    public void confirm(String rawEmail, String input) {
-        String email = User.normalizeEmail(rawEmail);
+    public void confirm(ConfirmEmailVerificationCommand command) {
+        String email = User.normalizeEmail(command.email());
         VerificationCode code = store.findCode(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_EXPIRED));
         // 비교보다 먼저 시도 횟수를 원자적으로 올린다. 읽고 비교한 뒤에 세면 동시 요청이 모두
@@ -51,7 +52,7 @@ public class EmailVerificationService {
             store.deleteCode(email);
             throw new BusinessException(ErrorCode.VERIFICATION_ATTEMPTS_EXCEEDED);
         }
-        if (code.matches(input)) {
+        if (code.matches(command.code())) {
             store.deleteCode(email);
             store.markVerified(email);
             return;

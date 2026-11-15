@@ -2,8 +2,6 @@ package com.ssangtteongnip.web.schedule;
 
 import com.ssangtteongnip.application.service.ScheduleService;
 import com.ssangtteongnip.domain.schedule.Schedule;
-import com.ssangtteongnip.application.service.dto.ScheduleAddressRequest;
-import com.ssangtteongnip.application.service.dto.ScheduleRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,14 +23,14 @@ public class ScheduleController {
     @ResponseStatus(HttpStatus.CREATED)
     public Schedule register(@AuthenticationPrincipal Long userId,
                              @RequestBody @Valid ScheduleRequest request) {
-        return scheduleService.register(userId, request);
+        return scheduleService.register(userId, request.toCommand());
     }
 
     @PatchMapping("/{id}/address")
     public Schedule updateAddress(@AuthenticationPrincipal Long userId,
                                   @PathVariable Long id,
                                   @RequestBody @Valid ScheduleAddressRequest request) {
-        return scheduleService.updateAddress(userId, id, request);
+        return scheduleService.updateAddress(userId, id, request.address());
     }
 
     @GetMapping

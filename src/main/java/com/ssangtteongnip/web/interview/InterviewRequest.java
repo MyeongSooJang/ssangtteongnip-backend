@@ -1,5 +1,6 @@
-package com.ssangtteongnip.application.service.dto;
+package com.ssangtteongnip.web.interview;
 
+import com.ssangtteongnip.application.service.command.RegisterInterviewCommand;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -11,4 +12,9 @@ public record InterviewRequest(
         String location,
         String note,
         @Min(0) @Max(100) Integer score
-) {}
+) {
+
+    public RegisterInterviewCommand toCommand() {
+        return new RegisterInterviewCommand(round, interviewDate, location, note, score);
+    }
+}

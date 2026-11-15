@@ -2,9 +2,6 @@ package com.ssangtteongnip.web.interview;
 
 import com.ssangtteongnip.application.service.InterviewService;
 import com.ssangtteongnip.domain.interview.Interview;
-import com.ssangtteongnip.application.service.dto.InterviewQuestionRequest;
-import com.ssangtteongnip.application.service.dto.InterviewRequest;
-import com.ssangtteongnip.application.service.dto.InterviewScoreRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +22,7 @@ public class InterviewController {
     public Interview register(@AuthenticationPrincipal Long userId,
                               @PathVariable Long applicationId,
                               @RequestBody @Valid InterviewRequest request) {
-        return interviewService.register(userId, applicationId, request);
+        return interviewService.register(userId, applicationId, request.toCommand());
     }
 
     @GetMapping
@@ -38,7 +35,7 @@ public class InterviewController {
                               @PathVariable Long applicationId,
                               @PathVariable Long interviewId,
                               @RequestBody @Valid InterviewScoreRequest request) {
-        return interviewService.evaluate(userId, applicationId, interviewId, request);
+        return interviewService.evaluate(userId, applicationId, interviewId, request.score());
     }
 
     @PostMapping("/{interviewId}/questions")
@@ -47,6 +44,6 @@ public class InterviewController {
                                  @PathVariable Long applicationId,
                                  @PathVariable Long interviewId,
                                  @RequestBody @Valid InterviewQuestionRequest request) {
-        return interviewService.addQuestion(userId, applicationId, interviewId, request);
+        return interviewService.addQuestion(userId, applicationId, interviewId, request.toCommand());
     }
 }

@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.review;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ReviewService;
+import com.ssangtteongnip.application.service.command.WriteReviewCommand;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.review.ApplyRoute;
@@ -25,6 +26,7 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -123,5 +125,19 @@ class ReviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("content", "좋았다", "rating", 6))))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void PATCH_reviews_평점과_난이도를_구분해_서비스에_전달한다() throws Exception {
+        given(reviewService.write(eq(1L), eq(1L), any())).willReturn(review());
+
+        mockMvc.perform(patch("/api/reviews/1")
+                        .header("Authorization", BEARER)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("content", "분위기가 좋았다", "rating", 4, "difficulty", 2))))
+                .andExpect(status().isOk());
+
+        verify(reviewService).write(1L, 1L, new WriteReviewCommand("분위기가 좋았다", 4, 2, null, null, null));
     }
 }
