@@ -28,7 +28,7 @@ public class JobApplicationController {
 
     @GetMapping
     public List<JobApplication> findAll(@AuthenticationPrincipal Long userId,
-                                     @RequestParam(required = false) JobApplicationStatus status) {
+                                        @RequestParam(required = false) JobApplicationStatus status) {
         return status == null
                 ? jobApplicationService.findAll(userId)
                 : jobApplicationService.findByStatus(userId, status);
@@ -46,29 +46,29 @@ public class JobApplicationController {
 
     @PatchMapping("/{id}/job-site")
     public JobApplication changeJobSite(@AuthenticationPrincipal Long userId,
-                                     @PathVariable Long id,
-                                     @RequestBody @Valid JobApplicationJobSiteRequest request) {
+                                        @PathVariable Long id,
+                                        @RequestBody @Valid JobApplicationJobSiteRequest request) {
         return jobApplicationService.changeJobSite(userId, id, request.jobSite());
     }
 
     @PatchMapping("/{id}/deadline")
     public JobApplication changeDeadline(@AuthenticationPrincipal Long userId,
-                                      @PathVariable Long id,
-                                      @RequestBody @Valid JobApplicationDeadlineRequest request) {
+                                         @PathVariable Long id,
+                                         @RequestBody @Valid JobApplicationDeadlineRequest request) {
         return jobApplicationService.changeDeadline(userId, id, request.deadline());
     }
 
     @PatchMapping("/{id}/resume-view")
     public JobApplication changeResumeView(@AuthenticationPrincipal Long userId,
-                                        @PathVariable Long id,
-                                        @RequestBody @Valid JobApplicationResumeViewRequest request) {
+                                           @PathVariable Long id,
+                                           @RequestBody @Valid JobApplicationResumeViewRequest request) {
         return jobApplicationService.changeResumeView(userId, id, request.resumeView());
     }
 
     @PatchMapping("/{id}/status")
     public JobApplication decideResult(@AuthenticationPrincipal Long userId,
-                                    @PathVariable Long id,
-                                    @RequestBody @Valid JobApplicationStatusRequest request) {
+                                       @PathVariable Long id,
+                                       @RequestBody @Valid JobApplicationStatusRequest request) {
         return jobApplicationService.decideResult(userId, id, request.status());
     }
 }

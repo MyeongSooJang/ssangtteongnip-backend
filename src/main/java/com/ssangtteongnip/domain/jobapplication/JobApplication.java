@@ -71,12 +71,12 @@ public class JobApplication {
     }
 
     public static JobApplication create(Long userId, Company company, String position, LocalDate appliedDate,
-                                     JobSite jobSite) {
+                                        JobSite jobSite) {
         return create(userId, company, position, appliedDate, jobSite, null, ResumeView.NOT_VIEWED);
     }
 
     public static JobApplication create(Long userId, Company company, String position, LocalDate appliedDate,
-                                     JobSite jobSite, LocalDate deadline, ResumeView resumeView) {
+                                        JobSite jobSite, LocalDate deadline, ResumeView resumeView) {
         JobApplication application = new JobApplication();
         application.jobSite = jobSite;
         application.userId = userId;
