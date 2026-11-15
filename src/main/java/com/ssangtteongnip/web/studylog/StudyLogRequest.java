@@ -8,11 +8,7 @@ public record StudyLogRequest(
         @Size(max = 10000, message = "공부 내용은 10000자 이하여야 합니다.") String content,
         Integer studyMinutes) {
 
-    public int minutesOrZero() {
-        return studyMinutes == null ? 0 : studyMinutes;
-    }
-
     public RewriteStudyLogCommand toCommand() {
-        return new RewriteStudyLogCommand(title, content, minutesOrZero());
+        return new RewriteStudyLogCommand(title, content, studyMinutes);
     }
 }

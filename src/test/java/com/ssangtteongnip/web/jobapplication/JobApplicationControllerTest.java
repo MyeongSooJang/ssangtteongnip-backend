@@ -69,7 +69,7 @@ class JobApplicationControllerTest {
     }
 
     @Test
-    void POST_applications_열람_여부를_생략하면_미열람으로_서비스에_전달한다() throws Exception {
+    void POST_applications_본문_필드를_구분해_서비스에_전달한다() throws Exception {
         given(jobApplicationService.register(eq(1L), any())).willReturn(sampleApplication());
 
         mockMvc.perform(post("/api/applications")
@@ -77,11 +77,12 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 Map.of("companyId", 1, "position", "백엔드 개발자", "appliedDate", "2026-11-01",
-                                        "jobSite", "OTHER"))))
+                                        "jobSite", "OTHER", "deadline", "2026-11-30", "resumeView", "VIEWED"))))
                 .andExpect(status().isCreated());
 
         verify(jobApplicationService).register(1L, new RegisterJobApplicationCommand(
-                1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.OTHER, null, ResumeView.NOT_VIEWED));
+                1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.OTHER,
+                LocalDate.of(2026, 11, 30), ResumeView.VIEWED));
     }
 
     @Test

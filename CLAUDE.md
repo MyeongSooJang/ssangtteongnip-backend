@@ -48,7 +48,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Request는 `web`에만 둔다. Service는 Request를 모른다 (`application`이 `web`을 참조하면 안 된다).
 - Service에 넘기는 값의 개수는 `userId`(토큰)와 URL 경로 값을 빼고 요청 본문 기준으로 센다. 본문 값이 1개면 컨트롤러가 꺼내서 값으로 넘기고, 2개 이상이면 Request의 `toCommand()`로 만든 `XxxCommand`를 넘긴다. 1개짜리 Request도 JSON 본문 모양을 받으려고 `web`에 남는다.
-- 생략 시 기본값 같은 웹 입력 규칙은 Request에서 채우고, 비즈니스 규칙은 도메인에 둔다. 기본값 테스트는 컨트롤러 테스트에서 Service가 받는 Command로 검증한다.
+- 생략 시 기본값은 Command 생성자에서 채운다. 컨트롤러가 아닌 곳에서 Command를 만들어도 Service가 받는 값이 같아야 하기 때문이다. Request는 JSON 값을 그대로 넘기고, 기본값 테스트는 서비스 테스트에 둔다.
 - Response는 Service가 만들어 반환하므로 `application/service/dto`에 둔다 (`web`이 `application`을 참조하는 방향만 허용).
 - `toCommand()`가 새 필드를 빠뜨리거나 같은 타입 필드의 순서를 바꾸면 컴파일은 통과한다. 필드 값이 모두 다른 요청을 보내 Service가 받는 Command를 `verify`로 검증하는 컨트롤러 테스트를 함께 둔다.
 

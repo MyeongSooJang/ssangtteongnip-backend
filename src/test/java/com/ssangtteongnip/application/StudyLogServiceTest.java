@@ -72,6 +72,16 @@ class StudyLogServiceTest {
     }
 
     @Test
+    void 공부_시간을_생략하면_0분으로_저장한다() {
+        given(studyLogRepository.save(any(StudyLog.class))).willAnswer(invocation -> invocation.getArgument(0));
+
+        StudyLogResponse response = studyLogService.create(USER_ID,
+                new CreateStudyLogCommand(TODAY, "JPA 정리", "JPA 공부", null));
+
+        assertThat(response.studyMinutes()).isZero();
+    }
+
+    @Test
     void 같은_날짜에_글을_또_작성해도_기존_글을_건드리지_않고_새로_저장한다() {
         given(studyLogRepository.save(any(StudyLog.class))).willAnswer(invocation -> invocation.getArgument(0));
 

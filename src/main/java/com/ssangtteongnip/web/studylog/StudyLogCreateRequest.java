@@ -12,11 +12,7 @@ public record StudyLogCreateRequest(
         @Size(max = 10000, message = "공부 내용은 10000자 이하여야 합니다.") String content,
         Integer studyMinutes) {
 
-    public int minutesOrZero() {
-        return studyMinutes == null ? 0 : studyMinutes;
-    }
-
     public CreateStudyLogCommand toCommand() {
-        return new CreateStudyLogCommand(studyDate, title, content, minutesOrZero());
+        return new CreateStudyLogCommand(studyDate, title, content, studyMinutes);
     }
 }

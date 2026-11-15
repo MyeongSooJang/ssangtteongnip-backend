@@ -108,21 +108,6 @@ class StudyLogControllerTest {
     }
 
     @Test
-    void POST_공부_시간을_생략하면_0분으로_서비스에_전달한다() throws Exception {
-        given(studyLogService.create(1L, new CreateStudyLogCommand(DATE, "JPA 정리", "JPA 공부", 0)))
-                .willReturn(response());
-
-        mockMvc.perform(post("/api/me/study-logs")
-                        .header("Authorization", BEARER)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of(
-                                "studyDate", "2026-11-03", "title", "JPA 정리", "content", "JPA 공부"))))
-                .andExpect(status().isCreated());
-
-        verify(studyLogService).create(1L, new CreateStudyLogCommand(DATE, "JPA 정리", "JPA 공부", 0));
-    }
-
-    @Test
     void PUT_글을_수정하고_200과_수정된_글을_반환한다() throws Exception {
         given(studyLogService.rewrite(1L, 10L, new RewriteStudyLogCommand("JPA 정리", "JPA 공부", 90))).willReturn(response());
 

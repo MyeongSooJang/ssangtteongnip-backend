@@ -57,7 +57,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, ResumeView.NOT_VIEWED));
+                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
 
         assertThat(saved.isOwnedBy(7L)).isTrue();
         assertThat(saved.getCompany()).isSameAs(company);
@@ -66,14 +66,15 @@ class JobApplicationServiceTest {
     }
 
     @Test
-    void 마감일을_생략하면_마감일이_빈_지원_건으로_등록된다() {
+    void 마감일과_열람_여부를_생략하면_마감일은_비고_미열람으로_등록된다() {
         given(companyService.findById(1L)).willReturn(Company.create("카카오", "IT", "https://kakao.com"));
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, ResumeView.NOT_VIEWED));
+                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
 
         assertThat(saved.getDeadline()).isNull();
+        assertThat(saved.getResumeView()).isEqualTo(ResumeView.NOT_VIEWED);
     }
 
     @Test
