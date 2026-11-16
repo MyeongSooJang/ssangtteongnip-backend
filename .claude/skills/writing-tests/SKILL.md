@@ -28,7 +28,7 @@ description: Use when writing, modifying, or reviewing test code in this project
 | 대상 | 방식 | 비중 |
 |---|---|---|
 | `domain/*` 엔티티·enum (비즈니스 규칙) | Spring 없는 순수 단위 테스트. 실제 협력 객체 사용 | **가장 많이** |
-| `presentation/controller` | `@WebMvcTest` + `@MockitoBean` 서비스. 요청 매핑, 검증, 상태코드, 에러 응답 | 적당히 |
+| `web/<기능>` | `@WebMvcTest` + `@MockitoBean` 서비스. 요청 매핑, 검증, 상태코드, 에러 응답 | 적당히 |
 | `application/service` | `@ExtendWith(MockitoExtension.class)`. 도메인 호출과 협력 흐름 위주 (로직은 도메인에 있으므로 얇게) | 적게 |
 | `infrastructure/persistence` | 쿼리 메서드가 직접 정의된 경우에만 | 필요한 만큼 |
 | 전체 연동 `@SpringBootTest` | 핵심 흐름 소수만. 컨텍스트가 새로 뜨므로 느리다 | 아주 적게 |
@@ -60,7 +60,7 @@ description: Use when writing, modifying, or reviewing test code in this project
 - 컨트롤러 테스트는 HTTP 요청과 응답을 행동으로 기술한다: `유효한_요청이면_201과_등록된_회사를_반환한다`, `토큰이_없으면_401을_반환한다`
 - 기존 테스트의 `메서드_행동` 이름은 해당 테스트를 수정할 때 행동 중심으로 바꾼다. 이름만 바꾸려고 별도 작업을 만들지 않는다.
 - **테스트 메서드(`@Test`)만 한글 문장으로 짓는다. 헬퍼 메서드와 변수는 영문 camelCase**로 짓는다(`application()`, `applicationInInterview()`, `interviewSchedule()`). 기존 헬퍼가 `company()`처럼 영문이었고, 한글 헬퍼를 섞으면 한 파일에 두 스타일이 공존한다.
-- 상태가 필요한 헬퍼 이름에는 도메인 enum 이름과 맞춘 상태를 쓴다(`applicationInInterview`는 `ApplicationStatus.INTERVIEW`). 도메인 상태명이 바뀌면 헬퍼 이름도 함께 바꾼다.
+- 상태가 필요한 헬퍼 이름에는 도메인 enum 이름과 맞춘 상태를 쓴다(`applicationInInterview`는 `JobApplicationStatus.INTERVIEW`). 도메인 상태명이 바뀌면 헬퍼 이름도 함께 바꾼다.
 
 ## 템플릿
 
@@ -71,7 +71,7 @@ class ApplicationTest {
 
     private Application applicationInInterview() {
         Application app = Application.create(1L, company(), "백엔드 개발자", LocalDate.now());
-        app.advanceStatus(ApplicationStatus.INTERVIEW);
+        app.advanceStatus(JobApplicationStatus.INTERVIEW);
         return app;
     }
 
@@ -81,20 +81,20 @@ class ApplicationTest {
         Application app = applicationInInterview();
 
         // when
-        app.advanceStatus(ApplicationStatus.ACCEPTED);
+        app.advanceStatus(JobApplicationStatus.ACCEPTED);
 
         // then
-        assertThat(app.getStatus()).isEqualTo(ApplicationStatus.ACCEPTED);
+        assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.ACCEPTED);
     }
 
     @Test
     void 이미_합격한_지원은_다시_면접으로_전이할_수_없다() {
         // given
         Application app = applicationInInterview();
-        app.advanceStatus(ApplicationStatus.ACCEPTED);
+        app.advanceStatus(JobApplicationStatus.ACCEPTED);
 
         // when & then
-        assertThatThrownBy(() -> app.advanceStatus(ApplicationStatus.INTERVIEW))
+        assertThatThrownBy(() -> app.advanceStatus(JobApplicationStatus.INTERVIEW))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.INVALID_STATUS_TRANSITION);
@@ -102,7 +102,7 @@ class ApplicationTest {
 
     @ParameterizedTest
     @MethodSource("허용되지_않는_전이")
-    void 종료된_지원은_다른_상태로_전이할_수_없다(ApplicationStatus from, ApplicationStatus to) {
+    void 종료된_지원은_다른_상태로_전이할_수_없다(JobApplicationStatus from, JobApplicationStatus to) {
         // 입력 조합이 많을 때 @ParameterizedTest 로 한 규칙을 한 곳에서 검증한다
     }
 }
@@ -158,29 +158,29 @@ class CompanyControllerTest {
 
 ```java
 @ExtendWith(MockitoExtension.class)
-class ApplicationServiceTest {
+class JobApplicationServiceTest {
 
-    @Mock ApplicationRepository applicationRepository;
-    @InjectMocks ApplicationService applicationService;
+    @Mock JobApplicationRepository jobApplicationRepository;
+    @InjectMocks JobApplicationService jobApplicationService;
 
     @Test
     void 소유자의_지원은_요청한_상태로_전이된다() {
         // given
         Application app = Application.create(1L, company(), "백엔드 개발자", LocalDate.now());
-        given(applicationRepository.findById(10L)).willReturn(Optional.of(app));
+        given(jobApplicationRepository.findById(10L)).willReturn(Optional.of(app));
 
         // when
-        applicationService.advanceStatus(1L, 10L, new ApplicationStatusRequest(ApplicationStatus.ACCEPTED));
+        jobApplicationService.advanceStatus(1L, 10L, new JobApplicationStatusRequest(JobApplicationStatus.ACCEPTED));
 
         // then: 서비스가 도메인에 위임했는지를 결과 상태로 확인한다
-        assertThat(app.getStatus()).isEqualTo(ApplicationStatus.ACCEPTED);
+        assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.ACCEPTED);
     }
 
     @Test
     void 존재하지_않는_지원은_조회할_수_없다() {
-        given(applicationRepository.findById(10L)).willReturn(Optional.empty());
+        given(jobApplicationRepository.findById(10L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> applicationService.findById(1L, 10L))
+        assertThatThrownBy(() -> jobApplicationService.findById(1L, 10L))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.APPLICATION_NOT_FOUND);

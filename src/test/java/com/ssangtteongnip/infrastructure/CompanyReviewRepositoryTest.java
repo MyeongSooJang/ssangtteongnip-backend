@@ -1,7 +1,7 @@
 package com.ssangtteongnip.infrastructure;
 
-import com.ssangtteongnip.domain.application.Application;
-import com.ssangtteongnip.domain.application.ApplicationRepository;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.company.CompanyRepository;
 import com.ssangtteongnip.domain.review.CompanyReviewRating;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.tuple;
 class CompanyReviewRepositoryTest {
 
     @Autowired CompanyRepository companyRepository;
-    @Autowired ApplicationRepository applicationRepository;
+    @Autowired JobApplicationRepository jobApplicationRepository;
     @Autowired ReviewRepository reviewRepository;
     @Autowired EntityManager em;
 
@@ -46,8 +46,8 @@ class CompanyReviewRepositoryTest {
     }
 
     private Review unwrittenReview(Company company, long userId) {
-        Application application = applicationRepository.save(
-                Application.create(userId, company, "백엔드 개발자", LocalDate.of(2026, 10, 1)));
+        JobApplication application = jobApplicationRepository.save(
+                JobApplication.create(userId, company, "백엔드 개발자", LocalDate.of(2026, 10, 1)));
         return reviewRepository.save(Review.create(application));
     }
 

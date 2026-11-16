@@ -1,12 +1,13 @@
 package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.ProfileService;
-import com.ssangtteongnip.application.service.dto.ProfileRequest;
+import com.ssangtteongnip.application.service.command.ReviseProfileCommand;
 import com.ssangtteongnip.application.service.dto.ProfileResponse;
 import com.ssangtteongnip.application.service.dto.UserFileResponse;
 import com.ssangtteongnip.domain.FakeFileStorage;
 import com.ssangtteongnip.domain.FakePasswordHasher;
 import com.ssangtteongnip.domain.profile.FileType;
+import com.ssangtteongnip.domain.profile.PersonalInfo;
 import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.profile.UserFile;
@@ -42,10 +43,11 @@ class ProfileServiceTest {
         return Profile.create(user);
     }
 
-    private ProfileRequest request(String name) {
-        return new ProfileRequest(name, "010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
+    private ReviseProfileCommand command(String name) {
+        PersonalInfo info = PersonalInfo.of("010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
                 "https://github.com/hong", null, null, "OO대 컴퓨터공학", "인턴 6개월", "백엔드 개발자", "안녕하세요",
                 LocalDate.of(2025, 3, 1));
+        return new ReviseProfileCommand(name, info);
     }
 
     @Test
@@ -91,7 +93,7 @@ class ProfileServiceTest {
         given(profileRepository.findByUserId(USER_ID)).willReturn(Optional.of(profile()));
         given(userFileRepository.findUserFilesNewestFirst(USER_ID)).willReturn(List.of());
 
-        ProfileResponse response = profileService.reviseMyProfile(USER_ID, request("홍길순"));
+        ProfileResponse response = profileService.reviseMyProfile(USER_ID, command("홍길순"));
 
         assertThat(response.name()).isEqualTo("홍길순");
         assertThat(response.phone()).isEqualTo("010-1234-5678");
@@ -103,6 +105,6 @@ class ProfileServiceTest {
     void 프로필이_없으면_수정할_수_없다() {
         given(profileRepository.findByUserId(USER_ID)).willReturn(Optional.empty());
 
-        assertErrorCode(() -> profileService.reviseMyProfile(USER_ID, request("홍길순")), ErrorCode.PROFILE_NOT_FOUND);
+        assertErrorCode(() -> profileService.reviseMyProfile(USER_ID, command("홍길순")), ErrorCode.PROFILE_NOT_FOUND);
     }
 }

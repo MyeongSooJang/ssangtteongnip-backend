@@ -1,8 +1,8 @@
 package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.AuthService;
-import com.ssangtteongnip.application.service.dto.LoginRequest;
-import com.ssangtteongnip.application.service.dto.SignupRequest;
+import com.ssangtteongnip.application.service.command.LoginCommand;
+import com.ssangtteongnip.application.service.command.SignupCommand;
 import com.ssangtteongnip.application.service.dto.TokenResponse;
 import com.ssangtteongnip.domain.FakeEmailVerificationStore;
 import com.ssangtteongnip.domain.FakePasswordHasher;
@@ -52,7 +52,7 @@ class AuthServiceTest {
         given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
         given(tokenProvider.issue(any())).willReturn("jwt-token");
 
-        TokenResponse response = authService.signup(new SignupRequest(" Hong@Example.com ", "홍길동", "password1"));
+        TokenResponse response = authService.signup(new SignupCommand(" Hong@Example.com ", "홍길동", "password1"));
 
         assertThat(response.accessToken()).isEqualTo("jwt-token");
         verify(profileRepository).save(any());
@@ -65,7 +65,7 @@ class AuthServiceTest {
         given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
         given(tokenProvider.issue(any())).willReturn("jwt-token");
 
-        authService.signup(new SignupRequest("hong@example.com", "홍길동", "password1"));
+        authService.signup(new SignupCommand("hong@example.com", "홍길동", "password1"));
 
         assertThat(verificationStore.isVerified("hong@example.com")).isFalse();
     }
@@ -74,7 +74,7 @@ class AuthServiceTest {
     void signup_이메일_인증을_받지_않았으면_가입할_수_없다() {
         given(userRepository.existsByEmail("hong@example.com")).willReturn(false);
 
-        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "password1")))
+        assertThatThrownBy(() -> authService.signup(new SignupCommand("hong@example.com", "홍길동", "password1")))
                 .isInstanceOfSatisfying(BusinessException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.EMAIL_NOT_VERIFIED));
         verify(userRepository, never()).save(any());
@@ -85,7 +85,7 @@ class AuthServiceTest {
     void signup_이미_가입된_이메일이면_예외가_발생한다() {
         given(userRepository.existsByEmail("hong@example.com")).willReturn(true);
 
-        assertThatThrownBy(() -> authService.signup(new SignupRequest("Hong@Example.com", "홍길동", "password1")))
+        assertThatThrownBy(() -> authService.signup(new SignupCommand("Hong@Example.com", "홍길동", "password1")))
                 .isInstanceOfSatisfying(BusinessException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS));
         verify(userRepository, never()).save(any());
@@ -98,7 +98,7 @@ class AuthServiceTest {
         given(userRepository.findByEmail("hong@example.com")).willReturn(Optional.of(user));
         given(tokenProvider.issue(any())).willReturn("jwt-token");
 
-        TokenResponse response = authService.login(new LoginRequest("HONG@example.com", "password1"));
+        TokenResponse response = authService.login(new LoginCommand("HONG@example.com", "password1"));
 
         assertThat(response.accessToken()).isEqualTo("jwt-token");
     }
@@ -107,7 +107,7 @@ class AuthServiceTest {
     void login_없는_이메일이면_자격_증명_오류가_발생한다() {
         given(userRepository.findByEmail("none@example.com")).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.login(new LoginRequest("none@example.com", "password1")))
+        assertThatThrownBy(() -> authService.login(new LoginCommand("none@example.com", "password1")))
                 .isInstanceOfSatisfying(BusinessException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_CREDENTIALS));
     }
@@ -117,7 +117,7 @@ class AuthServiceTest {
         User user = User.register("hong@example.com", "홍길동", "password1", passwordHasher);
         given(userRepository.findByEmail("hong@example.com")).willReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> authService.login(new LoginRequest("hong@example.com", "wrong-password")))
+        assertThatThrownBy(() -> authService.login(new LoginCommand("hong@example.com", "wrong-password")))
                 .isInstanceOfSatisfying(BusinessException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_CREDENTIALS));
         verify(tokenProvider, never()).issue(any());

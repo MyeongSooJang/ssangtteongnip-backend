@@ -1,8 +1,8 @@
 package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.ReviewService;
-import com.ssangtteongnip.application.service.dto.ReviewRequest;
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.application.service.command.WriteReviewCommand;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
@@ -35,7 +35,7 @@ class ReviewServiceTest {
 
     private Review review() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        return Review.create(Application.create(OWNER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1)));
+        return Review.create(JobApplication.create(OWNER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1)));
     }
 
     @Test
@@ -43,7 +43,7 @@ class ReviewServiceTest {
         Review review = review();
         given(reviewRepository.findById(REVIEW_ID)).willReturn(Optional.of(review));
 
-        reviewService.write(OWNER_ID, REVIEW_ID, request("분위기가 좋았다", 4));
+        reviewService.write(OWNER_ID, REVIEW_ID, command("분위기가 좋았다", 4));
 
         assertThat(review.getContent()).isEqualTo("분위기가 좋았다");
         assertThat(review.getRating()).isEqualTo(4);
@@ -54,7 +54,7 @@ class ReviewServiceTest {
         Review review = review();
         given(reviewRepository.findById(REVIEW_ID)).willReturn(Optional.of(review));
 
-        reviewService.write(OWNER_ID, REVIEW_ID, new ReviewRequest("분위기가 좋았다", 4,
+        reviewService.write(OWNER_ID, REVIEW_ID, new WriteReviewCommand("분위기가 좋았다", 4,
                 3, InterviewAtmosphere.COMFORTABLE, ApplyRoute.ONLINE, List.of("자기소개")));
 
         assertThat(review.getDifficulty()).isEqualTo(3);
@@ -67,7 +67,7 @@ class ReviewServiceTest {
     void 존재하지_않는_후기는_작성할_수_없다() {
         given(reviewRepository.findById(REVIEW_ID)).willReturn(Optional.empty());
 
-        assertErrorCode(() -> reviewService.write(OWNER_ID, REVIEW_ID, request("내용", 4)),
+        assertErrorCode(() -> reviewService.write(OWNER_ID, REVIEW_ID, command("내용", 4)),
                 ErrorCode.REVIEW_NOT_FOUND);
     }
 
@@ -76,7 +76,7 @@ class ReviewServiceTest {
         Review review = review();
         given(reviewRepository.findById(REVIEW_ID)).willReturn(Optional.of(review));
 
-        assertErrorCode(() -> reviewService.write(OTHER_USER_ID, REVIEW_ID, new ReviewRequest("내용", 4,
+        assertErrorCode(() -> reviewService.write(OTHER_USER_ID, REVIEW_ID, new WriteReviewCommand("내용", 4,
                         3, InterviewAtmosphere.TENSE, ApplyRoute.OTHER, List.of("자기소개"))),
                 ErrorCode.REVIEW_NOT_FOUND);
         assertThat(review.getContent()).isNull();
@@ -85,7 +85,7 @@ class ReviewServiceTest {
         assertThat(review.getQuestions()).isEmpty();
     }
 
-    private ReviewRequest request(String content, int rating) {
-        return new ReviewRequest(content, rating, null, null, null, null);
+    private WriteReviewCommand command(String content, int rating) {
+        return new WriteReviewCommand(content, rating, null, null, null, null);
     }
 }

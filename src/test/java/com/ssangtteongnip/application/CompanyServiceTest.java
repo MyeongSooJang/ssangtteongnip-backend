@@ -1,11 +1,11 @@
 package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.CompanyService;
-import com.ssangtteongnip.application.service.dto.CompanyRequest;
+import com.ssangtteongnip.application.service.command.RegisterCompanyCommand;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
-import com.ssangtteongnip.domain.application.Application;
-import com.ssangtteongnip.domain.application.ApplicationStatus;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.company.CompanyRepository;
 import com.ssangtteongnip.domain.review.ApplyRoute;
@@ -41,11 +41,11 @@ class CompanyServiceTest {
     @Mock ReviewRepository reviewRepository;
     @InjectMocks CompanyService companyService;
 
-    private Application applicationOf(Company company) {
-        return Application.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 10, 1));
+    private JobApplication applicationOf(Company company) {
+        return JobApplication.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 10, 1));
     }
 
-    private Review writtenReview(Application application, String content, int rating) {
+    private Review writtenReview(JobApplication application, String content, int rating) {
         Review review = Review.create(application);
         review.write(content, rating);
         return review;
@@ -56,7 +56,7 @@ class CompanyServiceTest {
         given(companyRepository.existsByName("카카오")).willReturn(false);
         given(companyRepository.save(any(Company.class))).willAnswer(i -> i.getArgument(0));
 
-        Company registered = companyService.register(new CompanyRequest("카카오", "IT", "https://kakao.com"));
+        Company registered = companyService.register(new RegisterCompanyCommand("카카오", "IT", "https://kakao.com"));
 
         assertThat(registered.getName()).isEqualTo("카카오");
         assertThat(registered.getIndustry()).isEqualTo("IT");
@@ -68,7 +68,7 @@ class CompanyServiceTest {
         given(companyRepository.existsByName("카카오")).willReturn(true);
 
         assertErrorCode(
-                () -> companyService.register(new CompanyRequest("카카오", "IT", "https://kakao.com")),
+                () -> companyService.register(new RegisterCompanyCommand("카카오", "IT", "https://kakao.com")),
                 ErrorCode.COMPANY_ALREADY_EXISTS);
         verify(companyRepository, never()).save(any());
     }
@@ -143,7 +143,7 @@ class CompanyServiceTest {
     @Test
     void 회사의_후기는_직무와_지원_결과를_담아_작성자_정보_없이_준다() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application application = applicationOf(company);
+        JobApplication application = applicationOf(company);
         application.startInterview(java.time.LocalDateTime.of(2026, 11, 5, 10, 0));
         application.accept();
         given(companyRepository.findById(1L)).willReturn(Optional.of(company));
@@ -156,14 +156,14 @@ class CompanyServiceTest {
             assertThat(review.rating()).isEqualTo(5);
             assertThat(review.content()).isEqualTo("면접관이 친절했어요");
             assertThat(review.position()).isEqualTo("백엔드 개발자");
-            assertThat(review.stage()).isEqualTo(ApplicationStatus.ACCEPTED);
+            assertThat(review.stage()).isEqualTo(JobApplicationStatus.ACCEPTED);
         });
     }
 
     @Test
     void 회사의_후기에는_면접_상세가_함께_담긴다() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        Application application = applicationOf(company);
+        JobApplication application = applicationOf(company);
         Review review = writtenReview(application, "면접관이 친절했어요", 5);
         review.describeInterview(4, InterviewAtmosphere.TENSE, ApplyRoute.RECRUITER, List.of("자기소개", "프로젝트 경험"));
         given(companyRepository.findById(1L)).willReturn(Optional.of(company));

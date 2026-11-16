@@ -1,12 +1,11 @@
 package com.ssangtteongnip.application;
 
-import com.ssangtteongnip.application.service.ApplicationService;
+import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.InterviewService;
-import com.ssangtteongnip.application.service.dto.InterviewQuestionRequest;
-import com.ssangtteongnip.application.service.dto.InterviewRequest;
-import com.ssangtteongnip.application.service.dto.InterviewScoreRequest;
-import com.ssangtteongnip.domain.application.Application;
-import com.ssangtteongnip.domain.application.ApplicationStatus;
+import com.ssangtteongnip.application.service.command.AddInterviewQuestionCommand;
+import com.ssangtteongnip.application.service.command.RegisterInterviewCommand;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.domain.interview.InterviewRepository;
@@ -47,37 +46,37 @@ class InterviewServiceTest {
     private static final LocalDateTime INTERVIEW_DATE = LocalDateTime.of(2026, 11, 10, 14, 0);
 
     @Mock InterviewRepository interviewRepository;
-    @Mock ApplicationService applicationService;
+    @Mock JobApplicationService jobApplicationService;
     InterviewService interviewService;
 
-    private Application application;
+    private JobApplication application;
 
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(NOW.atZone(SEOUL).toInstant(), SEOUL);
-        interviewService = new InterviewService(interviewRepository, applicationService, clock);
+        interviewService = new InterviewService(interviewRepository, jobApplicationService, clock);
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        application = Application.create(USER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
+        application = JobApplication.create(USER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
         ReflectionTestUtils.setField(application, "id", APPLICATION_ID);
     }
 
-    private Interview interviewOf(Application owner) {
+    private Interview interviewOf(JobApplication owner) {
         return Interview.create(owner, 1, INTERVIEW_DATE, "판교 본사", "1차 면접");
     }
 
-    private Application otherApplication() {
-        Application other = Application.create(USER_ID, application.getCompany(), "프론트엔드 개발자", LocalDate.of(2026, 11, 2));
+    private JobApplication otherApplication() {
+        JobApplication other = JobApplication.create(USER_ID, application.getCompany(), "프론트엔드 개발자", LocalDate.of(2026, 11, 2));
         ReflectionTestUtils.setField(other, "id", OTHER_APPLICATION_ID);
         return other;
     }
 
     @Test
     void 면접을_등록하면_지원_건에_연결되고_점수가_기록된다() {
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.save(any(Interview.class))).willAnswer(i -> i.getArgument(0));
 
         Interview registered = interviewService.register(USER_ID, APPLICATION_ID,
-                new InterviewRequest(1, INTERVIEW_DATE, "판교 본사", "1차 면접", 80));
+                new RegisterInterviewCommand(1, INTERVIEW_DATE, "판교 본사", "1차 면접", 80));
 
         assertThat(registered.getApplication()).isSameAs(application);
         assertThat(registered.getRound()).isEqualTo(1);
@@ -86,24 +85,24 @@ class InterviewServiceTest {
 
     @Test
     void 면접을_등록하면_서류_통과로_기록되고_면접_단계가_된다() {
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.save(any(Interview.class))).willAnswer(i -> i.getArgument(0));
 
         interviewService.register(USER_ID, APPLICATION_ID,
-                new InterviewRequest(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null));
+                new RegisterInterviewCommand(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null));
 
-        assertThat(application.getStatus()).isEqualTo(ApplicationStatus.INTERVIEW);
+        assertThat(application.getStatus()).isEqualTo(JobApplicationStatus.INTERVIEW);
         assertThat(application.getDocumentPassedAt()).isEqualTo(NOW);
     }
 
     @Test
     void 이미_면접_중인_지원에_면접을_추가해도_서류_통과_시점은_유지된다() {
         application.startInterview(NOW.minusDays(7));
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.save(any(Interview.class))).willAnswer(i -> i.getArgument(0));
 
         interviewService.register(USER_ID, APPLICATION_ID,
-                new InterviewRequest(2, INTERVIEW_DATE, "판교 본사", "2차 면접", null));
+                new RegisterInterviewCommand(2, INTERVIEW_DATE, "판교 본사", "2차 면접", null));
 
         assertThat(application.getDocumentPassedAt()).isEqualTo(NOW.minusDays(7));
     }
@@ -111,10 +110,10 @@ class InterviewServiceTest {
     @Test
     void 다른_사용자의_지원_건에는_면접을_등록할_수_없다() {
         willThrow(new BusinessException(ErrorCode.APPLICATION_NOT_FOUND))
-                .given(applicationService).findById(OTHER_USER_ID, APPLICATION_ID);
+                .given(jobApplicationService).findById(OTHER_USER_ID, APPLICATION_ID);
 
         assertErrorCode(() -> interviewService.register(OTHER_USER_ID, APPLICATION_ID,
-                        new InterviewRequest(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null)),
+                        new RegisterInterviewCommand(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null)),
                 ErrorCode.APPLICATION_NOT_FOUND);
         verify(interviewRepository, never()).save(any());
     }
@@ -122,10 +121,10 @@ class InterviewServiceTest {
     @Test
     void 면접에_점수를_매기면_점수가_저장된다() {
         Interview interview = interviewOf(application);
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.findById(INTERVIEW_ID)).willReturn(Optional.of(interview));
 
-        interviewService.evaluate(USER_ID, APPLICATION_ID, INTERVIEW_ID, new InterviewScoreRequest(90));
+        interviewService.evaluate(USER_ID, APPLICATION_ID, INTERVIEW_ID, 90);
 
         assertThat(interview.getScore()).isEqualTo(90);
     }
@@ -133,11 +132,11 @@ class InterviewServiceTest {
     @Test
     void 면접에_질문을_추가하면_질문이_기록된다() {
         Interview interview = interviewOf(application);
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.findById(INTERVIEW_ID)).willReturn(Optional.of(interview));
 
         interviewService.addQuestion(USER_ID, APPLICATION_ID, INTERVIEW_ID,
-                new InterviewQuestionRequest("자기소개 해주세요", "저는...", "잘 대답했음"));
+                new AddInterviewQuestionCommand("자기소개 해주세요", "저는...", "잘 대답했음"));
 
         assertThat(interview.getQuestions()).hasSize(1);
         assertThat(interview.getQuestions().get(0).getQuestion()).isEqualTo("자기소개 해주세요");
@@ -145,20 +144,20 @@ class InterviewServiceTest {
 
     @Test
     void 존재하지_않는_면접은_평가할_수_없다() {
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.findById(INTERVIEW_ID)).willReturn(Optional.empty());
 
-        assertErrorCode(() -> interviewService.evaluate(USER_ID, APPLICATION_ID, INTERVIEW_ID, new InterviewScoreRequest(90)),
+        assertErrorCode(() -> interviewService.evaluate(USER_ID, APPLICATION_ID, INTERVIEW_ID, 90),
                 ErrorCode.INTERVIEW_NOT_FOUND);
     }
 
     @Test
     void 다른_지원_건의_면접은_평가할_수_없다() {
         Interview otherInterview = interviewOf(otherApplication());
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.findById(INTERVIEW_ID)).willReturn(Optional.of(otherInterview));
 
-        assertErrorCode(() -> interviewService.evaluate(USER_ID, APPLICATION_ID, INTERVIEW_ID, new InterviewScoreRequest(90)),
+        assertErrorCode(() -> interviewService.evaluate(USER_ID, APPLICATION_ID, INTERVIEW_ID, 90),
                 ErrorCode.INTERVIEW_NOT_FOUND);
         assertThat(otherInterview.getScore()).isNull();
     }
@@ -166,11 +165,11 @@ class InterviewServiceTest {
     @Test
     void 다른_지원_건의_면접에는_질문을_추가할_수_없다() {
         Interview otherInterview = interviewOf(otherApplication());
-        given(applicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
+        given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.findById(INTERVIEW_ID)).willReturn(Optional.of(otherInterview));
 
         assertErrorCode(() -> interviewService.addQuestion(USER_ID, APPLICATION_ID, INTERVIEW_ID,
-                        new InterviewQuestionRequest("자기소개 해주세요", null, null)),
+                        new AddInterviewQuestionCommand("자기소개 해주세요", null, null)),
                 ErrorCode.INTERVIEW_NOT_FOUND);
         assertThat(otherInterview.getQuestions()).isEmpty();
     }
@@ -178,7 +177,7 @@ class InterviewServiceTest {
     @Test
     void 다른_사용자의_지원_건에서는_면접_목록을_조회할_수_없다() {
         willThrow(new BusinessException(ErrorCode.APPLICATION_NOT_FOUND))
-                .given(applicationService).findById(OTHER_USER_ID, APPLICATION_ID);
+                .given(jobApplicationService).findById(OTHER_USER_ID, APPLICATION_ID);
 
         assertErrorCode(() -> interviewService.findByApplicationId(OTHER_USER_ID, APPLICATION_ID),
                 ErrorCode.APPLICATION_NOT_FOUND);

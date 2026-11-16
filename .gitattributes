@@ -1,3 +1,21 @@
+# 텍스트 파일은 저장소와 작업 트리 모두 LF로 통일한다.
+# Windows의 core.autocrlf=true가 작업 트리를 CRLF로 바꿔서 LF로 쓰는 도구와 줄바꿈이 섞이는 문제를 막는다.
+* text=auto eol=lf
+
+# 아래 파일은 자동 판별에 맡기지 않고 항상 텍스트(LF)로 다룬다.
 *.sh text eol=lf
 *.yml text eol=lf
 Caddyfile text eol=lf
+
+# Windows 전용 스크립트만 CRLF를 유지한다.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 바이너리는 변환하지 않는다.
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

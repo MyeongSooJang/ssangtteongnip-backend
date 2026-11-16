@@ -1,10 +1,10 @@
 package com.ssangtteongnip.infrastructure;
 
-import com.ssangtteongnip.domain.application.Application;
-import com.ssangtteongnip.domain.application.ApplicationRepository;
-import com.ssangtteongnip.domain.application.ApplicationStatus;
-import com.ssangtteongnip.domain.application.JobSite;
-import com.ssangtteongnip.domain.application.JobSiteStatistics;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
+import com.ssangtteongnip.domain.jobapplication.JobSite;
+import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.company.CompanyRepository;
 import com.ssangtteongnip.domain.review.Review;
@@ -37,7 +37,7 @@ class OwnershipRepositoryTest {
     private static final Long NO_APPLICATION_USER = 12L;
 
     @Autowired CompanyRepository companyRepository;
-    @Autowired ApplicationRepository applicationRepository;
+    @Autowired JobApplicationRepository jobApplicationRepository;
     @Autowired ScheduleRepository scheduleRepository;
     @Autowired ReviewRepository reviewRepository;
     @Autowired EntityManager em;
@@ -54,8 +54,8 @@ class OwnershipRepositoryTest {
     }
 
     private void save(Company company, Long userId) {
-        Application application = applicationRepository.save(
-                Application.create(userId, company, "백엔드 개발자", LocalDate.now()));
+        JobApplication application = jobApplicationRepository.save(
+                JobApplication.create(userId, company, "백엔드 개발자", LocalDate.now()));
         scheduleRepository.save(Schedule.create(application, "1차 면접", scheduledAt,
                 ScheduleType.INTERVIEW, "판교", ""));
         reviewRepository.save(Review.create(application));
@@ -63,19 +63,19 @@ class OwnershipRepositoryTest {
 
     @Test
     void 지원_건은_소유자의_것만_조회한다() {
-        assertThat(applicationRepository.findByUserId(OWNER)).hasSize(1)
+        assertThat(jobApplicationRepository.findByUserId(OWNER)).hasSize(1)
                 .allMatch(application -> application.isOwnedBy(OWNER));
-        assertThat(applicationRepository.findByUserIdAndStatus(OWNER, ApplicationStatus.RESUME_SUBMITTED)).hasSize(1);
-        assertThat(applicationRepository.findByUserIdAndStatus(OWNER, ApplicationStatus.INTERVIEW)).isEmpty();
+        assertThat(jobApplicationRepository.findByUserIdAndStatus(OWNER, JobApplicationStatus.RESUME_SUBMITTED)).hasSize(1);
+        assertThat(jobApplicationRepository.findByUserIdAndStatus(OWNER, JobApplicationStatus.INTERVIEW)).isEmpty();
     }
 
     private void saveApplication(Long userId, JobSite jobSite, boolean documentPassed) {
         Company company = companyRepository.findAll().get(0);
-        Application application = Application.create(userId, company, "백엔드 개발자", LocalDate.now(), jobSite);
+        JobApplication application = JobApplication.create(userId, company, "백엔드 개발자", LocalDate.now(), jobSite);
         if (documentPassed) {
             application.startInterview(scheduledAt);
         }
-        applicationRepository.save(application);
+        jobApplicationRepository.save(application);
     }
 
     @Test
@@ -89,7 +89,7 @@ class OwnershipRepositoryTest {
         em.flush();
         em.clear();
 
-        assertThat(applicationRepository.summarizeByJobSite(STATS_OWNER)).containsExactly(
+        assertThat(jobApplicationRepository.summarizeByJobSite(STATS_OWNER)).containsExactly(
                 new JobSiteStatistics(JobSite.SARAMIN, 3, 2),
                 new JobSiteStatistics(JobSite.WANTED, 1, 0));
     }
@@ -98,17 +98,17 @@ class OwnershipRepositoryTest {
     void 사이트별_집계는_서류_탈락_후_불합격과_면접_후_불합격을_구분한다() {
         saveApplication(STATS_OWNER, JobSite.JOBKOREA, false);
         Company company = companyRepository.findAll().get(0);
-        Application rejectedAfterDocument = Application.create(STATS_OWNER, company, "백엔드 개발자", LocalDate.now(), JobSite.JOBKOREA);
+        JobApplication rejectedAfterDocument = JobApplication.create(STATS_OWNER, company, "백엔드 개발자", LocalDate.now(), JobSite.JOBKOREA);
         rejectedAfterDocument.reject();
-        Application rejectedAfterInterview = Application.create(STATS_OWNER, company, "백엔드 개발자", LocalDate.now(), JobSite.JOBKOREA);
+        JobApplication rejectedAfterInterview = JobApplication.create(STATS_OWNER, company, "백엔드 개발자", LocalDate.now(), JobSite.JOBKOREA);
         rejectedAfterInterview.startInterview(scheduledAt);
         rejectedAfterInterview.reject();
-        applicationRepository.save(rejectedAfterDocument);
-        applicationRepository.save(rejectedAfterInterview);
+        jobApplicationRepository.save(rejectedAfterDocument);
+        jobApplicationRepository.save(rejectedAfterInterview);
         em.flush();
         em.clear();
 
-        assertThat(applicationRepository.summarizeByJobSite(STATS_OWNER))
+        assertThat(jobApplicationRepository.summarizeByJobSite(STATS_OWNER))
                 .containsExactly(new JobSiteStatistics(JobSite.JOBKOREA, 3, 1));
     }
 
@@ -121,14 +121,14 @@ class OwnershipRepositoryTest {
         em.flush();
         em.clear();
 
-        assertThat(applicationRepository.summarizeByJobSite(STATS_OWNER))
+        assertThat(jobApplicationRepository.summarizeByJobSite(STATS_OWNER))
                 .extracting(JobSiteStatistics::jobSite)
                 .containsExactly(JobSite.SARAMIN, JobSite.JOBKOREA, JobSite.WANTED);
     }
 
     @Test
     void 지원이_없는_사용자의_사이트별_집계는_비어_있다() {
-        assertThat(applicationRepository.summarizeByJobSite(NO_APPLICATION_USER)).isEmpty();
+        assertThat(jobApplicationRepository.summarizeByJobSite(NO_APPLICATION_USER)).isEmpty();
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.ssangtteongnip.domain;
 
-import com.ssangtteongnip.domain.application.Application;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
@@ -25,7 +25,7 @@ class ReviewTest {
 
     private Review review() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        return Review.create(Application.create(OWNER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1)));
+        return Review.create(JobApplication.create(OWNER_ID, company, "백엔드 개발자", LocalDate.of(2026, 11, 1)));
     }
 
     @Test
