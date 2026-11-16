@@ -63,10 +63,11 @@ class UserFileControllerTest {
         mockMvc.perform(multipart("/api/me/files").file(pdfFile()).param("type", "PORTFOLIO")
                         .header("Authorization", BEARER))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.type").value("PORTFOLIO"))
-                .andExpect(jsonPath("$.fileName").value("포트폴리오.pdf"))
-                .andExpect(jsonPath("$.sizeBytes").value(13));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value(5))
+                .andExpect(jsonPath("$.data.type").value("PORTFOLIO"))
+                .andExpect(jsonPath("$.data.fileName").value("포트폴리오.pdf"))
+                .andExpect(jsonPath("$.data.sizeBytes").value(13));
     }
 
     @Test
@@ -118,9 +119,10 @@ class UserFileControllerTest {
 
         mockMvc.perform(get("/api/me/files").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(6))
-                .andExpect(jsonPath("$[0].type").value("CERTIFICATE"))
-                .andExpect(jsonPath("$[1].type").value("RESUME"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].id").value(6))
+                .andExpect(jsonPath("$.data[0].type").value("CERTIFICATE"))
+                .andExpect(jsonPath("$.data[1].type").value("RESUME"));
     }
 
     @Test
@@ -132,9 +134,10 @@ class UserFileControllerTest {
 
         mockMvc.perform(get("/api/me/files/5").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.url").value("https://test-bucket.s3.amazonaws.com/files/1/a.pdf?X-Amz-Signature=x"))
-                .andExpect(jsonPath("$.fileName").value("이력서.pdf"))
-                .andExpect(jsonPath("$.expiresAt").value("2026-11-05T01:05:00Z"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.url").value("https://test-bucket.s3.amazonaws.com/files/1/a.pdf?X-Amz-Signature=x"))
+                .andExpect(jsonPath("$.data.fileName").value("이력서.pdf"))
+                .andExpect(jsonPath("$.data.expiresAt").value("2026-11-05T01:05:00Z"));
     }
 
     @Test
@@ -149,7 +152,8 @@ class UserFileControllerTest {
     @Test
     void DELETE_me_files_id_파일을_삭제한다() throws Exception {
         mockMvc.perform(delete("/api/me/files/5").header("Authorization", BEARER))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test
