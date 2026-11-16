@@ -3,6 +3,7 @@ package com.ssangtteongnip.web.image;
 import com.ssangtteongnip.application.service.StudyImageService;
 import com.ssangtteongnip.application.service.dto.StudyImageResponse;
 import com.ssangtteongnip.domain.profile.PresignedUrl;
+import com.ssangtteongnip.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -29,9 +30,9 @@ public class StudyImageController {
 
     @PostMapping(value = "/me/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public StudyImageResponse upload(@AuthenticationPrincipal Long userId,
-                                     @RequestPart("file") MultipartFile file) throws IOException {
-        return studyImageService.upload(userId, file.getBytes());
+    public ApiResponse<StudyImageResponse> upload(@AuthenticationPrincipal Long userId,
+                                                  @RequestPart("file") MultipartFile file) throws IOException {
+        return ApiResponse.ok(studyImageService.upload(userId, file.getBytes()));
     }
 
     // <img src>는 Authorization 헤더를 보낼 수 없으므로 인증 없이 열어 둔다. 주소(UUID)를 아는 사람만 볼 수 있다.

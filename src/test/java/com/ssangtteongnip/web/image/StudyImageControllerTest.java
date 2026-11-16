@@ -54,7 +54,8 @@ class StudyImageControllerTest {
 
         mockMvc.perform(multipart("/api/me/images").file(image()).header("Authorization", BEARER))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.url").value("/api/images/abc"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.url").value("/api/images/abc"));
     }
 
     @Test
