@@ -241,7 +241,9 @@ class JobApplicationControllerTest {
     void GET_applications_토큰이_없으면_401을_반환한다() throws Exception {
         mockMvc.perform(get("/api/applications"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test

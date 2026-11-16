@@ -85,7 +85,9 @@ class ProfileControllerTest {
     void GET_me_profile_토큰이_없으면_401을_반환한다() throws Exception {
         mockMvc.perform(get("/api/me/profile"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test
@@ -96,7 +98,9 @@ class ProfileControllerTest {
 
         mockMvc.perform(get("/api/me/profile").header("Authorization", "Bearer bad-token"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test

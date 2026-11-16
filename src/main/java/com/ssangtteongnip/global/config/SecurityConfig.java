@@ -3,7 +3,7 @@ package com.ssangtteongnip.global.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.exception.ErrorCode;
-import com.ssangtteongnip.global.response.ErrorResponse;
+import com.ssangtteongnip.global.response.ApiResponse;
 import com.ssangtteongnip.infrastructure.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +47,7 @@ public class SecurityConfig {
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
                     response.getWriter().write(objectMapper.writeValueAsString(
-                            ErrorResponse.of(ErrorCode.UNAUTHORIZED)));
+                            ApiResponse.fail(ErrorCode.UNAUTHORIZED)));
                 }))
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();

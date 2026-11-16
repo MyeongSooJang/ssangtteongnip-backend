@@ -1,6 +1,6 @@
 package com.ssangtteongnip.global.exception;
 
-import com.ssangtteongnip.global.response.ErrorResponse;
+import com.ssangtteongnip.global.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,34 +13,34 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
         return ResponseEntity
                 .status(e.getErrorCode().getHttpStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
+                .body(ApiResponse.fail(e.getErrorCode()));
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         return ResponseEntity
                 .status(ErrorCode.FILE_TOO_LARGE.getHttpStatus())
-                .body(ErrorResponse.of(ErrorCode.FILE_TOO_LARGE));
+                .body(ApiResponse.fail(ErrorCode.FILE_TOO_LARGE));
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
-    public ResponseEntity<ErrorResponse> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
         return ResponseEntity
                 .status(ErrorCode.EMPTY_FILE.getHttpStatus())
-                .body(ErrorResponse.of(ErrorCode.EMPTY_FILE));
+                .body(ApiResponse.fail(ErrorCode.EMPTY_FILE));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(fieldError -> fieldError.getDefaultMessage())
                 .orElse("입력값이 올바르지 않습니다.");
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("VALIDATION_ERROR", message));
+                .body(ApiResponse.fail("VALIDATION_ERROR", message));
     }
 }
