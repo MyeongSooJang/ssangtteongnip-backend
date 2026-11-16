@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.schedule;
 
 import com.ssangtteongnip.application.service.ScheduleService;
 import com.ssangtteongnip.domain.schedule.Schedule;
+import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,26 +22,26 @@ public class ScheduleController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Schedule register(@AuthenticationPrincipal Long userId,
-                             @RequestBody @Valid ScheduleRequest request) {
-        return scheduleService.register(userId, request.toCommand());
+    public ApiResponse<Schedule> register(@AuthenticationPrincipal Long userId,
+                                          @RequestBody @Valid ScheduleRequest request) {
+        return ApiResponse.ok(scheduleService.register(userId, request.toCommand()));
     }
 
     @PatchMapping("/{id}/address")
-    public Schedule updateAddress(@AuthenticationPrincipal Long userId,
-                                  @PathVariable Long id,
-                                  @RequestBody @Valid ScheduleAddressRequest request) {
-        return scheduleService.updateAddress(userId, id, request.address());
+    public ApiResponse<Schedule> updateAddress(@AuthenticationPrincipal Long userId,
+                                               @PathVariable Long id,
+                                               @RequestBody @Valid ScheduleAddressRequest request) {
+        return ApiResponse.ok(scheduleService.updateAddress(userId, id, request.address()));
     }
 
     @GetMapping
-    public List<Schedule> findAll(
+    public ApiResponse<List<Schedule>> findAll(
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
         if (from != null && to != null) {
-            return scheduleService.findByPeriod(userId, from, to);
+            return ApiResponse.ok(scheduleService.findByPeriod(userId, from, to));
         }
-        return scheduleService.findAll(userId);
+        return ApiResponse.ok(scheduleService.findAll(userId));
     }
 }

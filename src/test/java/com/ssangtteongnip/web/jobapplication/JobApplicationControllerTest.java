@@ -65,7 +65,8 @@ class JobApplicationControllerTest {
                                 Map.of("companyId", 1, "position", "백엔드 개발자", "appliedDate", LocalDate.now().toString(),
                                         "jobSite", "OTHER"))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("RESUME_SUBMITTED"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("RESUME_SUBMITTED"));
     }
 
     @Test
@@ -93,6 +94,7 @@ class JobApplicationControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 Map.of("companyId", 1, "position", "백엔드 개발자", "appliedDate", LocalDate.now().toString()))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -107,7 +109,8 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("jobSite", "WANTED"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jobSite").value("WANTED"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.jobSite").value("WANTED"));
     }
 
     @Test
@@ -117,6 +120,7 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -139,7 +143,8 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("status", "INTERVIEW"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("INTERVIEW"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("INTERVIEW"));
     }
 
     @Test
@@ -151,7 +156,8 @@ class JobApplicationControllerTest {
         mockMvc.perform(get("/api/applications")
                         .header("Authorization", BEARER).param("status", "INTERVIEW"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].status").value("INTERVIEW"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].status").value("INTERVIEW"));
     }
 
     @Test
@@ -161,6 +167,7 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("position", "백엔드 개발자"))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -171,6 +178,7 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -184,6 +192,7 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("status", "ACCEPTED"))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("INVALID_STATUS_TRANSITION"));
     }
 
@@ -193,8 +202,9 @@ class JobApplicationControllerTest {
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.position").value("백엔드 개발자"))
-                .andExpect(jsonPath("$.status").value("RESUME_SUBMITTED"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.position").value("백엔드 개발자"))
+                .andExpect(jsonPath("$.data.status").value("RESUME_SUBMITTED"));
     }
 
     @Test
@@ -204,10 +214,11 @@ class JobApplicationControllerTest {
 
         mockMvc.perform(get("/api/applications/stats/job-site").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].jobSite").value("SARAMIN"))
-                .andExpect(jsonPath("$[0].applicationCount").value(10))
-                .andExpect(jsonPath("$[0].documentPassedCount").value(3))
-                .andExpect(jsonPath("$[0].documentPassRate").value(0.3));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].jobSite").value("SARAMIN"))
+                .andExpect(jsonPath("$.data[0].applicationCount").value(10))
+                .andExpect(jsonPath("$.data[0].documentPassedCount").value(3))
+                .andExpect(jsonPath("$.data[0].documentPassRate").value(0.3));
     }
 
     @Test
@@ -224,8 +235,9 @@ class JobApplicationControllerTest {
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.documentPassed").value(true))
-                .andExpect(jsonPath("$.documentPassedAt").value("2026-11-05T10:00:00"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.documentPassed").value(true))
+                .andExpect(jsonPath("$.data.documentPassedAt").value("2026-11-05T10:00:00"));
     }
 
     @Test
@@ -234,6 +246,7 @@ class JobApplicationControllerTest {
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("APPLICATION_NOT_FOUND"));
     }
 
@@ -258,7 +271,8 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("deadline", "2026-11-30"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.deadline").value("2026-11-30"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.deadline").value("2026-11-30"));
     }
 
     @Test
@@ -268,6 +282,7 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -291,7 +306,8 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("resumeView", "VIEWED"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resumeView").value("VIEWED"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.resumeView").value("VIEWED"));
     }
 
     @Test
@@ -301,6 +317,7 @@ class JobApplicationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -313,8 +330,9 @@ class JobApplicationControllerTest {
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.deadline").value("2026-10-10"))
-                .andExpect(jsonPath("$.resumeView").value("NOT_VIEWED"))
-                .andExpect(jsonPath("$.autoRejectedAt").value("2026-11-11T07:00:00"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.deadline").value("2026-10-10"))
+                .andExpect(jsonPath("$.data.resumeView").value("NOT_VIEWED"))
+                .andExpect(jsonPath("$.data.autoRejectedAt").value("2026-11-11T07:00:00"));
     }
 }

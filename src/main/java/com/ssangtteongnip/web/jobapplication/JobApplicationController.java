@@ -4,6 +4,7 @@ import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
+import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,54 +22,54 @@ public class JobApplicationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public JobApplication register(@AuthenticationPrincipal Long userId,
-                               @RequestBody @Valid JobApplicationRequest request) {
-        return jobApplicationService.register(userId, request.toCommand());
+    public ApiResponse<JobApplication> register(@AuthenticationPrincipal Long userId,
+                                                @RequestBody @Valid JobApplicationRequest request) {
+        return ApiResponse.ok(jobApplicationService.register(userId, request.toCommand()));
     }
 
     @GetMapping
-    public List<JobApplication> findAll(@AuthenticationPrincipal Long userId,
-                                        @RequestParam(required = false) JobApplicationStatus status) {
-        return status == null
+    public ApiResponse<List<JobApplication>> findAll(@AuthenticationPrincipal Long userId,
+                                                     @RequestParam(required = false) JobApplicationStatus status) {
+        return ApiResponse.ok(status == null
                 ? jobApplicationService.findAll(userId)
-                : jobApplicationService.findByStatus(userId, status);
+                : jobApplicationService.findByStatus(userId, status));
     }
 
     @GetMapping("/stats/job-site")
-    public List<JobSiteStatisticsResponse> summarizeByJobSite(@AuthenticationPrincipal Long userId) {
-        return jobApplicationService.summarizeByJobSite(userId);
+    public ApiResponse<List<JobSiteStatisticsResponse>> summarizeByJobSite(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(jobApplicationService.summarizeByJobSite(userId));
     }
 
     @GetMapping("/{id}")
-    public JobApplication findById(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
-        return jobApplicationService.findById(userId, id);
+    public ApiResponse<JobApplication> findById(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
+        return ApiResponse.ok(jobApplicationService.findById(userId, id));
     }
 
     @PatchMapping("/{id}/job-site")
-    public JobApplication changeJobSite(@AuthenticationPrincipal Long userId,
-                                        @PathVariable Long id,
-                                        @RequestBody @Valid JobApplicationJobSiteRequest request) {
-        return jobApplicationService.changeJobSite(userId, id, request.jobSite());
+    public ApiResponse<JobApplication> changeJobSite(@AuthenticationPrincipal Long userId,
+                                                     @PathVariable Long id,
+                                                     @RequestBody @Valid JobApplicationJobSiteRequest request) {
+        return ApiResponse.ok(jobApplicationService.changeJobSite(userId, id, request.jobSite()));
     }
 
     @PatchMapping("/{id}/deadline")
-    public JobApplication changeDeadline(@AuthenticationPrincipal Long userId,
-                                         @PathVariable Long id,
-                                         @RequestBody @Valid JobApplicationDeadlineRequest request) {
-        return jobApplicationService.changeDeadline(userId, id, request.deadline());
+    public ApiResponse<JobApplication> changeDeadline(@AuthenticationPrincipal Long userId,
+                                                      @PathVariable Long id,
+                                                      @RequestBody @Valid JobApplicationDeadlineRequest request) {
+        return ApiResponse.ok(jobApplicationService.changeDeadline(userId, id, request.deadline()));
     }
 
     @PatchMapping("/{id}/resume-view")
-    public JobApplication changeResumeView(@AuthenticationPrincipal Long userId,
-                                           @PathVariable Long id,
-                                           @RequestBody @Valid JobApplicationResumeViewRequest request) {
-        return jobApplicationService.changeResumeView(userId, id, request.resumeView());
+    public ApiResponse<JobApplication> changeResumeView(@AuthenticationPrincipal Long userId,
+                                                        @PathVariable Long id,
+                                                        @RequestBody @Valid JobApplicationResumeViewRequest request) {
+        return ApiResponse.ok(jobApplicationService.changeResumeView(userId, id, request.resumeView()));
     }
 
     @PatchMapping("/{id}/status")
-    public JobApplication decideResult(@AuthenticationPrincipal Long userId,
-                                       @PathVariable Long id,
-                                       @RequestBody @Valid JobApplicationStatusRequest request) {
-        return jobApplicationService.decideResult(userId, id, request.status());
+    public ApiResponse<JobApplication> decideResult(@AuthenticationPrincipal Long userId,
+                                                    @PathVariable Long id,
+                                                    @RequestBody @Valid JobApplicationStatusRequest request) {
+        return ApiResponse.ok(jobApplicationService.decideResult(userId, id, request.status()));
     }
 }

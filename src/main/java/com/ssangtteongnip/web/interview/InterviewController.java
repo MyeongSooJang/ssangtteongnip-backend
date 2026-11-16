@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.interview;
 
 import com.ssangtteongnip.application.service.InterviewService;
 import com.ssangtteongnip.domain.interview.Interview;
+import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,31 +20,31 @@ public class InterviewController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Interview register(@AuthenticationPrincipal Long userId,
-                              @PathVariable Long applicationId,
-                              @RequestBody @Valid InterviewRequest request) {
-        return interviewService.register(userId, applicationId, request.toCommand());
+    public ApiResponse<Interview> register(@AuthenticationPrincipal Long userId,
+                                           @PathVariable Long applicationId,
+                                           @RequestBody @Valid InterviewRequest request) {
+        return ApiResponse.ok(interviewService.register(userId, applicationId, request.toCommand()));
     }
 
     @GetMapping
-    public List<Interview> findAll(@AuthenticationPrincipal Long userId, @PathVariable Long applicationId) {
-        return interviewService.findByApplicationId(userId, applicationId);
+    public ApiResponse<List<Interview>> findAll(@AuthenticationPrincipal Long userId, @PathVariable Long applicationId) {
+        return ApiResponse.ok(interviewService.findByApplicationId(userId, applicationId));
     }
 
     @PatchMapping("/{interviewId}/score")
-    public Interview evaluate(@AuthenticationPrincipal Long userId,
-                              @PathVariable Long applicationId,
-                              @PathVariable Long interviewId,
-                              @RequestBody @Valid InterviewScoreRequest request) {
-        return interviewService.evaluate(userId, applicationId, interviewId, request.score());
+    public ApiResponse<Interview> evaluate(@AuthenticationPrincipal Long userId,
+                                           @PathVariable Long applicationId,
+                                           @PathVariable Long interviewId,
+                                           @RequestBody @Valid InterviewScoreRequest request) {
+        return ApiResponse.ok(interviewService.evaluate(userId, applicationId, interviewId, request.score()));
     }
 
     @PostMapping("/{interviewId}/questions")
     @ResponseStatus(HttpStatus.CREATED)
-    public Interview addQuestion(@AuthenticationPrincipal Long userId,
-                                 @PathVariable Long applicationId,
-                                 @PathVariable Long interviewId,
-                                 @RequestBody @Valid InterviewQuestionRequest request) {
-        return interviewService.addQuestion(userId, applicationId, interviewId, request.toCommand());
+    public ApiResponse<Interview> addQuestion(@AuthenticationPrincipal Long userId,
+                                              @PathVariable Long applicationId,
+                                              @PathVariable Long interviewId,
+                                              @RequestBody @Valid InterviewQuestionRequest request) {
+        return ApiResponse.ok(interviewService.addQuestion(userId, applicationId, interviewId, request.toCommand()));
     }
 }

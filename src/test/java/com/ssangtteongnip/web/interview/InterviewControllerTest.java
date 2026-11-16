@@ -62,7 +62,8 @@ class InterviewControllerTest {
                                 Map.of("round", 1, "interviewDate", LocalDateTime.now().toString(),
                                         "location", "판교", "note", "1차 면접"))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.round").value(1));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.round").value(1));
     }
 
     @Test
@@ -78,7 +79,8 @@ class InterviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("score", 85))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.score").value(85));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.score").value(85));
     }
 
     @Test
@@ -102,8 +104,9 @@ class InterviewControllerTest {
 
         mockMvc.perform(get("/api/applications/1/interviews").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].round").value(1))
-                .andExpect(jsonPath("$[0].location").value("판교"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].round").value(1))
+                .andExpect(jsonPath("$.data[0].location").value("판교"));
     }
 
     @Test
@@ -114,6 +117,7 @@ class InterviewControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 Map.of("round", 0, "interviewDate", "2026-11-10T14:00:00"))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -128,7 +132,8 @@ class InterviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("question", "자기소개 해주세요"))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.questions[0].question").value("자기소개 해주세요"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.questions[0].question").value("자기소개 해주세요"));
     }
 
     @Test
@@ -138,6 +143,7 @@ class InterviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("question", " "))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
