@@ -63,13 +63,14 @@ class ProfileControllerTest {
 
         mockMvc.perform(get("/api/me/profile").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("hong@example.com"))
-                .andExpect(jsonPath("$.desiredJob").value("백엔드 개발자"))
-                .andExpect(jsonPath("$.jobSearchStartDate").value("2025-03-01"))
-                .andExpect(jsonPath("$.files[0].id").value(3))
-                .andExpect(jsonPath("$.files[0].type").value("RESUME"))
-                .andExpect(jsonPath("$.files[0].fileName").value("이력서.pdf"))
-                .andExpect(jsonPath("$.files[0].sizeBytes").value(1024));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.email").value("hong@example.com"))
+                .andExpect(jsonPath("$.data.desiredJob").value("백엔드 개발자"))
+                .andExpect(jsonPath("$.data.jobSearchStartDate").value("2025-03-01"))
+                .andExpect(jsonPath("$.data.files[0].id").value(3))
+                .andExpect(jsonPath("$.data.files[0].type").value("RESUME"))
+                .andExpect(jsonPath("$.data.files[0].fileName").value("이력서.pdf"))
+                .andExpect(jsonPath("$.data.files[0].sizeBytes").value(1024));
     }
 
     @Test
@@ -78,14 +79,17 @@ class ProfileControllerTest {
 
         mockMvc.perform(get("/api/me/profile").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.files").isEmpty());
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.files").isEmpty());
     }
 
     @Test
     void GET_me_profile_토큰이_없으면_401을_반환한다() throws Exception {
         mockMvc.perform(get("/api/me/profile"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test
@@ -96,7 +100,9 @@ class ProfileControllerTest {
 
         mockMvc.perform(get("/api/me/profile").header("Authorization", "Bearer bad-token"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test
@@ -109,7 +115,8 @@ class ProfileControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 Map.of("name", "홍길동", "phone", "010-1234-5678", "desiredJob", "백엔드 개발자"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("홍길동"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.name").value("홍길동"));
     }
 
     @Test
@@ -132,7 +139,8 @@ class ProfileControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 Map.of("name", "홍길동", "jobSearchStartDate", "2025-03-01"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jobSearchStartDate").value("2025-03-01"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.jobSearchStartDate").value("2025-03-01"));
     }
 
     @Test
@@ -157,7 +165,8 @@ class ProfileControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 Map.of("name", "홍길동", "jobSearchStartDate", LocalDate.now().toString()))))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test
@@ -168,7 +177,8 @@ class ProfileControllerTest {
                         .header("Authorization", BEARER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", "홍길동"))))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test
@@ -191,7 +201,8 @@ class ProfileControllerTest {
                                 Map.entry("desiredJob", "백엔드 개발자"),
                                 Map.entry("introduction", "안녕하세요"),
                                 Map.entry("jobSearchStartDate", "2025-03-01")))))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
 
         ArgumentCaptor<ReviseProfileCommand> captor = ArgumentCaptor.forClass(ReviseProfileCommand.class);
         verify(profileService).reviseMyProfile(eq(1L), captor.capture());

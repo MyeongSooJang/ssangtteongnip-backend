@@ -60,7 +60,8 @@ class ReviewControllerTest {
         mockMvc.perform(get("/api/reviews")
                         .header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].application.position").value("백엔드 개발자"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].application.position").value("백엔드 개발자"));
     }
 
     @Test
@@ -74,8 +75,9 @@ class ReviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("content", "분위기가 좋았다", "rating", 4))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("분위기가 좋았다"))
-                .andExpect(jsonPath("$.rating").value(4));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.content").value("분위기가 좋았다"))
+                .andExpect(jsonPath("$.data.rating").value(4));
     }
 
     @Test
@@ -93,10 +95,11 @@ class ReviewControllerTest {
                                 "difficulty", 3, "atmosphere", "COMFORTABLE",
                                 "route", "REFERRAL", "questions", List.of("자기소개")))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.difficulty").value(3))
-                .andExpect(jsonPath("$.atmosphere").value("COMFORTABLE"))
-                .andExpect(jsonPath("$.route").value("REFERRAL"))
-                .andExpect(jsonPath("$.questions[0]").value("자기소개"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.difficulty").value(3))
+                .andExpect(jsonPath("$.data.atmosphere").value("COMFORTABLE"))
+                .andExpect(jsonPath("$.data.route").value("REFERRAL"))
+                .andExpect(jsonPath("$.data.questions[0]").value("자기소개"));
     }
 
     @Test

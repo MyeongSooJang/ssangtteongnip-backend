@@ -65,11 +65,12 @@ class StudyLogControllerTest {
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "studyDate", "2026-11-03", "title", "JPA 정리", "content", "JPA 공부", "studyMinutes", 90))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(10))
-                .andExpect(jsonPath("$.studyDate").value("2026-11-03"))
-                .andExpect(jsonPath("$.title").value("JPA 정리"))
-                .andExpect(jsonPath("$.content").value("JPA 공부"))
-                .andExpect(jsonPath("$.studyMinutes").value(90));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value(10))
+                .andExpect(jsonPath("$.data.studyDate").value("2026-11-03"))
+                .andExpect(jsonPath("$.data.title").value("JPA 정리"))
+                .andExpect(jsonPath("$.data.content").value("JPA 공부"))
+                .andExpect(jsonPath("$.data.studyMinutes").value(90));
     }
 
     @Test
@@ -117,7 +118,8 @@ class StudyLogControllerTest {
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "title", "JPA 정리", "content", "JPA 공부", "studyMinutes", 90))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("JPA 정리"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.title").value("JPA 정리"));
     }
 
     @Test
@@ -139,7 +141,8 @@ class StudyLogControllerTest {
 
         mockMvc.perform(get("/api/me/study-logs/10").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(10));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value(10));
     }
 
     @Test
@@ -159,8 +162,9 @@ class StudyLogControllerTest {
                         .param("from", "2026-10-21").param("to", "2026-11-03")
                         .header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].studyDate").value("2026-11-03"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].studyDate").value("2026-11-03"));
     }
 
     @Test
@@ -189,11 +193,12 @@ class StudyLogControllerTest {
 
         mockMvc.perform(get("/api/me/study-logs/stats").header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.currentStreak").value(3))
-                .andExpect(jsonPath("$.longestStreak").value(21))
-                .andExpect(jsonPath("$.monthWrittenDays").value(5))
-                .andExpect(jsonPath("$.todayMinutes").value(90))
-                .andExpect(jsonPath("$.last7Days").doesNotExist());
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.currentStreak").value(3))
+                .andExpect(jsonPath("$.data.longestStreak").value(21))
+                .andExpect(jsonPath("$.data.monthWrittenDays").value(5))
+                .andExpect(jsonPath("$.data.todayMinutes").value(90))
+                .andExpect(jsonPath("$.data.last7Days").doesNotExist());
     }
 
     @Test
@@ -205,10 +210,11 @@ class StudyLogControllerTest {
                         .param("from", "2025-11-03").param("to", "2026-11-03")
                         .header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].date").value("2026-11-03"))
-                .andExpect(jsonPath("$[0].count").value(2))
-                .andExpect(jsonPath("$[0].minutes").value(90));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].date").value("2026-11-03"))
+                .andExpect(jsonPath("$.data[0].count").value(2))
+                .andExpect(jsonPath("$.data[0].minutes").value(90));
     }
 
     @Test
@@ -224,9 +230,10 @@ class StudyLogControllerTest {
     }
 
     @Test
-    void DELETE_글을_삭제하고_204를_반환한다() throws Exception {
+    void DELETE_글을_삭제하고_200을_반환한다() throws Exception {
         mockMvc.perform(delete("/api/me/study-logs/10").header("Authorization", BEARER))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
 
         verify(studyLogService).delete(1L, 10L);
     }

@@ -4,6 +4,7 @@ import com.ssangtteongnip.application.service.UserFileService;
 import com.ssangtteongnip.application.service.dto.FileDownload;
 import com.ssangtteongnip.application.service.dto.UserFileResponse;
 import com.ssangtteongnip.domain.profile.FileType;
+import com.ssangtteongnip.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,25 +24,26 @@ public class UserFileController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public UserFileResponse upload(@AuthenticationPrincipal Long userId,
-                                   @RequestParam(value = "type", required = false) String type,
-                                   @RequestPart("file") MultipartFile file) throws IOException {
-        return userFileService.upload(userId, FileType.parse(type), file.getOriginalFilename(), file.getBytes());
+    public ApiResponse<UserFileResponse> upload(@AuthenticationPrincipal Long userId,
+                                                @RequestParam(value = "type", required = false) String type,
+                                                @RequestPart("file") MultipartFile file) throws IOException {
+        FileType fileType = FileType.parse(type);
+        return ApiResponse.ok(userFileService.upload(userId, fileType, file.getOriginalFilename(), file.getBytes()));
     }
 
     @GetMapping
-    public List<UserFileResponse> list(@AuthenticationPrincipal Long userId) {
-        return userFileService.list(userId);
+    public ApiResponse<List<UserFileResponse>> list(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(userFileService.list(userId));
     }
 
     @GetMapping("/{id}")
-    public FileDownload download(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
-        return userFileService.download(userId, id);
+    public ApiResponse<FileDownload> download(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
+        return ApiResponse.ok(userFileService.download(userId, id));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
+    public ApiResponse<Void> delete(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
         userFileService.delete(userId, id);
+        return ApiResponse.ok();
     }
 }

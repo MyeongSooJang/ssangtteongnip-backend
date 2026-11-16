@@ -3,6 +3,7 @@ package com.ssangtteongnip.web.auth;
 import com.ssangtteongnip.application.service.AuthService;
 import com.ssangtteongnip.application.service.EmailVerificationService;
 import com.ssangtteongnip.application.service.dto.TokenResponse;
+import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,23 +18,25 @@ public class AuthController {
     private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/email-verifications")
-    public void sendVerificationCode(@RequestBody @Valid EmailVerificationRequest request) {
+    public ApiResponse<Void> sendVerificationCode(@RequestBody @Valid EmailVerificationRequest request) {
         emailVerificationService.send(request.email());
+        return ApiResponse.ok();
     }
 
     @PostMapping("/email-verifications/confirm")
-    public void confirmVerificationCode(@RequestBody @Valid EmailVerificationConfirmRequest request) {
+    public ApiResponse<Void> confirmVerificationCode(@RequestBody @Valid EmailVerificationConfirmRequest request) {
         emailVerificationService.confirm(request.toCommand());
+        return ApiResponse.ok();
     }
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public TokenResponse signup(@RequestBody @Valid SignupRequest request) {
-        return authService.signup(request.toCommand());
+    public ApiResponse<TokenResponse> signup(@RequestBody @Valid SignupRequest request) {
+        return ApiResponse.ok(authService.signup(request.toCommand()));
     }
 
     @PostMapping("/login")
-    public TokenResponse login(@RequestBody @Valid LoginRequest request) {
-        return authService.login(request.toCommand());
+    public ApiResponse<TokenResponse> login(@RequestBody @Valid LoginRequest request) {
+        return ApiResponse.ok(authService.login(request.toCommand()));
     }
 }

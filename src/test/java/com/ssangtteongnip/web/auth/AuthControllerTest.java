@@ -44,7 +44,8 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/email-verifications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("email", "hong@example.com"))))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
 
         verify(emailVerificationService).send("hong@example.com");
     }
@@ -76,7 +77,8 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 Map.of("email", "hong@example.com", "code", "123456"))))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
 
         verify(emailVerificationService).confirm(new ConfirmEmailVerificationCommand("hong@example.com", "123456"));
     }
@@ -115,7 +117,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 Map.of("email", "hong@example.com", "name", "홍길동", "password", "password1"))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accessToken").value("jwt-token"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.accessToken").value("jwt-token"));
 
         verify(authService).signup(new SignupCommand("hong@example.com", "홍길동", "password1"));
     }
@@ -150,7 +153,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 Map.of("email", "hong@example.com", "password", "password1"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("jwt-token"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.accessToken").value("jwt-token"));
 
         verify(authService).login(new LoginCommand("hong@example.com", "password1"));
     }

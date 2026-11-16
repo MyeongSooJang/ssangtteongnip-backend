@@ -63,8 +63,9 @@ class ScheduleControllerTest {
                                 "type", "INTERVIEW",
                                 "address", "경기도 성남시 판교역로 166"))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("1차 면접"))
-                .andExpect(jsonPath("$.address").value("경기도 성남시 판교역로 166"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.title").value("1차 면접"))
+                .andExpect(jsonPath("$.data.address").value("경기도 성남시 판교역로 166"));
     }
 
     private Schedule schedule(String address) {
@@ -80,7 +81,8 @@ class ScheduleControllerTest {
         mockMvc.perform(get("/api/schedules")
                         .header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("1차 면접"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].title").value("1차 면접"));
     }
 
     @Test
@@ -94,7 +96,8 @@ class ScheduleControllerTest {
                         .param("from", "2026-11-01T00:00:00")
                         .param("to", "2026-11-30T23:59:00"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].address").value("판교"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].address").value("판교"));
     }
 
     @Test
@@ -105,7 +108,8 @@ class ScheduleControllerTest {
                         .header("Authorization", BEARER)
                         .param("from", "2026-11-01T00:00:00"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("1차 면접"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].title").value("1차 면접"));
     }
 
     @Test
@@ -115,6 +119,7 @@ class ScheduleControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("address", " "))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -143,7 +148,8 @@ class ScheduleControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("address", "서울시 강남구"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.address").value("서울시 강남구"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.address").value("서울시 강남구"));
     }
 
     @Test

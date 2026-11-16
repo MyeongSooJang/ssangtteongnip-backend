@@ -4,6 +4,7 @@ import com.ssangtteongnip.application.service.StudyLogService;
 import com.ssangtteongnip.application.service.dto.HeatmapDayResponse;
 import com.ssangtteongnip.application.service.dto.StudyLogResponse;
 import com.ssangtteongnip.application.service.dto.StudyStatsResponse;
+import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,45 +24,45 @@ public class StudyLogController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public StudyLogResponse create(@AuthenticationPrincipal Long userId,
-                                   @RequestBody @Valid StudyLogCreateRequest request) {
-        return studyLogService.create(userId, request.toCommand());
+    public ApiResponse<StudyLogResponse> create(@AuthenticationPrincipal Long userId,
+                                                @RequestBody @Valid StudyLogCreateRequest request) {
+        return ApiResponse.ok(studyLogService.create(userId, request.toCommand()));
     }
 
     @PutMapping("/{id}")
-    public StudyLogResponse rewrite(@AuthenticationPrincipal Long userId,
-                                   @PathVariable Long id,
-                                   @RequestBody @Valid StudyLogRequest request) {
-        return studyLogService.rewrite(userId, id, request.toCommand());
+    public ApiResponse<StudyLogResponse> rewrite(@AuthenticationPrincipal Long userId,
+                                                 @PathVariable Long id,
+                                                 @RequestBody @Valid StudyLogRequest request) {
+        return ApiResponse.ok(studyLogService.rewrite(userId, id, request.toCommand()));
     }
 
     @GetMapping("/{id}")
-    public StudyLogResponse find(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
-        return studyLogService.find(userId, id);
+    public ApiResponse<StudyLogResponse> find(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
+        return ApiResponse.ok(studyLogService.find(userId, id));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
+    public ApiResponse<Void> delete(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
         studyLogService.delete(userId, id);
+        return ApiResponse.ok();
     }
 
     @GetMapping
-    public List<StudyLogResponse> findRange(@AuthenticationPrincipal Long userId,
-                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        return studyLogService.findRange(userId, from, to);
+    public ApiResponse<List<StudyLogResponse>> findRange(@AuthenticationPrincipal Long userId,
+                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return ApiResponse.ok(studyLogService.findRange(userId, from, to));
     }
 
     @GetMapping("/heatmap")
-    public List<HeatmapDayResponse> heatmap(@AuthenticationPrincipal Long userId,
-                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        return studyLogService.heatmap(userId, from, to);
+    public ApiResponse<List<HeatmapDayResponse>> heatmap(@AuthenticationPrincipal Long userId,
+                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return ApiResponse.ok(studyLogService.heatmap(userId, from, to));
     }
 
     @GetMapping("/stats")
-    public StudyStatsResponse stats(@AuthenticationPrincipal Long userId) {
-        return studyLogService.stats(userId);
+    public ApiResponse<StudyStatsResponse> stats(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(studyLogService.stats(userId));
     }
 }

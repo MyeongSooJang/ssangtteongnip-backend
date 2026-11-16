@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.profile;
 
 import com.ssangtteongnip.application.service.ProfileService;
 import com.ssangtteongnip.application.service.dto.ProfileResponse;
+import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,13 +16,13 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
-    public ProfileResponse getMyProfile(@AuthenticationPrincipal Long userId) {
-        return profileService.getMyProfile(userId);
+    public ApiResponse<ProfileResponse> getMyProfile(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(profileService.getMyProfile(userId));
     }
 
     @PutMapping
-    public ProfileResponse reviseMyProfile(@AuthenticationPrincipal Long userId,
-                                           @RequestBody @Valid ProfileRequest request) {
-        return profileService.reviseMyProfile(userId, request.toCommand());
+    public ApiResponse<ProfileResponse> reviseMyProfile(@AuthenticationPrincipal Long userId,
+                                                        @RequestBody @Valid ProfileRequest request) {
+        return ApiResponse.ok(profileService.reviseMyProfile(userId, request.toCommand()));
     }
 }

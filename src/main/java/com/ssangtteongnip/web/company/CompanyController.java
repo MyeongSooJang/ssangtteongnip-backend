@@ -4,6 +4,7 @@ import com.ssangtteongnip.application.service.CompanyService;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
 import com.ssangtteongnip.domain.company.Company;
+import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,22 +21,22 @@ public class CompanyController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Company register(@RequestBody @Valid CompanyRequest request) {
-        return companyService.register(request.toCommand());
+    public ApiResponse<Company> register(@RequestBody @Valid CompanyRequest request) {
+        return ApiResponse.ok(companyService.register(request.toCommand()));
     }
 
     @GetMapping
-    public List<CompanyResponse> findAll() {
-        return companyService.findAll();
+    public ApiResponse<List<CompanyResponse>> findAll() {
+        return ApiResponse.ok(companyService.findAll());
     }
 
     @GetMapping("/{id}")
-    public CompanyResponse findById(@PathVariable Long id) {
-        return companyService.findDetail(id);
+    public ApiResponse<CompanyResponse> findById(@PathVariable Long id) {
+        return ApiResponse.ok(companyService.findDetail(id));
     }
 
     @GetMapping("/{id}/reviews")
-    public List<CompanyReviewResponse> findReviews(@PathVariable Long id) {
-        return companyService.findReviews(id);
+    public ApiResponse<List<CompanyReviewResponse>> findReviews(@PathVariable Long id) {
+        return ApiResponse.ok(companyService.findReviews(id));
     }
 }

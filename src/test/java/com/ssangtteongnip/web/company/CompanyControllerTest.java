@@ -60,7 +60,8 @@ class CompanyControllerTest {
                         .content(objectMapper.writeValueAsString(
                                 Map.of("name", "카카오", "industry", "IT", "website", "https://kakao.com"))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("카카오"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.name").value("카카오"));
 
         verify(companyService).register(new RegisterCompanyCommand("카카오", "IT", "https://kakao.com"));
     }
@@ -74,11 +75,12 @@ class CompanyControllerTest {
         mockMvc.perform(get("/api/companies")
                         .header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("카카오"))
-                .andExpect(jsonPath("$[0].reviewCount").value(2))
-                .andExpect(jsonPath("$[0].averageRating").value(4.5))
-                .andExpect(jsonPath("$[1].reviewCount").value(0))
-                .andExpect(jsonPath("$[1].averageRating").doesNotExist());
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].name").value("카카오"))
+                .andExpect(jsonPath("$.data[0].reviewCount").value(2))
+                .andExpect(jsonPath("$.data[0].averageRating").value(4.5))
+                .andExpect(jsonPath("$.data[1].reviewCount").value(0))
+                .andExpect(jsonPath("$.data[1].averageRating").doesNotExist());
     }
 
     @Test
@@ -88,9 +90,10 @@ class CompanyControllerTest {
         mockMvc.perform(get("/api/companies/1")
                         .header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("카카오"))
-                .andExpect(jsonPath("$.reviewCount").value(3))
-                .andExpect(jsonPath("$.averageRating").value(4.0));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.name").value("카카오"))
+                .andExpect(jsonPath("$.data.reviewCount").value(3))
+                .andExpect(jsonPath("$.data.averageRating").value(4.0));
     }
 
     @Test
@@ -101,6 +104,7 @@ class CompanyControllerTest {
         mockMvc.perform(get("/api/companies/1")
                         .header("Authorization", BEARER))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("COMPANY_NOT_FOUND"));
     }
 
@@ -114,16 +118,17 @@ class CompanyControllerTest {
         mockMvc.perform(get("/api/companies/1/reviews")
                         .header("Authorization", BEARER))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].rating").value(5))
-                .andExpect(jsonPath("$[0].content").value("면접관이 친절했어요"))
-                .andExpect(jsonPath("$[0].position").value("백엔드 개발자"))
-                .andExpect(jsonPath("$[0].stage").value("ACCEPTED"))
-                .andExpect(jsonPath("$[0].difficulty").value(3))
-                .andExpect(jsonPath("$[0].atmosphere").value("COMFORTABLE"))
-                .andExpect(jsonPath("$[0].route").value("REFERRAL"))
-                .andExpect(jsonPath("$[0].questions[0]").value("자기소개"))
-                .andExpect(jsonPath("$[0].userId").doesNotExist())
-                .andExpect(jsonPath("$[0].application").doesNotExist());
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].rating").value(5))
+                .andExpect(jsonPath("$.data[0].content").value("면접관이 친절했어요"))
+                .andExpect(jsonPath("$.data[0].position").value("백엔드 개발자"))
+                .andExpect(jsonPath("$.data[0].stage").value("ACCEPTED"))
+                .andExpect(jsonPath("$.data[0].difficulty").value(3))
+                .andExpect(jsonPath("$.data[0].atmosphere").value("COMFORTABLE"))
+                .andExpect(jsonPath("$.data[0].route").value("REFERRAL"))
+                .andExpect(jsonPath("$.data[0].questions[0]").value("자기소개"))
+                .andExpect(jsonPath("$.data[0].userId").doesNotExist())
+                .andExpect(jsonPath("$.data[0].application").doesNotExist());
     }
 
     @Test
@@ -134,6 +139,7 @@ class CompanyControllerTest {
         mockMvc.perform(get("/api/companies/1/reviews")
                         .header("Authorization", BEARER))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("COMPANY_NOT_FOUND"));
     }
 
@@ -155,6 +161,7 @@ class CompanyControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", " ", "industry", "IT"))))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
@@ -167,6 +174,7 @@ class CompanyControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", "카카오"))))
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.code").value("COMPANY_ALREADY_EXISTS"));
     }
 }
