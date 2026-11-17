@@ -4,6 +4,7 @@ import com.ssangtteongnip.domain.FakePasswordHasher;
 import com.ssangtteongnip.domain.profile.PersonalInfo;
 import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
 import com.ssangtteongnip.global.config.JpaConfig;
@@ -26,7 +27,7 @@ class ProfileRepositoryTest {
     @Autowired EntityManager em;
 
     private User saveUser() {
-        return userRepository.save(User.register("hong@example.com", "홍길동", "password1", new FakePasswordHasher()));
+        return userRepository.save(User.register(new Email("hong@example.com"), "홍길동", "password1", new FakePasswordHasher()));
     }
 
     private void flushAndClear() {
@@ -39,7 +40,8 @@ class ProfileRepositoryTest {
         User user = saveUser();
         Profile profile = profileRepository.save(Profile.create(user));
         profile.reviseNameAndInfo("홍길순", PersonalInfo.of("010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
-                "https://github.com/hong", null, null, "OO대", "인턴", "백엔드", "안녕하세요", null));
+                "https://github.com/hong", null, null, "OO대", "인턴", "백엔드", "안녕하세요", null),
+                LocalDate.of(2026, 11, 17));
         flushAndClear();
 
         Profile found = profileRepository.findByUserId(user.getId()).orElseThrow();

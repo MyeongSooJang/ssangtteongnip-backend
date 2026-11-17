@@ -25,7 +25,7 @@ public record ProfileResponse(
     public static ProfileResponse of(Profile profile, List<UserFileResponse> files) {
         PersonalInfo info = profile.getInfo();
         return new ProfileResponse(
-                profile.getUser().getEmail(),
+                profile.getUser().getEmail().value(),
                 profile.getUser().getName(),
                 info.getPhone(),
                 info.getBirthDate(),

@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -49,7 +50,8 @@ public class Profile {
         return info != null ? info : PersonalInfo.empty();
     }
 
-    public void reviseNameAndInfo(String name, PersonalInfo info) {
+    public void reviseNameAndInfo(String name, PersonalInfo info, LocalDate today) {
+        info.validateJobSearchStartDate(today);
         this.user.changeName(name);
         this.info = info;
     }

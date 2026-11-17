@@ -1,14 +1,14 @@
 package com.ssangtteongnip.application;
 
-import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.InterviewService;
-import com.ssangtteongnip.application.service.command.AddInterviewQuestionCommand;
-import com.ssangtteongnip.application.service.command.RegisterInterviewCommand;
-import com.ssangtteongnip.domain.jobapplication.JobApplication;
-import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
+import com.ssangtteongnip.application.service.JobApplicationService;
+import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
+import com.ssangtteongnip.application.service.request.InterviewRequest;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.domain.interview.InterviewRepository;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +76,7 @@ class InterviewServiceTest {
         given(interviewRepository.save(any(Interview.class))).willAnswer(i -> i.getArgument(0));
 
         Interview registered = interviewService.register(USER_ID, APPLICATION_ID,
-                new RegisterInterviewCommand(1, INTERVIEW_DATE, "판교 본사", "1차 면접", 80));
+                new InterviewRequest(1, INTERVIEW_DATE, "판교 본사", "1차 면접", 80));
 
         assertThat(registered.getApplication()).isSameAs(application);
         assertThat(registered.getRound()).isEqualTo(1);
@@ -89,7 +89,7 @@ class InterviewServiceTest {
         given(interviewRepository.save(any(Interview.class))).willAnswer(i -> i.getArgument(0));
 
         interviewService.register(USER_ID, APPLICATION_ID,
-                new RegisterInterviewCommand(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null));
+                new InterviewRequest(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null));
 
         assertThat(application.getStatus()).isEqualTo(JobApplicationStatus.INTERVIEW);
         assertThat(application.getDocumentPassedAt()).isEqualTo(NOW);
@@ -102,7 +102,7 @@ class InterviewServiceTest {
         given(interviewRepository.save(any(Interview.class))).willAnswer(i -> i.getArgument(0));
 
         interviewService.register(USER_ID, APPLICATION_ID,
-                new RegisterInterviewCommand(2, INTERVIEW_DATE, "판교 본사", "2차 면접", null));
+                new InterviewRequest(2, INTERVIEW_DATE, "판교 본사", "2차 면접", null));
 
         assertThat(application.getDocumentPassedAt()).isEqualTo(NOW.minusDays(7));
     }
@@ -113,7 +113,7 @@ class InterviewServiceTest {
                 .given(jobApplicationService).findById(OTHER_USER_ID, APPLICATION_ID);
 
         assertErrorCode(() -> interviewService.register(OTHER_USER_ID, APPLICATION_ID,
-                        new RegisterInterviewCommand(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null)),
+                        new InterviewRequest(1, INTERVIEW_DATE, "판교 본사", "1차 면접", null)),
                 ErrorCode.APPLICATION_NOT_FOUND);
         verify(interviewRepository, never()).save(any());
     }
@@ -136,7 +136,7 @@ class InterviewServiceTest {
         given(interviewRepository.findById(INTERVIEW_ID)).willReturn(Optional.of(interview));
 
         interviewService.addQuestion(USER_ID, APPLICATION_ID, INTERVIEW_ID,
-                new AddInterviewQuestionCommand("자기소개 해주세요", "저는...", "잘 대답했음"));
+                new InterviewQuestionRequest("자기소개 해주세요", "저는...", "잘 대답했음"));
 
         assertThat(interview.getQuestions()).hasSize(1);
         assertThat(interview.getQuestions().get(0).getQuestion()).isEqualTo("자기소개 해주세요");
@@ -169,7 +169,7 @@ class InterviewServiceTest {
         given(interviewRepository.findById(INTERVIEW_ID)).willReturn(Optional.of(otherInterview));
 
         assertErrorCode(() -> interviewService.addQuestion(USER_ID, APPLICATION_ID, INTERVIEW_ID,
-                        new AddInterviewQuestionCommand("자기소개 해주세요", null, null)),
+                        new InterviewQuestionRequest("자기소개 해주세요", null, null)),
                 ErrorCode.INTERVIEW_NOT_FOUND);
         assertThat(otherInterview.getQuestions()).isEmpty();
     }

@@ -5,6 +5,7 @@ import com.ssangtteongnip.domain.FakePasswordHasher;
 import com.ssangtteongnip.domain.profile.FileType;
 import com.ssangtteongnip.domain.profile.UserFile;
 import com.ssangtteongnip.domain.profile.UserFileRepository;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
 import com.ssangtteongnip.global.config.JpaConfig;
@@ -30,7 +31,7 @@ class UserFileRepositoryTest {
     private final FakeFileStorage storage = new FakeFileStorage();
 
     private User saveUser(String email) {
-        return userRepository.save(User.register(email, "홍길동", "password1", new FakePasswordHasher()));
+        return userRepository.save(User.register(new Email(email), "홍길동", "password1", new FakePasswordHasher()));
     }
 
     private UserFile saveFile(User user, FileType type, String fileName) {

@@ -1,10 +1,11 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.application.service.command.LoginCommand;
-import com.ssangtteongnip.application.service.command.SignupCommand;
 import com.ssangtteongnip.application.service.dto.TokenResponse;
+import com.ssangtteongnip.application.service.request.LoginRequest;
+import com.ssangtteongnip.application.service.request.SignupRequest;
 import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.EmailVerificationStore;
 import com.ssangtteongnip.domain.user.PasswordHasher;
 import com.ssangtteongnip.domain.user.TokenProvider;
@@ -29,8 +30,8 @@ public class AuthService {
     private final EmailVerificationStore verificationStore;
 
     @Transactional
-    public TokenResponse signup(SignupCommand command) {
-        String email = User.normalizeEmail(command.email());
+    public TokenResponse signup(SignupRequest request) {
+        Email email = new Email(request.email());
         if (userRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -38,16 +39,16 @@ public class AuthService {
             throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
         User user = userRepository.save(
-                User.register(command.email(), command.name(), command.password(), passwordHasher));
+                User.register(email, request.name(), request.password(), passwordHasher));
         profileRepository.save(Profile.create(user));
         AfterCommit.runQuietly("이메일 인증 상태 삭제", () -> verificationStore.clearVerified(email));
         return new TokenResponse(tokenProvider.issue(user.getId()));
     }
 
-    public TokenResponse login(LoginCommand command) {
-        User user = userRepository.findByEmail(User.normalizeEmail(command.email()))
+    public TokenResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(new Email(request.email()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
-        user.authenticate(command.password(), passwordHasher);
+        user.authenticate(request.password(), passwordHasher);
         return new TokenResponse(tokenProvider.issue(user.getId()));
     }
 }

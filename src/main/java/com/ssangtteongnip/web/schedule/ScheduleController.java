@@ -1,6 +1,7 @@
 package com.ssangtteongnip.web.schedule;
 
 import com.ssangtteongnip.application.service.ScheduleService;
+import com.ssangtteongnip.application.service.request.ScheduleRequest;
 import com.ssangtteongnip.domain.schedule.Schedule;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ public class ScheduleController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Schedule> register(@AuthenticationPrincipal Long userId,
                                           @RequestBody @Valid ScheduleRequest request) {
-        return ApiResponse.ok(scheduleService.register(userId, request.toCommand()));
+        return ApiResponse.ok(scheduleService.register(userId, request));
     }
 
     @PatchMapping("/{id}/address")

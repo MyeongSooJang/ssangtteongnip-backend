@@ -1,5 +1,7 @@
 package com.ssangtteongnip.domain.profile;
 
+import com.ssangtteongnip.global.exception.BusinessException;
+import com.ssangtteongnip.global.exception.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -32,6 +34,7 @@ public class PersonalInfo {
     private LocalDate jobSearchStartDate;
 
     private String desiredJob;
+
     @Column(length = 2000)
     private String introduction;
 
@@ -57,5 +60,12 @@ public class PersonalInfo {
         info.introduction = introduction;
         info.jobSearchStartDate = jobSearchStartDate;
         return info;
+    }
+
+    // 취업 준비 시작일은 비워 둘 수 있지만, 적었다면 오늘보다 뒤일 수 없다.
+    void validateJobSearchStartDate(LocalDate today) {
+        if (jobSearchStartDate != null && jobSearchStartDate.isAfter(today)) {
+            throw new BusinessException(ErrorCode.FUTURE_JOB_SEARCH_START_DATE);
+        }
     }
 }

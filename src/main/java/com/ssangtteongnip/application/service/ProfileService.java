@@ -1,8 +1,8 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.application.service.command.ReviseProfileCommand;
 import com.ssangtteongnip.application.service.dto.ProfileResponse;
 import com.ssangtteongnip.application.service.dto.UserFileResponse;
+import com.ssangtteongnip.application.service.request.ProfileRequest;
 import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.profile.UserFileRepository;
@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -21,15 +23,16 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final UserFileRepository userFileRepository;
+    private final Clock clock;
 
     public ProfileResponse getMyProfile(Long userId) {
         return toResponse(userId, findProfile(userId));
     }
 
     @Transactional
-    public ProfileResponse reviseMyProfile(Long userId, ReviseProfileCommand command) {
+    public ProfileResponse reviseMyProfile(Long userId, ProfileRequest request) {
         Profile profile = findProfile(userId);
-        profile.reviseNameAndInfo(command.name(), command.personalInfo());
+        profile.reviseNameAndInfo(request.name(), request.toPersonalInfo(), LocalDate.now(clock));
         return toResponse(userId, profile);
     }
 

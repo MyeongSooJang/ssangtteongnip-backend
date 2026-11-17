@@ -1,6 +1,8 @@
 package com.ssangtteongnip.web.interview;
 
 import com.ssangtteongnip.application.service.InterviewService;
+import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
+import com.ssangtteongnip.application.service.request.InterviewRequest;
 import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -23,7 +25,7 @@ public class InterviewController {
     public ApiResponse<Interview> register(@AuthenticationPrincipal Long userId,
                                            @PathVariable Long applicationId,
                                            @RequestBody @Valid InterviewRequest request) {
-        return ApiResponse.ok(interviewService.register(userId, applicationId, request.toCommand()));
+        return ApiResponse.ok(interviewService.register(userId, applicationId, request));
     }
 
     @GetMapping
@@ -45,6 +47,6 @@ public class InterviewController {
                                               @PathVariable Long applicationId,
                                               @PathVariable Long interviewId,
                                               @RequestBody @Valid InterviewQuestionRequest request) {
-        return ApiResponse.ok(interviewService.addQuestion(userId, applicationId, interviewId, request.toCommand()));
+        return ApiResponse.ok(interviewService.addQuestion(userId, applicationId, interviewId, request));
     }
 }

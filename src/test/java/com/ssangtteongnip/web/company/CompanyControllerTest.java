@@ -2,23 +2,23 @@ package com.ssangtteongnip.web.company;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.CompanyService;
-import com.ssangtteongnip.application.service.command.RegisterCompanyCommand;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
-import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
+import com.ssangtteongnip.application.service.request.CompanyRequest;
 import com.ssangtteongnip.domain.company.Company;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
+import com.ssangtteongnip.domain.user.TokenProvider;
+import com.ssangtteongnip.global.config.SecurityConfig;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
-import com.ssangtteongnip.domain.user.TokenProvider;
-import com.ssangtteongnip.global.config.SecurityConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -63,7 +63,7 @@ class CompanyControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.name").value("카카오"));
 
-        verify(companyService).register(new RegisterCompanyCommand("카카오", "IT", "https://kakao.com"));
+        verify(companyService).register(new CompanyRequest("카카오", "IT", "https://kakao.com"));
     }
 
     @Test

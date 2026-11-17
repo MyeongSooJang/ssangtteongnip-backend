@@ -1,13 +1,13 @@
 package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.CompanyService;
-import com.ssangtteongnip.application.service.command.RegisterCompanyCommand;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
-import com.ssangtteongnip.domain.jobapplication.JobApplication;
-import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
+import com.ssangtteongnip.application.service.request.CompanyRequest;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.company.CompanyRepository;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.CompanyReviewRating;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
@@ -56,7 +56,7 @@ class CompanyServiceTest {
         given(companyRepository.existsByName("카카오")).willReturn(false);
         given(companyRepository.save(any(Company.class))).willAnswer(i -> i.getArgument(0));
 
-        Company registered = companyService.register(new RegisterCompanyCommand("카카오", "IT", "https://kakao.com"));
+        Company registered = companyService.register(new CompanyRequest("카카오", "IT", "https://kakao.com"));
 
         assertThat(registered.getName()).isEqualTo("카카오");
         assertThat(registered.getIndustry()).isEqualTo("IT");
@@ -68,7 +68,7 @@ class CompanyServiceTest {
         given(companyRepository.existsByName("카카오")).willReturn(true);
 
         assertErrorCode(
-                () -> companyService.register(new RegisterCompanyCommand("카카오", "IT", "https://kakao.com")),
+                () -> companyService.register(new CompanyRequest("카카오", "IT", "https://kakao.com")),
                 ErrorCode.COMPANY_ALREADY_EXISTS);
         verify(companyRepository, never()).save(any());
     }

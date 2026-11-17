@@ -1,13 +1,13 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.application.service.command.RegisterJobApplicationCommand;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
+import com.ssangtteongnip.application.service.request.JobApplicationRequest;
+import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.jobapplication.JobSite;
 import com.ssangtteongnip.domain.jobapplication.ResumeView;
-import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +27,11 @@ public class JobApplicationService {
     private final CompanyService companyService;
 
     @Transactional
-    public JobApplication register(Long userId, RegisterJobApplicationCommand command) {
-        Company company = companyService.findById(command.companyId());
+    public JobApplication register(Long userId, JobApplicationRequest request) {
+        Company company = companyService.findById(request.companyId());
         return jobApplicationRepository.save(
-                JobApplication.create(userId, company, command.position(), command.appliedDate(),
-                        command.jobSite(), command.deadline(), command.resumeView())
+                JobApplication.create(userId, company, request.position(), request.appliedDate(),
+                        request.jobSite(), request.deadline(), request.resumeView())
         );
     }
 

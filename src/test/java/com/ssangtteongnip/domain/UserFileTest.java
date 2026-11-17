@@ -3,6 +3,7 @@ package com.ssangtteongnip.domain;
 import com.ssangtteongnip.domain.profile.FileType;
 import com.ssangtteongnip.domain.profile.PresignedUrl;
 import com.ssangtteongnip.domain.profile.UserFile;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class UserFileTest {
     private final User user = registeredUser();
 
     private static User registeredUser() {
-        User user = User.register("hong@example.com", "홍길동", "password1", new FakePasswordHasher());
+        User user = User.register(new Email("hong@example.com"), "홍길동", "password1", new FakePasswordHasher());
         ReflectionTestUtils.setField(user, "id", 7L);
         return user;
     }

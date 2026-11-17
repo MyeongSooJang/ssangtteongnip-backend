@@ -1,6 +1,7 @@
 package com.ssangtteongnip.infrastructure.verification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.MailSender;
 import com.ssangtteongnip.domain.user.VerificationCode;
 import com.ssangtteongnip.global.exception.BusinessException;
@@ -54,7 +55,7 @@ public class GmailMailSender implements MailSender {
     }
 
     @Override
-    public void sendVerificationCode(String email, VerificationCode code) {
+    public void sendVerificationCode(Email email, VerificationCode code) {
         try {
             String raw = encode(verificationMessage(email, code));
             SendResponse response = restClient.post()
@@ -90,10 +91,10 @@ public class GmailMailSender implements MailSender {
         return response.accessToken();
     }
 
-    private MimeMessage verificationMessage(String email, VerificationCode code) throws MessagingException {
+    private MimeMessage verificationMessage(Email email, VerificationCode code) throws MessagingException {
         MimeMessage message = new MimeMessage(Session.getInstance(new Properties()));
         message.setFrom(new InternetAddress(from));
-        message.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
+        message.setRecipient(Message.RecipientType.TO, new InternetAddress(email.value()));
         message.setSubject("[Job Tracker] 이메일 인증 코드", StandardCharsets.UTF_8.name());
         message.setText("인증 코드: " + code.value() + "\n5분 안에 입력해주세요.", StandardCharsets.UTF_8.name());
         return message;

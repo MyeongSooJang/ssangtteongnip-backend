@@ -2,19 +2,19 @@ package com.ssangtteongnip.web.interview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.InterviewService;
-import com.ssangtteongnip.application.service.command.AddInterviewQuestionCommand;
-import com.ssangtteongnip.application.service.command.RegisterInterviewCommand;
-import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
+import com.ssangtteongnip.application.service.request.InterviewRequest;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.interview.Interview;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.domain.user.TokenProvider;
+import com.ssangtteongnip.global.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
-import com.ssangtteongnip.domain.user.TokenProvider;
-import com.ssangtteongnip.global.config.SecurityConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -159,7 +159,7 @@ class InterviewControllerTest {
                                         "location", "판교", "note", "2차 면접", "score", 80))))
                 .andExpect(status().isCreated());
 
-        verify(interviewService).register(1L, 1L, new RegisterInterviewCommand(
+        verify(interviewService).register(1L, 1L, new InterviewRequest(
                 2, LocalDateTime.of(2026, 11, 10, 14, 0), "판교", "2차 면접", 80));
     }
 
@@ -175,6 +175,6 @@ class InterviewControllerTest {
                 .andExpect(status().isCreated());
 
         verify(interviewService).addQuestion(1L, 1L, 1L,
-                new AddInterviewQuestionCommand("자기소개 해주세요", "저는...", "잘 대답했음"));
+                new InterviewQuestionRequest("자기소개 해주세요", "저는...", "잘 대답했음"));
     }
 }

@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.profile;
 
 import com.ssangtteongnip.application.service.ProfileService;
 import com.ssangtteongnip.application.service.dto.ProfileResponse;
+import com.ssangtteongnip.application.service.request.ProfileRequest;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,6 @@ public class ProfileController {
     @PutMapping
     public ApiResponse<ProfileResponse> reviseMyProfile(@AuthenticationPrincipal Long userId,
                                                         @RequestBody @Valid ProfileRequest request) {
-        return ApiResponse.ok(profileService.reviseMyProfile(userId, request.toCommand()));
+        return ApiResponse.ok(profileService.reviseMyProfile(userId, request));
     }
 }

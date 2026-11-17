@@ -1,11 +1,11 @@
 package com.ssangtteongnip.application.service;
 
+import com.ssangtteongnip.application.service.request.ScheduleRequest;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.review.Review;
 import com.ssangtteongnip.domain.review.ReviewRepository;
 import com.ssangtteongnip.domain.schedule.Schedule;
 import com.ssangtteongnip.domain.schedule.ScheduleRepository;
-import com.ssangtteongnip.application.service.command.RegisterScheduleCommand;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +27,11 @@ public class ScheduleService {
     private final Clock clock;
 
     @Transactional
-    public Schedule register(Long userId, RegisterScheduleCommand command) {
-        JobApplication application = jobApplicationService.findById(userId, command.applicationId());
+    public Schedule register(Long userId, ScheduleRequest request) {
+        JobApplication application = jobApplicationService.findById(userId, request.applicationId());
         Schedule schedule = scheduleRepository.save(
-                Schedule.create(application, command.title(), command.scheduledAt(),
-                        command.type(), command.address(), command.note())
+                Schedule.create(application, request.title(), request.scheduledAt(),
+                        request.type(), request.address(), request.note())
         );
         if (schedule.isInterview()) {
             application.startInterview(LocalDateTime.now(clock));

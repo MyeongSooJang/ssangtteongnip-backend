@@ -2,10 +2,10 @@ package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.ScheduleService;
-import com.ssangtteongnip.application.service.command.RegisterScheduleCommand;
+import com.ssangtteongnip.application.service.request.ScheduleRequest;
+import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
-import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.review.Review;
 import com.ssangtteongnip.domain.review.ReviewRepository;
 import com.ssangtteongnip.domain.schedule.Schedule;
@@ -48,8 +48,8 @@ class ScheduleServiceTest {
         scheduleService = new ScheduleService(scheduleRepository, jobApplicationService, reviewRepository, clock);
     }
 
-    private RegisterScheduleCommand command(ScheduleType type) {
-        return new RegisterScheduleCommand(1L, "1차 면접", LocalDateTime.now(), type, "판교", "");
+    private ScheduleRequest request(ScheduleType type) {
+        return new ScheduleRequest(1L, "1차 면접", LocalDateTime.now(), type, "판교", "");
     }
 
     private void givenSavedSchedule() {
@@ -64,7 +64,7 @@ class ScheduleServiceTest {
         givenSavedSchedule();
         given(reviewRepository.existsByApplicationId(any())).willReturn(false);
 
-        scheduleService.register(1L, command(ScheduleType.INTERVIEW));
+        scheduleService.register(1L, request(ScheduleType.INTERVIEW));
 
         verify(reviewRepository).save(any(Review.class));
     }
@@ -77,7 +77,7 @@ class ScheduleServiceTest {
         given(scheduleRepository.save(any(Schedule.class))).willAnswer(i -> i.getArgument(0));
         given(reviewRepository.existsByApplicationId(any())).willReturn(false);
 
-        scheduleService.register(1L, command(ScheduleType.INTERVIEW));
+        scheduleService.register(1L, request(ScheduleType.INTERVIEW));
 
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.INTERVIEW);
     }
@@ -90,7 +90,7 @@ class ScheduleServiceTest {
         given(scheduleRepository.save(any(Schedule.class))).willAnswer(i -> i.getArgument(0));
         given(reviewRepository.existsByApplicationId(any())).willReturn(false);
 
-        scheduleService.register(1L, command(ScheduleType.INTERVIEW));
+        scheduleService.register(1L, request(ScheduleType.INTERVIEW));
 
         assertThat(app.getDocumentPassedAt()).isEqualTo(NOW);
     }
@@ -102,11 +102,11 @@ class ScheduleServiceTest {
         given(jobApplicationService.findById(1L, 1L)).willReturn(app);
         given(scheduleRepository.save(any(Schedule.class))).willAnswer(i -> i.getArgument(0));
         given(reviewRepository.existsByApplicationId(any())).willReturn(false);
-        scheduleService.register(1L, command(ScheduleType.INTERVIEW));
+        scheduleService.register(1L, request(ScheduleType.INTERVIEW));
         Clock later = Clock.fixed(NOW.plusDays(7).atZone(SEOUL).toInstant(), SEOUL);
         ScheduleService laterService = new ScheduleService(scheduleRepository, jobApplicationService, reviewRepository, later);
 
-        laterService.register(1L, command(ScheduleType.INTERVIEW));
+        laterService.register(1L, request(ScheduleType.INTERVIEW));
 
         assertThat(app.getDocumentPassedAt()).isEqualTo(NOW);
     }
@@ -118,7 +118,7 @@ class ScheduleServiceTest {
         given(jobApplicationService.findById(1L, 1L)).willReturn(app);
         given(scheduleRepository.save(any(Schedule.class))).willAnswer(i -> i.getArgument(0));
 
-        scheduleService.register(1L, command(ScheduleType.TASK));
+        scheduleService.register(1L, request(ScheduleType.TASK));
 
         assertThat(app.isDocumentPassed()).isFalse();
     }
@@ -130,7 +130,7 @@ class ScheduleServiceTest {
         given(jobApplicationService.findById(1L, 1L)).willReturn(app);
         given(scheduleRepository.save(any(Schedule.class))).willAnswer(i -> i.getArgument(0));
 
-        scheduleService.register(1L, command(ScheduleType.TASK));
+        scheduleService.register(1L, request(ScheduleType.TASK));
 
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.RESUME_SUBMITTED);
     }
@@ -140,7 +140,7 @@ class ScheduleServiceTest {
         givenSavedSchedule();
         given(reviewRepository.existsByApplicationId(any())).willReturn(true);
 
-        scheduleService.register(1L, command(ScheduleType.INTERVIEW));
+        scheduleService.register(1L, request(ScheduleType.INTERVIEW));
 
         verify(reviewRepository, never()).save(any(Review.class));
     }
@@ -149,7 +149,7 @@ class ScheduleServiceTest {
     void register_면접이_아닌_일정은_후기를_생성하지_않는다() {
         givenSavedSchedule();
 
-        scheduleService.register(1L, command(ScheduleType.TASK));
+        scheduleService.register(1L, request(ScheduleType.TASK));
 
         verify(reviewRepository, never()).save(any(Review.class));
     }

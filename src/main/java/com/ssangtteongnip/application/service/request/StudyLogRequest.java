@@ -1,6 +1,5 @@
-package com.ssangtteongnip.web.studylog;
+package com.ssangtteongnip.application.service.request;
 
-import com.ssangtteongnip.application.service.command.RewriteStudyLogCommand;
 import jakarta.validation.constraints.Size;
 
 public record StudyLogRequest(
@@ -8,7 +7,8 @@ public record StudyLogRequest(
         @Size(max = 10000, message = "공부 내용은 10000자 이하여야 합니다.") String content,
         Integer studyMinutes) {
 
-    public RewriteStudyLogCommand toCommand() {
-        return new RewriteStudyLogCommand(title, content, studyMinutes);
+    // 공부 시간을 생략하면 0분으로 저장한다.
+    public StudyLogRequest {
+        studyMinutes = studyMinutes == null ? 0 : studyMinutes;
     }
 }
