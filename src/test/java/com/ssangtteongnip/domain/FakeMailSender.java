@@ -1,5 +1,6 @@
 package com.ssangtteongnip.domain;
 
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.MailSender;
 import com.ssangtteongnip.domain.user.VerificationCode;
 import com.ssangtteongnip.global.exception.BusinessException;
@@ -10,7 +11,7 @@ import java.util.Map;
 
 public class FakeMailSender implements MailSender {
 
-    private final Map<String, String> lastCodes = new HashMap<>();
+    private final Map<Email, String> lastCodes = new HashMap<>();
     private int sentCount;
     private boolean failing;
 
@@ -26,12 +27,12 @@ public class FakeMailSender implements MailSender {
         return sentCount;
     }
 
-    public String lastCodeSentTo(String email) {
+    public String lastCodeSentTo(Email email) {
         return lastCodes.get(email);
     }
 
     @Override
-    public void sendVerificationCode(String email, VerificationCode code) {
+    public void sendVerificationCode(Email email, VerificationCode code) {
         if (failing) {
             throw new BusinessException(ErrorCode.MAIL_SEND_FAILED);
         }

@@ -1,5 +1,6 @@
 package com.ssangtteongnip.infrastructure;
 
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.VerificationCode;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import com.ssangtteongnip.infrastructure.verification.GmailMailSender;
@@ -61,7 +62,7 @@ class GmailMailSenderTest {
                 .andExpect(request -> sentBody.set(((MockClientHttpRequest) request).getBodyAsString()))
                 .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-        mailSender.sendVerificationCode("hong@example.com", VerificationCode.of("123456"));
+        mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456"));
 
         server.verify();
         MimeMessage sent = decode(sentBody.get());
@@ -75,7 +76,7 @@ class GmailMailSenderTest {
         server.expect(requestTo(TOKEN_URL)).andRespond(withStatus(HttpStatus.UNAUTHORIZED));
 
         assertErrorCode(
-                () -> mailSender.sendVerificationCode("hong@example.com", VerificationCode.of("123456")),
+                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456")),
                 ErrorCode.MAIL_SEND_FAILED);
     }
 
@@ -84,7 +85,7 @@ class GmailMailSenderTest {
         server.expect(requestTo(TOKEN_URL)).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
         assertErrorCode(
-                () -> mailSender.sendVerificationCode("hong@example.com", VerificationCode.of("123456")),
+                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456")),
                 ErrorCode.MAIL_SEND_FAILED);
     }
 
@@ -95,7 +96,7 @@ class GmailMailSenderTest {
         server.expect(requestTo(SEND_URL)).andRespond(withStatus(HttpStatus.FORBIDDEN));
 
         assertErrorCode(
-                () -> mailSender.sendVerificationCode("hong@example.com", VerificationCode.of("123456")),
+                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456")),
                 ErrorCode.MAIL_SEND_FAILED);
     }
 

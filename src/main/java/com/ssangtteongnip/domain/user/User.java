@@ -11,7 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.regex.Pattern;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -21,14 +21,13 @@ import java.util.regex.Pattern;
 public class User {
 
     public static final int MIN_PASSWORD_LENGTH = 8;
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Embedded
+    private Email email;
 
     @Column(nullable = false)
     private String name;
@@ -44,25 +43,12 @@ public class User {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public static String normalizeEmail(String email) {
-        return email == null ? "" : email.trim().toLowerCase();
-    }
-
-    public static String requireValidEmail(String email) {
-        String normalizedEmail = normalizeEmail(email);
-        if (!EMAIL_PATTERN.matcher(normalizedEmail).matches()) {
-            throw new BusinessException(ErrorCode.INVALID_EMAIL);
-        }
-        return normalizedEmail;
-    }
-
-    public static User register(String email, String name, String rawPassword, PasswordHasher hasher) {
-        String normalizedEmail = requireValidEmail(email);
+    public static User register(Email email, String name, String rawPassword, PasswordHasher hasher) {
         if (rawPassword == null || rawPassword.length() < MIN_PASSWORD_LENGTH) {
             throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
         User user = new User();
-        user.email = normalizedEmail;
+        user.email = Objects.requireNonNull(email);
         user.name = name;
         user.passwordHash = hasher.hash(rawPassword);
         return user;

@@ -11,6 +11,7 @@ import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.profile.UserFile;
 import com.ssangtteongnip.domain.profile.UserFileRepository;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ class ProfileServiceTest {
     }
 
     private Profile profile() {
-        User user = User.register("hong@example.com", "홍길동", "password1", new FakePasswordHasher());
+        User user = User.register(new Email("hong@example.com"), "홍길동", "password1", new FakePasswordHasher());
         return Profile.create(user);
     }
 

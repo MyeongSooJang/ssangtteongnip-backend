@@ -1,5 +1,6 @@
 package com.ssangtteongnip.infrastructure.verification;
 
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.EmailVerificationStore;
 import com.ssangtteongnip.domain.user.VerificationCode;
 import lombok.RequiredArgsConstructor;
@@ -22,28 +23,28 @@ public class RedisEmailVerificationStore implements EmailVerificationStore {
     private final StringRedisTemplate redis;
 
     @Override
-    public boolean tryAcquireCooldown(String email) {
+    public boolean tryAcquireCooldown(Email email) {
         return Boolean.TRUE.equals(redis.opsForValue().setIfAbsent(key("cooldown", email), "1", COOLDOWN_TTL));
     }
 
     @Override
-    public void releaseCooldown(String email) {
+    public void releaseCooldown(Email email) {
         redis.delete(key("cooldown", email));
     }
 
     @Override
-    public void saveCode(String email, VerificationCode code) {
+    public void saveCode(Email email, VerificationCode code) {
         redis.opsForValue().set(key("code", email), code.value(), CODE_TTL);
         redis.delete(key("attempts", email));
     }
 
     @Override
-    public Optional<VerificationCode> findCode(String email) {
+    public Optional<VerificationCode> findCode(Email email) {
         return Optional.ofNullable(redis.opsForValue().get(key("code", email))).map(VerificationCode::of);
     }
 
     @Override
-    public long recordAttempt(String email) {
+    public long recordAttempt(Email email) {
         String attemptsKey = key("attempts", email);
         long attempts = Objects.requireNonNull(redis.opsForValue().increment(attemptsKey));
         if (attempts == 1) {
@@ -53,26 +54,26 @@ public class RedisEmailVerificationStore implements EmailVerificationStore {
     }
 
     @Override
-    public void deleteCode(String email) {
+    public void deleteCode(Email email) {
         redis.delete(List.of(key("code", email), key("attempts", email)));
     }
 
     @Override
-    public void markVerified(String email) {
+    public void markVerified(Email email) {
         redis.opsForValue().set(key("verified", email), "1", VERIFIED_TTL);
     }
 
     @Override
-    public boolean isVerified(String email) {
+    public boolean isVerified(Email email) {
         return Boolean.TRUE.equals(redis.hasKey(key("verified", email)));
     }
 
     @Override
-    public void clearVerified(String email) {
+    public void clearVerified(Email email) {
         redis.delete(key("verified", email));
     }
 
-    private String key(String kind, String email) {
-        return "email-verify:" + kind + ":" + email;
+    private String key(String kind, Email email) {
+        return "email-verify:" + kind + ":" + email.value();
     }
 }

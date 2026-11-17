@@ -2,6 +2,7 @@ package com.ssangtteongnip.domain;
 
 import com.ssangtteongnip.domain.profile.PersonalInfo;
 import com.ssangtteongnip.domain.profile.Profile;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ class ProfileTest {
 
     private static final LocalDate TODAY = LocalDate.of(2026, 11, 17);
 
-    private final User user = User.register("hong@example.com", "홍길동", "password1", new FakePasswordHasher());
+    private final User user = User.register(new Email("hong@example.com"), "홍길동", "password1", new FakePasswordHasher());
 
     @Test
     void create_빈_인적_사항으로_프로필을_생성한다() {

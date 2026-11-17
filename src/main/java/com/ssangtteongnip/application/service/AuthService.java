@@ -5,6 +5,7 @@ import com.ssangtteongnip.application.service.request.LoginRequest;
 import com.ssangtteongnip.application.service.request.SignupRequest;
 import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.EmailVerificationStore;
 import com.ssangtteongnip.domain.user.PasswordHasher;
 import com.ssangtteongnip.domain.user.TokenProvider;
@@ -30,7 +31,7 @@ public class AuthService {
 
     @Transactional
     public TokenResponse signup(SignupRequest request) {
-        String email = User.normalizeEmail(request.email());
+        Email email = new Email(request.email());
         if (userRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -38,14 +39,14 @@ public class AuthService {
             throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
         User user = userRepository.save(
-                User.register(request.email(), request.name(), request.password(), passwordHasher));
+                User.register(email, request.name(), request.password(), passwordHasher));
         profileRepository.save(Profile.create(user));
         AfterCommit.runQuietly("이메일 인증 상태 삭제", () -> verificationStore.clearVerified(email));
         return new TokenResponse(tokenProvider.issue(user.getId()));
     }
 
     public TokenResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(User.normalizeEmail(request.email()))
+        User user = userRepository.findByEmail(new Email(request.email()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
         user.authenticate(request.password(), passwordHasher);
         return new TokenResponse(tokenProvider.issue(user.getId()));

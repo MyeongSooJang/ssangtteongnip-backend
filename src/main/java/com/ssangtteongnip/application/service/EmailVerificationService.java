@@ -2,9 +2,9 @@ package com.ssangtteongnip.application.service;
 
 import com.ssangtteongnip.application.service.request.EmailVerificationConfirmRequest;
 import com.ssangtteongnip.domain.user.CodeGenerator;
+import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.EmailVerificationStore;
 import com.ssangtteongnip.domain.user.MailSender;
-import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
 import com.ssangtteongnip.domain.user.VerificationCode;
 import com.ssangtteongnip.global.exception.BusinessException;
@@ -23,7 +23,7 @@ public class EmailVerificationService {
     private final CodeGenerator codeGenerator;
 
     public void send(String rawEmail) {
-        String email = User.requireValidEmail(rawEmail);
+        Email email = new Email(rawEmail);
         if (userRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -42,7 +42,7 @@ public class EmailVerificationService {
     }
 
     public void confirm(EmailVerificationConfirmRequest request) {
-        String email = User.normalizeEmail(request.email());
+        Email email = new Email(request.email());
         VerificationCode code = store.findCode(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_EXPIRED));
         // 비교보다 먼저 시도 횟수를 원자적으로 올린다. 읽고 비교한 뒤에 세면 동시 요청이 모두
