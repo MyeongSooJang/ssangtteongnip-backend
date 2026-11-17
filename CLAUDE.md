@@ -53,6 +53,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 생략 시 기본값은 Request의 compact 생성자에서 채운다. 컨트롤러가 아닌 곳에서 Request를 만들어도 Service가 받는 값이 같아야 하기 때문이다. 기본값 테스트는 서비스 테스트에 둔다.
 - Response는 Service가 만들어 반환하므로 `application/service/dto`에 둔다 (`web`이 `application`을 참조하는 방향만 허용).
 
+### 검증 위치
+
+- Request의 검증 어노테이션은 **입력이 깨졌는지**(빈 값, 길이, DB 컬럼 한도)만 본다.
+- 도메인 규칙(값의 범위, 형식, 날짜 조건, 상태 전이)은 엔티티·값 객체가 원본이다. 컨트롤러를 거치지 않는 경로도 같은 규칙을 지켜야 하기 때문이다. 같은 규칙을 Request에도 두는 것은 필드별 오류 메시지를 위한 선택이다.
+- 오늘 날짜가 필요한 규칙은 `@PastOrPresent` 같은 어노테이션 대신 도메인이 `Clock`으로 만든 `today`를 받아 검사한다.
+
 ## 동시성: 확인한 뒤 처리하지 않는다
 
 - 시도 횟수·쿨다운·중복 방지·일회성처럼 한도를 지키는 로직은 "읽고 판단한 뒤 갱신"으로 쓰지 않는다. 원자 연산(Redis `INCR`/`setIfAbsent`, DB 유니크 제약)을 **먼저** 실행하고 그 결과로 판단한다. 읽는 시점에는 동시 요청이 모두 같은 상태를 보기 때문이다.

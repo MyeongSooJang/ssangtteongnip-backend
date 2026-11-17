@@ -13,14 +13,17 @@ import com.ssangtteongnip.domain.profile.UserFile;
 import com.ssangtteongnip.domain.profile.UserFileRepository;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.global.exception.ErrorCode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +38,13 @@ class ProfileServiceTest {
 
     @Mock ProfileRepository profileRepository;
     @Mock UserFileRepository userFileRepository;
-    @InjectMocks ProfileService profileService;
+    ProfileService profileService;
+
+    @BeforeEach
+    void setUp() {
+        Clock clock = Clock.fixed(Instant.parse("2026-11-17T03:00:00Z"), ZoneId.of("Asia/Seoul"));
+        profileService = new ProfileService(profileRepository, userFileRepository, clock);
+    }
 
     private Profile profile() {
         User user = User.register("hong@example.com", "홍길동", "password1", new FakePasswordHasher());
