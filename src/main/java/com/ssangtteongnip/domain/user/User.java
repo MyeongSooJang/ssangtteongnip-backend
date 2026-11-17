@@ -26,7 +26,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 한 이메일로 한 번만 가입한다는 규칙은 users 테이블의 것이라 값 객체가 아니라 여기서 유니크를 건다.
     @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false, unique = true))
     private Email email;
 
     @Column(nullable = false)
