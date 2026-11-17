@@ -4,11 +4,15 @@ import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.domain.interview.InterviewQuestion;
+import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static com.ssangtteongnip.support.ErrorCodeAssertions.assertErrorCode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -17,9 +21,12 @@ class InterviewTest {
     private static final LocalDateTime INTERVIEW_DATE = LocalDateTime.of(2026, 11, 10, 14, 0);
 
     private Interview interview() {
+        return Interview.create(application(), 1, INTERVIEW_DATE, "판교 본사", "1차 면접");
+    }
+
+    private JobApplication application() {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        JobApplication application = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
-        return Interview.create(application, 1, INTERVIEW_DATE, "판교 본사", "1차 면접");
+        return JobApplication.create(1L, company, "백엔드 개발자", LocalDate.of(2026, 11, 1));
     }
 
     @Test
@@ -41,6 +48,44 @@ class InterviewTest {
         interview.evaluate(4);
 
         assertThat(interview.getScore()).isEqualTo(4);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 100})
+    void 점수가_0점이나_100점이면_그대로_저장된다(int score) {
+        Interview interview = interview();
+
+        interview.evaluate(score);
+
+        assertThat(interview.getScore()).isEqualTo(score);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 101})
+    void 점수가_0에서_100_밖이면_평가할_수_없다(int score) {
+        Interview interview = interview();
+
+        assertErrorCode(() -> interview.evaluate(score), ErrorCode.INVALID_INTERVIEW_SCORE);
+        assertThat(interview.getScore()).isNull();
+    }
+
+    @Test
+    void 점수를_비우면_평가_전으로_돌아간다() {
+        Interview interview = interview();
+        interview.evaluate(80);
+
+        interview.evaluate(null);
+
+        assertThat(interview.getScore()).isNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void 차수가_1보다_작으면_면접을_만들_수_없다(int round) {
+        JobApplication application = application();
+
+        assertErrorCode(() -> Interview.create(application, round, INTERVIEW_DATE, "판교 본사", "1차 면접"),
+                ErrorCode.INVALID_INTERVIEW_ROUND);
     }
 
     @Test
