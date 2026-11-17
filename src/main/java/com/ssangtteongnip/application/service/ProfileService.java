@@ -1,8 +1,8 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.application.service.command.ReviseProfileCommand;
 import com.ssangtteongnip.application.service.dto.ProfileResponse;
 import com.ssangtteongnip.application.service.dto.UserFileResponse;
+import com.ssangtteongnip.application.service.request.ProfileRequest;
 import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.profile.UserFileRepository;
@@ -27,9 +27,9 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileResponse reviseMyProfile(Long userId, ReviseProfileCommand command) {
+    public ProfileResponse reviseMyProfile(Long userId, ProfileRequest request) {
         Profile profile = findProfile(userId);
-        profile.reviseNameAndInfo(command.name(), command.personalInfo());
+        profile.reviseNameAndInfo(request.name(), request.toPersonalInfo());
         return toResponse(userId, profile);
     }
 

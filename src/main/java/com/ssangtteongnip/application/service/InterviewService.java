@@ -1,12 +1,12 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
+import com.ssangtteongnip.application.service.request.InterviewRequest;
 import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.domain.interview.InterviewRepository;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
-import com.ssangtteongnip.application.service.command.AddInterviewQuestionCommand;
-import com.ssangtteongnip.application.service.command.RegisterInterviewCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +25,11 @@ public class InterviewService {
     private final Clock clock;
 
     @Transactional
-    public Interview register(Long userId, Long applicationId, RegisterInterviewCommand command) {
+    public Interview register(Long userId, Long applicationId, InterviewRequest request) {
         JobApplication application = jobApplicationService.findById(userId, applicationId);
-        Interview interview = Interview.create(application, command.round(), command.interviewDate(),
-                command.location(), command.note());
-        interview.evaluate(command.score());
+        Interview interview = Interview.create(application, request.round(), request.interviewDate(),
+                request.location(), request.note());
+        interview.evaluate(request.score());
         application.startInterview(LocalDateTime.now(clock));
         return interviewRepository.save(interview);
     }
@@ -47,9 +47,9 @@ public class InterviewService {
     }
 
     @Transactional
-    public Interview addQuestion(Long userId, Long applicationId, Long interviewId, AddInterviewQuestionCommand command) {
+    public Interview addQuestion(Long userId, Long applicationId, Long interviewId, InterviewQuestionRequest request) {
         Interview interview = findInterview(userId, applicationId, interviewId);
-        interview.addQuestion(command.question(), command.answer(), command.memo());
+        interview.addQuestion(request.question(), request.answer(), request.memo());
         return interview;
     }
 

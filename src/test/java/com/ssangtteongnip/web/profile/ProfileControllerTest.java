@@ -3,13 +3,13 @@ package com.ssangtteongnip.web.profile;
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.mockito.ArgumentCaptor;
-import com.ssangtteongnip.domain.profile.PersonalInfo;
-import com.ssangtteongnip.application.service.command.ReviseProfileCommand;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ProfileService;
 import com.ssangtteongnip.application.service.dto.ProfileResponse;
 import com.ssangtteongnip.application.service.dto.UserFileResponse;
+import com.ssangtteongnip.application.service.request.ProfileRequest;
 import com.ssangtteongnip.domain.profile.FileType;
+import com.ssangtteongnip.domain.profile.PersonalInfo;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -204,10 +204,10 @@ class ProfileControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
-        ArgumentCaptor<ReviseProfileCommand> captor = ArgumentCaptor.forClass(ReviseProfileCommand.class);
+        ArgumentCaptor<ProfileRequest> captor = ArgumentCaptor.forClass(ProfileRequest.class);
         verify(profileService).reviseMyProfile(eq(1L), captor.capture());
         assertThat(captor.getValue().name()).isEqualTo("홍길동");
-        assertThat(captor.getValue().personalInfo()).usingRecursiveComparison().isEqualTo(PersonalInfo.of(
+        assertThat(captor.getValue().toPersonalInfo()).usingRecursiveComparison().isEqualTo(PersonalInfo.of(
                 "010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
                 "https://github.com/hong", "https://blog.example.com", "https://portfolio.example.com",
                 "OO대 컴퓨터공학", "인턴 6개월", "백엔드 개발자", "안녕하세요",

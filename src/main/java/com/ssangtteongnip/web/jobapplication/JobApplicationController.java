@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.jobapplication;
 
 import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
+import com.ssangtteongnip.application.service.request.JobApplicationRequest;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.global.response.ApiResponse;
@@ -24,7 +25,7 @@ public class JobApplicationController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<JobApplication> register(@AuthenticationPrincipal Long userId,
                                                 @RequestBody @Valid JobApplicationRequest request) {
-        return ApiResponse.ok(jobApplicationService.register(userId, request.toCommand()));
+        return ApiResponse.ok(jobApplicationService.register(userId, request));
     }
 
     @GetMapping

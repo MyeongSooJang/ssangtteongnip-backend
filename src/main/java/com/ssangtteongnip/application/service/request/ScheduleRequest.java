@@ -1,6 +1,5 @@
-package com.ssangtteongnip.web.schedule;
+package com.ssangtteongnip.application.service.request;
 
-import com.ssangtteongnip.application.service.command.RegisterScheduleCommand;
 import com.ssangtteongnip.domain.schedule.ScheduleType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,9 +12,4 @@ public record ScheduleRequest(
         @NotNull ScheduleType type,
         @NotBlank String address,
         String note
-) {
-
-    public RegisterScheduleCommand toCommand() {
-        return new RegisterScheduleCommand(applicationId, title, scheduledAt, type, address, note);
-    }
-}
+) {}

@@ -4,6 +4,8 @@ import com.ssangtteongnip.application.service.StudyLogService;
 import com.ssangtteongnip.application.service.dto.HeatmapDayResponse;
 import com.ssangtteongnip.application.service.dto.StudyLogResponse;
 import com.ssangtteongnip.application.service.dto.StudyStatsResponse;
+import com.ssangtteongnip.application.service.request.StudyLogCreateRequest;
+import com.ssangtteongnip.application.service.request.StudyLogRequest;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +28,14 @@ public class StudyLogController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<StudyLogResponse> create(@AuthenticationPrincipal Long userId,
                                                 @RequestBody @Valid StudyLogCreateRequest request) {
-        return ApiResponse.ok(studyLogService.create(userId, request.toCommand()));
+        return ApiResponse.ok(studyLogService.create(userId, request));
     }
 
     @PutMapping("/{id}")
     public ApiResponse<StudyLogResponse> rewrite(@AuthenticationPrincipal Long userId,
                                                  @PathVariable Long id,
                                                  @RequestBody @Valid StudyLogRequest request) {
-        return ApiResponse.ok(studyLogService.rewrite(userId, id, request.toCommand()));
+        return ApiResponse.ok(studyLogService.rewrite(userId, id, request));
     }
 
     @GetMapping("/{id}")

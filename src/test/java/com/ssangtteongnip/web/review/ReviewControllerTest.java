@@ -2,20 +2,20 @@ package com.ssangtteongnip.web.review;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ReviewService;
-import com.ssangtteongnip.application.service.command.WriteReviewCommand;
-import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.application.service.request.ReviewRequest;
 import com.ssangtteongnip.domain.company.Company;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.review.ApplyRoute;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
 import com.ssangtteongnip.domain.review.Review;
+import com.ssangtteongnip.domain.user.TokenProvider;
+import com.ssangtteongnip.global.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
-import com.ssangtteongnip.domain.user.TokenProvider;
-import com.ssangtteongnip.global.config.SecurityConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -143,7 +143,7 @@ class ReviewControllerTest {
                                         "questions", List.of("자기소개", "프로젝트 경험")))))
                 .andExpect(status().isOk());
 
-        verify(reviewService).write(1L, 1L, new WriteReviewCommand("분위기가 좋았다", 4, 2,
+        verify(reviewService).write(1L, 1L, new ReviewRequest("분위기가 좋았다", 4, 2,
                 InterviewAtmosphere.COMFORTABLE, ApplyRoute.REFERRAL, List.of("자기소개", "프로젝트 경험")));
     }
 }

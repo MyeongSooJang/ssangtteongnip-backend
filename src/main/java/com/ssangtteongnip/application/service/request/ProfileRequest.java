@@ -1,6 +1,5 @@
-package com.ssangtteongnip.web.profile;
+package com.ssangtteongnip.application.service.request;
 
-import com.ssangtteongnip.application.service.command.ReviseProfileCommand;
 import com.ssangtteongnip.domain.profile.PersonalInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
@@ -25,9 +24,5 @@ public record ProfileRequest(
     public PersonalInfo toPersonalInfo() {
         return PersonalInfo.of(phone, birthDate, address, githubUrl, blogUrl, portfolioUrl,
                 education, career, desiredJob, introduction, jobSearchStartDate);
-    }
-
-    public ReviseProfileCommand toCommand() {
-        return new ReviseProfileCommand(name, toPersonalInfo());
     }
 }

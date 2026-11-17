@@ -2,19 +2,19 @@ package com.ssangtteongnip.web.schedule;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ScheduleService;
-import com.ssangtteongnip.application.service.command.RegisterScheduleCommand;
-import com.ssangtteongnip.domain.jobapplication.JobApplication;
+import com.ssangtteongnip.application.service.request.ScheduleRequest;
 import com.ssangtteongnip.domain.company.Company;
+import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.schedule.Schedule;
 import com.ssangtteongnip.domain.schedule.ScheduleType;
+import com.ssangtteongnip.domain.user.TokenProvider;
+import com.ssangtteongnip.global.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
-import com.ssangtteongnip.domain.user.TokenProvider;
-import com.ssangtteongnip.global.config.SecurityConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -168,7 +168,7 @@ class ScheduleControllerTest {
                                 "note", "정장 착용"))))
                 .andExpect(status().isCreated());
 
-        verify(scheduleService).register(1L, new RegisterScheduleCommand(
+        verify(scheduleService).register(1L, new ScheduleRequest(
                 1L, "1차 면접", LocalDateTime.of(2026, 11, 10, 14, 0), ScheduleType.INTERVIEW,
                 "경기도 성남시 판교역로 166", "정장 착용"));
     }

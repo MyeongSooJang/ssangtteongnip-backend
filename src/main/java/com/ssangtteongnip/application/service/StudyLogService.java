@@ -1,10 +1,10 @@
 package com.ssangtteongnip.application.service;
 
 import com.ssangtteongnip.application.service.dto.HeatmapDayResponse;
-import com.ssangtteongnip.application.service.command.CreateStudyLogCommand;
-import com.ssangtteongnip.application.service.command.RewriteStudyLogCommand;
 import com.ssangtteongnip.application.service.dto.StudyLogResponse;
 import com.ssangtteongnip.application.service.dto.StudyStatsResponse;
+import com.ssangtteongnip.application.service.request.StudyLogCreateRequest;
+import com.ssangtteongnip.application.service.request.StudyLogRequest;
 import com.ssangtteongnip.domain.studylog.StudyLog;
 import com.ssangtteongnip.domain.studylog.StudyLogRepository;
 import com.ssangtteongnip.domain.studylog.StudyLogs;
@@ -36,17 +36,17 @@ public class StudyLogService {
     private final Clock clock;
 
     @Transactional
-    public StudyLogResponse create(Long userId, CreateStudyLogCommand command) {
-        StudyLog created = StudyLog.create(userId, command.studyDate(), command.title(), command.content(),
-                command.studyMinutes(), today());
+    public StudyLogResponse create(Long userId, StudyLogCreateRequest request) {
+        StudyLog created = StudyLog.create(userId, request.studyDate(), request.title(), request.content(),
+                request.studyMinutes(), today());
         return StudyLogResponse.from(studyLogRepository.save(created));
     }
 
     @Transactional
-    public StudyLogResponse rewrite(Long userId, Long id, RewriteStudyLogCommand command) {
+    public StudyLogResponse rewrite(Long userId, Long id, StudyLogRequest request) {
         StudyLog studyLog = findOrThrow(userId, id);
-        Set<UUID> removedImages = studyLog.imageIdsRemovedBy(command.content());
-        studyLog.write(command.title(), command.content(), command.studyMinutes());
+        Set<UUID> removedImages = studyLog.imageIdsRemovedBy(request.content());
+        studyLog.write(request.title(), request.content(), request.studyMinutes());
         studyImageService.deleteUnused(userId, removedImages);
         return StudyLogResponse.from(studyLog);
     }

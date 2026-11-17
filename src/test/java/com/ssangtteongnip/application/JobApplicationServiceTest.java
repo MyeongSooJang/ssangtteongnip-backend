@@ -1,16 +1,16 @@
 package com.ssangtteongnip.application;
 
-import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.CompanyService;
-import com.ssangtteongnip.application.service.command.RegisterJobApplicationCommand;
+import com.ssangtteongnip.application.service.JobApplicationService;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
-import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
+import com.ssangtteongnip.application.service.request.JobApplicationRequest;
+import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.jobapplication.JobSite;
+import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
 import com.ssangtteongnip.domain.jobapplication.ResumeView;
-import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +57,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
+                new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
 
         assertThat(saved.isOwnedBy(7L)).isTrue();
         assertThat(saved.getCompany()).isSameAs(company);
@@ -71,7 +71,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
+                new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
 
         assertThat(saved.getDeadline()).isNull();
         assertThat(saved.getResumeView()).isEqualTo(ResumeView.NOT_VIEWED);
@@ -83,7 +83,7 @@ class JobApplicationServiceTest {
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
         JobApplication saved = jobApplicationService.register(7L,
-                new RegisterJobApplicationCommand(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN,
+                new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN,
                         LocalDate.of(2026, 11, 30), ResumeView.VIEWED));
 
         assertThat(saved.getDeadline()).isEqualTo(LocalDate.of(2026, 11, 30));

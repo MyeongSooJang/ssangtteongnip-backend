@@ -23,8 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 패키지는 `com.ssangtteongnip` 아래 계층형 + DDD 풍으로 나뉜다.
 
-- `web/<기능>` — REST 컨트롤러 (`/api/**`)와 요청 본문을 받는 `XxxRequest` (`@Valid` 검증 포함)
-- `application/service` — 트랜잭션 서비스 (클래스 `@Transactional(readOnly = true)`, 쓰기 메서드만 `@Transactional`), 서비스 입력 `XxxCommand`는 `service/command`, 응답 DTO는 `service/dto`
+- `web/<기능>` — REST 컨트롤러 (`/api/**`)와 본문 값이 1개인 요청의 `XxxRequest`
+- `application/service` — 트랜잭션 서비스 (클래스 `@Transactional(readOnly = true)`, 쓰기 메서드만 `@Transactional`), 본문 값이 2개 이상인 요청 `XxxRequest`(`@Valid` 검증 포함)는 `service/request`, 응답 DTO는 `service/dto`
 - `domain/<aggregate>` — 엔티티, enum, **Repository 인터페이스**. 비즈니스 규칙은 엔티티/enum이 담당 (예: `JobApplicationStatus.canAdvanceTo`로 상태 전이 검증)
 - `infrastructure/persistence` — `XxxJpaRepository`가 `JpaRepository`와 도메인 `XxxRepository` 인터페이스를 **함께 상속**하는 구조 (별도 어댑터 구현 없음)
 - `global` — 오류는 `BusinessException` + `ErrorCode`로 던지고 `GlobalExceptionHandler`가 응답으로 바꾼다
@@ -46,11 +46,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 요청·응답 DTO
 
-- Request는 `web`에만 둔다. Service는 Request를 모른다 (`application`이 `web`을 참조하면 안 된다).
-- Service에 넘기는 값의 개수는 `userId`(토큰)와 URL 경로 값을 빼고 요청 본문 기준으로 센다. 본문 값이 1개면 컨트롤러가 꺼내서 값으로 넘기고, 2개 이상이면 Request의 `toCommand()`로 만든 `XxxCommand`를 넘긴다. 1개짜리 Request도 JSON 본문 모양을 받으려고 `web`에 남는다.
-- 생략 시 기본값은 Command 생성자에서 채운다. 컨트롤러가 아닌 곳에서 Command를 만들어도 Service가 받는 값이 같아야 하기 때문이다. Request는 JSON 값을 그대로 넘기고, 기본값 테스트는 서비스 테스트에 둔다.
+- Service에 넘기는 값의 개수는 `userId`(토큰)와 URL 경로 값을 빼고 요청 본문 기준으로 센다.
+  - 본문 값이 2개 이상이면 컨트롤러가 받은 `XxxRequest`를 그대로 Service에 넘긴다. Service의 입력이므로 `application/service/request`에 둔다 (`application`이 `web`을 참조하면 안 된다).
+  - 본문 값이 1개면 컨트롤러가 꺼내서 값으로 넘긴다. 이 Request는 JSON 본문 모양을 받는 용도라 `web`에 둔다.
+- Request를 Service 입력용 객체(Command)로 다시 복사하지 않는다. API 모양과 Service 입력이 같은 동안 복사본은 매핑 코드와 필드 순서 실수만 늘린다. 둘이 실제로 달라질 때(중첩 구조, 여러 API가 같은 Service를 다른 모양으로 부를 때) 나눈다.
+- 생략 시 기본값은 Request의 compact 생성자에서 채운다. 컨트롤러가 아닌 곳에서 Request를 만들어도 Service가 받는 값이 같아야 하기 때문이다. 기본값 테스트는 서비스 테스트에 둔다.
 - Response는 Service가 만들어 반환하므로 `application/service/dto`에 둔다 (`web`이 `application`을 참조하는 방향만 허용).
-- `toCommand()`가 새 필드를 빠뜨리거나 같은 타입 필드의 순서를 바꾸면 컴파일은 통과한다. 필드 값이 모두 다른 요청을 보내 Service가 받는 Command를 `verify`로 검증하는 컨트롤러 테스트를 함께 둔다.
 
 ## 동시성: 확인한 뒤 처리하지 않는다
 

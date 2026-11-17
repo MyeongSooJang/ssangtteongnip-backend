@@ -2,23 +2,23 @@ package com.ssangtteongnip.web.jobapplication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.JobApplicationService;
-import com.ssangtteongnip.application.service.command.RegisterJobApplicationCommand;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
+import com.ssangtteongnip.application.service.request.JobApplicationRequest;
+import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.jobapplication.JobSite;
 import com.ssangtteongnip.domain.jobapplication.ResumeView;
-import com.ssangtteongnip.domain.company.Company;
+import com.ssangtteongnip.domain.user.TokenProvider;
+import com.ssangtteongnip.global.config.SecurityConfig;
 import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
-import com.ssangtteongnip.domain.user.TokenProvider;
-import com.ssangtteongnip.global.config.SecurityConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -81,7 +81,7 @@ class JobApplicationControllerTest {
                                         "jobSite", "OTHER", "deadline", "2026-11-30", "resumeView", "VIEWED"))))
                 .andExpect(status().isCreated());
 
-        verify(jobApplicationService).register(1L, new RegisterJobApplicationCommand(
+        verify(jobApplicationService).register(1L, new JobApplicationRequest(
                 1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.OTHER,
                 LocalDate.of(2026, 11, 30), ResumeView.VIEWED));
     }

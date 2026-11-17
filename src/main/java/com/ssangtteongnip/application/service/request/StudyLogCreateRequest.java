@@ -1,6 +1,5 @@
-package com.ssangtteongnip.web.studylog;
+package com.ssangtteongnip.application.service.request;
 
-import com.ssangtteongnip.application.service.command.CreateStudyLogCommand;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -12,7 +11,8 @@ public record StudyLogCreateRequest(
         @Size(max = 10000, message = "공부 내용은 10000자 이하여야 합니다.") String content,
         Integer studyMinutes) {
 
-    public CreateStudyLogCommand toCommand() {
-        return new CreateStudyLogCommand(studyDate, title, content, studyMinutes);
+    // 공부 시간을 생략하면 0분으로 저장한다.
+    public StudyLogCreateRequest {
+        studyMinutes = studyMinutes == null ? 0 : studyMinutes;
     }
 }

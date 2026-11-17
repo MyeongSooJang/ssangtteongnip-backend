@@ -1,7 +1,7 @@
 package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.EmailVerificationService;
-import com.ssangtteongnip.application.service.command.ConfirmEmailVerificationCommand;
+import com.ssangtteongnip.application.service.request.EmailVerificationConfirmRequest;
 import com.ssangtteongnip.domain.FakeEmailVerificationStore;
 import com.ssangtteongnip.domain.FakeMailSender;
 import com.ssangtteongnip.domain.user.UserRepository;
@@ -35,7 +35,7 @@ class EmailVerificationServiceTest {
     }
 
     private void confirmWrongCode() {
-        assertErrorCode(() -> service.confirm(new ConfirmEmailVerificationCommand(EMAIL, WRONG_CODE)), ErrorCode.INVALID_VERIFICATION_CODE);
+        assertErrorCode(() -> service.confirm(new EmailVerificationConfirmRequest(EMAIL, WRONG_CODE)), ErrorCode.INVALID_VERIFICATION_CODE);
     }
 
     @Test
@@ -95,7 +95,7 @@ class EmailVerificationServiceTest {
     void 코드가_일치하면_인증_완료로_표시하고_코드를_지운다() {
         service.send(EMAIL);
 
-        service.confirm(new ConfirmEmailVerificationCommand(EMAIL, CODE));
+        service.confirm(new EmailVerificationConfirmRequest(EMAIL, CODE));
 
         assertThat(store.isVerified(EMAIL)).isTrue();
         assertThat(store.findCode(EMAIL)).isEmpty();
@@ -105,14 +105,14 @@ class EmailVerificationServiceTest {
     void 확인할_때도_이메일을_정규화한다() {
         service.send(EMAIL);
 
-        service.confirm(new ConfirmEmailVerificationCommand(" HONG@example.com ", CODE));
+        service.confirm(new EmailVerificationConfirmRequest(" HONG@example.com ", CODE));
 
         assertThat(store.isVerified(EMAIL)).isTrue();
     }
 
     @Test
     void 요청된_코드가_없으면_만료로_처리한다() {
-        assertErrorCode(() -> service.confirm(new ConfirmEmailVerificationCommand(EMAIL, CODE)), ErrorCode.VERIFICATION_EXPIRED);
+        assertErrorCode(() -> service.confirm(new EmailVerificationConfirmRequest(EMAIL, CODE)), ErrorCode.VERIFICATION_EXPIRED);
     }
 
     @Test
@@ -133,7 +133,7 @@ class EmailVerificationServiceTest {
         confirmWrongCode();
         confirmWrongCode();
 
-        service.confirm(new ConfirmEmailVerificationCommand(EMAIL, CODE));
+        service.confirm(new EmailVerificationConfirmRequest(EMAIL, CODE));
 
         assertThat(store.isVerified(EMAIL)).isTrue();
     }
@@ -146,10 +146,10 @@ class EmailVerificationServiceTest {
         confirmWrongCode();
         confirmWrongCode();
 
-        assertErrorCode(() -> service.confirm(new ConfirmEmailVerificationCommand(EMAIL, WRONG_CODE)), ErrorCode.VERIFICATION_ATTEMPTS_EXCEEDED);
+        assertErrorCode(() -> service.confirm(new EmailVerificationConfirmRequest(EMAIL, WRONG_CODE)), ErrorCode.VERIFICATION_ATTEMPTS_EXCEEDED);
 
         assertThat(store.findCode(EMAIL)).isEmpty();
-        assertErrorCode(() -> service.confirm(new ConfirmEmailVerificationCommand(EMAIL, CODE)), ErrorCode.VERIFICATION_EXPIRED);
+        assertErrorCode(() -> service.confirm(new EmailVerificationConfirmRequest(EMAIL, CODE)), ErrorCode.VERIFICATION_EXPIRED);
         assertThat(store.isVerified(EMAIL)).isFalse();
     }
 
@@ -162,7 +162,7 @@ class EmailVerificationServiceTest {
             store.recordAttempt(EMAIL);
         }
 
-        assertErrorCode(() -> service.confirm(new ConfirmEmailVerificationCommand(EMAIL, CODE)), ErrorCode.VERIFICATION_ATTEMPTS_EXCEEDED);
+        assertErrorCode(() -> service.confirm(new EmailVerificationConfirmRequest(EMAIL, CODE)), ErrorCode.VERIFICATION_ATTEMPTS_EXCEEDED);
 
         assertThat(store.isVerified(EMAIL)).isFalse();
         assertThat(store.findCode(EMAIL)).isEmpty();

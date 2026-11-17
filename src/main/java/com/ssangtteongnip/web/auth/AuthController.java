@@ -3,6 +3,9 @@ package com.ssangtteongnip.web.auth;
 import com.ssangtteongnip.application.service.AuthService;
 import com.ssangtteongnip.application.service.EmailVerificationService;
 import com.ssangtteongnip.application.service.dto.TokenResponse;
+import com.ssangtteongnip.application.service.request.EmailVerificationConfirmRequest;
+import com.ssangtteongnip.application.service.request.LoginRequest;
+import com.ssangtteongnip.application.service.request.SignupRequest;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,18 +28,18 @@ public class AuthController {
 
     @PostMapping("/email-verifications/confirm")
     public ApiResponse<Void> confirmVerificationCode(@RequestBody @Valid EmailVerificationConfirmRequest request) {
-        emailVerificationService.confirm(request.toCommand());
+        emailVerificationService.confirm(request);
         return ApiResponse.ok();
     }
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<TokenResponse> signup(@RequestBody @Valid SignupRequest request) {
-        return ApiResponse.ok(authService.signup(request.toCommand()));
+        return ApiResponse.ok(authService.signup(request));
     }
 
     @PostMapping("/login")
     public ApiResponse<TokenResponse> login(@RequestBody @Valid LoginRequest request) {
-        return ApiResponse.ok(authService.login(request.toCommand()));
+        return ApiResponse.ok(authService.login(request));
     }
 }

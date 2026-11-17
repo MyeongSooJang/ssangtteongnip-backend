@@ -2,11 +2,11 @@ package com.ssangtteongnip.web.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.AuthService;
-import com.ssangtteongnip.application.service.command.LoginCommand;
-import com.ssangtteongnip.application.service.command.SignupCommand;
-import com.ssangtteongnip.application.service.command.ConfirmEmailVerificationCommand;
 import com.ssangtteongnip.application.service.EmailVerificationService;
 import com.ssangtteongnip.application.service.dto.TokenResponse;
+import com.ssangtteongnip.application.service.request.EmailVerificationConfirmRequest;
+import com.ssangtteongnip.application.service.request.LoginRequest;
+import com.ssangtteongnip.application.service.request.SignupRequest;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.config.SecurityConfig;
 import com.ssangtteongnip.global.exception.BusinessException;
@@ -80,7 +80,7 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
-        verify(emailVerificationService).confirm(new ConfirmEmailVerificationCommand("hong@example.com", "123456"));
+        verify(emailVerificationService).confirm(new EmailVerificationConfirmRequest("hong@example.com", "123456"));
     }
 
     @Test
@@ -120,7 +120,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").value("jwt-token"));
 
-        verify(authService).signup(new SignupCommand("hong@example.com", "홍길동", "password1"));
+        verify(authService).signup(new SignupRequest("hong@example.com", "홍길동", "password1"));
     }
 
     @Test
@@ -156,7 +156,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").value("jwt-token"));
 
-        verify(authService).login(new LoginCommand("hong@example.com", "password1"));
+        verify(authService).login(new LoginRequest("hong@example.com", "password1"));
     }
 
     @Test

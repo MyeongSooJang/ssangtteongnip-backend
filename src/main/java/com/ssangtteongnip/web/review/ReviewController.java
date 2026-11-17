@@ -1,6 +1,7 @@
 package com.ssangtteongnip.web.review;
 
 import com.ssangtteongnip.application.service.ReviewService;
+import com.ssangtteongnip.application.service.request.ReviewRequest;
 import com.ssangtteongnip.domain.review.Review;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -26,6 +27,6 @@ public class ReviewController {
     public ApiResponse<Review> write(@AuthenticationPrincipal Long userId,
                                      @PathVariable Long id,
                                      @RequestBody @Valid ReviewRequest request) {
-        return ApiResponse.ok(reviewService.write(userId, id, request.toCommand()));
+        return ApiResponse.ok(reviewService.write(userId, id, request));
     }
 }

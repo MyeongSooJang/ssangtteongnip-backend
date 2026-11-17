@@ -3,6 +3,7 @@ package com.ssangtteongnip.web.company;
 import com.ssangtteongnip.application.service.CompanyService;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
+import com.ssangtteongnip.application.service.request.CompanyRequest;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class CompanyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Company> register(@RequestBody @Valid CompanyRequest request) {
-        return ApiResponse.ok(companyService.register(request.toCommand()));
+        return ApiResponse.ok(companyService.register(request));
     }
 
     @GetMapping

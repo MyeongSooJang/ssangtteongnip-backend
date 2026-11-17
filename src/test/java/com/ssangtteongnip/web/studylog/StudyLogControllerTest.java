@@ -3,10 +3,10 @@ package com.ssangtteongnip.web.studylog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.StudyLogService;
 import com.ssangtteongnip.application.service.dto.HeatmapDayResponse;
-import com.ssangtteongnip.application.service.command.CreateStudyLogCommand;
-import com.ssangtteongnip.application.service.command.RewriteStudyLogCommand;
 import com.ssangtteongnip.application.service.dto.StudyLogResponse;
 import com.ssangtteongnip.application.service.dto.StudyStatsResponse;
+import com.ssangtteongnip.application.service.request.StudyLogCreateRequest;
+import com.ssangtteongnip.application.service.request.StudyLogRequest;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.config.SecurityConfig;
 import com.ssangtteongnip.global.exception.BusinessException;
@@ -56,7 +56,7 @@ class StudyLogControllerTest {
 
     @Test
     void POST_글을_작성하고_201과_저장된_글을_반환한다() throws Exception {
-        given(studyLogService.create(1L, new CreateStudyLogCommand(DATE, "JPA 정리", "JPA 공부", 90)))
+        given(studyLogService.create(1L, new StudyLogCreateRequest(DATE, "JPA 정리", "JPA 공부", 90)))
                 .willReturn(response());
 
         mockMvc.perform(post("/api/me/study-logs")
@@ -110,7 +110,7 @@ class StudyLogControllerTest {
 
     @Test
     void PUT_글을_수정하고_200과_수정된_글을_반환한다() throws Exception {
-        given(studyLogService.rewrite(1L, 10L, new RewriteStudyLogCommand("JPA 정리", "JPA 공부", 90))).willReturn(response());
+        given(studyLogService.rewrite(1L, 10L, new StudyLogRequest("JPA 정리", "JPA 공부", 90))).willReturn(response());
 
         mockMvc.perform(put("/api/me/study-logs/10")
                         .header("Authorization", BEARER)
@@ -124,7 +124,7 @@ class StudyLogControllerTest {
 
     @Test
     void PUT_남의_글이거나_없는_글이면_404와_에러코드를_반환한다() throws Exception {
-        given(studyLogService.rewrite(1L, 99L, new RewriteStudyLogCommand("제목", "내용", 0)))
+        given(studyLogService.rewrite(1L, 99L, new StudyLogRequest("제목", "내용", 0)))
                 .willThrow(new BusinessException(ErrorCode.STUDY_LOG_NOT_FOUND));
 
         mockMvc.perform(put("/api/me/study-logs/99")

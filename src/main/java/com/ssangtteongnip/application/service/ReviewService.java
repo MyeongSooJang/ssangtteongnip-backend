@@ -1,6 +1,6 @@
 package com.ssangtteongnip.application.service;
 
-import com.ssangtteongnip.application.service.command.WriteReviewCommand;
+import com.ssangtteongnip.application.service.request.ReviewRequest;
 import com.ssangtteongnip.domain.review.Review;
 import com.ssangtteongnip.domain.review.ReviewRepository;
 import com.ssangtteongnip.global.exception.BusinessException;
@@ -23,12 +23,12 @@ public class ReviewService {
     }
 
     @Transactional
-    public Review write(Long userId, Long id, WriteReviewCommand command) {
+    public Review write(Long userId, Long id, ReviewRequest request) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
         review.verifyOwner(userId);
-        review.compose(command.content(), command.rating(), command.difficulty(), command.atmosphere(),
-                command.route(), command.questions());
+        review.compose(request.content(), request.rating(), request.difficulty(), request.atmosphere(),
+                request.route(), request.questions());
         return review;
     }
 }
