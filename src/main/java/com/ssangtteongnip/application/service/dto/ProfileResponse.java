@@ -22,7 +22,7 @@ public record ProfileResponse(
         LocalDate jobSearchStartDate,
         List<UserFileResponse> files) {
 
-    public static ProfileResponse of(Profile profile, List<UserFileResponse> files) {
+    public static ProfileResponse convert(Profile profile, List<UserFileResponse> files) {
         PersonalInfo info = profile.getInfo();
         return new ProfileResponse(
                 profile.getUser().getEmail().value(),

@@ -45,7 +45,7 @@ public class JobApplicationService {
 
     public List<JobSiteStatisticsResponse> summarizeByJobSite(Long userId) {
         return jobApplicationRepository.summarizeByJobSite(userId).stream()
-                .map(JobSiteStatisticsResponse::from)
+                .map(JobSiteStatisticsResponse::convert)
                 .toList();
     }
 

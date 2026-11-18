@@ -43,8 +43,8 @@ public class ProfileService {
 
     private ProfileResponse toResponse(Long userId, Profile profile) {
         List<UserFileResponse> files = userFileRepository.findUserFilesNewestFirst(userId).stream()
-                .map(UserFileResponse::describe)
+                .map(UserFileResponse::convert)
                 .toList();
-        return ProfileResponse.of(profile, files);
+        return ProfileResponse.convert(profile, files);
     }
 }

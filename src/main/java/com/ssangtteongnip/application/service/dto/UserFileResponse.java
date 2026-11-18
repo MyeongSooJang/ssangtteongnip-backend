@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public record UserFileResponse(Long id, FileType type, String fileName, long sizeBytes, LocalDateTime createdAt) {
 
-    public static UserFileResponse describe(UserFile file) {
+    public static UserFileResponse convert(UserFile file) {
         return new UserFileResponse(file.getId(), file.getType(), file.getFileName(),
                 file.getSizeBytes(), file.getCreatedAt());
     }

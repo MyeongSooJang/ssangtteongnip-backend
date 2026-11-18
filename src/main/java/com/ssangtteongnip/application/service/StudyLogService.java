@@ -39,7 +39,7 @@ public class StudyLogService {
     public StudyLogResponse create(Long userId, StudyLogCreateRequest request) {
         StudyLog created = StudyLog.create(userId, request.studyDate(), request.title(), request.content(),
                 request.studyMinutes(), today());
-        return StudyLogResponse.from(studyLogRepository.save(created));
+        return StudyLogResponse.convert(studyLogRepository.save(created));
     }
 
     @Transactional
@@ -48,18 +48,18 @@ public class StudyLogService {
         Set<UUID> removedImages = studyLog.imageIdsRemovedBy(request.content());
         studyLog.write(request.title(), request.content(), request.studyMinutes());
         studyImageService.deleteUnused(userId, removedImages);
-        return StudyLogResponse.from(studyLog);
+        return StudyLogResponse.convert(studyLog);
     }
 
     public StudyLogResponse find(Long userId, Long id) {
-        return StudyLogResponse.from(findOrThrow(userId, id));
+        return StudyLogResponse.convert(findOrThrow(userId, id));
     }
 
     public List<StudyLogResponse> findRange(Long userId, LocalDate from, LocalDate to) {
         StudyPeriod period = StudyPeriod.of(from, to, MAX_LIST_DAYS);
         return studyLogRepository
                 .findInPeriod(userId, period.from(), period.to())
-                .stream().map(StudyLogResponse::from).toList();
+                .stream().map(StudyLogResponse::convert).toList();
     }
 
     @Transactional
@@ -74,7 +74,7 @@ public class StudyLogService {
         StudyPeriod period = StudyPeriod.of(from, to, MAX_HEATMAP_DAYS);
         StudyLogs logs = new StudyLogs(studyLogRepository
                 .findInPeriod(userId, period.from(), period.to()));
-        return logs.dailySummaries().stream().map(HeatmapDayResponse::from).toList();
+        return logs.dailySummaries().stream().map(HeatmapDayResponse::convert).toList();
     }
 
     public StudyStatsResponse stats(Long userId) {

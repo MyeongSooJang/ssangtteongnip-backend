@@ -62,7 +62,7 @@ public class CompanyService {
     public List<CompanyReviewResponse> findReviews(Long id) {
         findById(id);
         return reviewRepository.findNewestRatedReviews(id).stream()
-                .map(CompanyReviewResponse::from)
+                .map(CompanyReviewResponse::convert)
                 .toList();
     }
 }

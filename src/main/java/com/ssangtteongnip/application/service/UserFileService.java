@@ -34,12 +34,12 @@ public class UserFileService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         UserFile.validateCanAdd(userFileRepository.countByUserId(userId));
         UserFile file = userFileRepository.save(UserFile.upload(user, type, fileName, content, fileStorage));
-        return UserFileResponse.describe(file);
+        return UserFileResponse.convert(file);
     }
 
     public List<UserFileResponse> list(Long userId) {
         return userFileRepository.findUserFilesNewestFirst(userId).stream()
-                .map(UserFileResponse::describe)
+                .map(UserFileResponse::convert)
                 .toList();
     }
 

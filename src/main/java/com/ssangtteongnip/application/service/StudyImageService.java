@@ -28,7 +28,7 @@ public class StudyImageService {
     @Transactional
     public StudyImageResponse upload(Long userId, byte[] content) {
         StudyImage image = studyImageRepository.save(StudyImage.upload(userId, content, fileStorage));
-        return StudyImageResponse.from(image);
+        return StudyImageResponse.convert(image);
     }
 
     // 글에서 빠졌거나 글과 함께 사라진 이미지 중, 아무 글도 더는 쓰지 않는 내 이미지를 지운다.
