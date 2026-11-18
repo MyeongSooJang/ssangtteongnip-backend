@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit;
 
 public record StudyPeriod(LocalDate from, LocalDate to) {
 
-    public static StudyPeriod of(LocalDate from, LocalDate to, int maxDays) {
+    public static StudyPeriod createWithin(LocalDate from, LocalDate to, int maxDays) {
         if (from == null || to == null || from.isAfter(to) || ChronoUnit.DAYS.between(from, to) + 1 > maxDays) {
             throw new BusinessException(ErrorCode.INVALID_STUDY_RANGE);
         }

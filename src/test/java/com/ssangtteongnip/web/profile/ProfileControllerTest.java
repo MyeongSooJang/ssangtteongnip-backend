@@ -181,7 +181,7 @@ class ProfileControllerTest {
         ArgumentCaptor<ProfileRequest> captor = ArgumentCaptor.forClass(ProfileRequest.class);
         verify(profileService).reviseMyProfile(eq(1L), captor.capture());
         assertThat(captor.getValue().name()).isEqualTo("홍길동");
-        assertThat(captor.getValue().toPersonalInfo()).usingRecursiveComparison().isEqualTo(PersonalInfo.of(
+        assertThat(captor.getValue().toPersonalInfo()).usingRecursiveComparison().isEqualTo(new PersonalInfo(
                 "010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
                 "https://github.com/hong", "https://blog.example.com", "https://portfolio.example.com",
                 "OO대 컴퓨터공학", "인턴 6개월", "백엔드 개발자", "안녕하세요",

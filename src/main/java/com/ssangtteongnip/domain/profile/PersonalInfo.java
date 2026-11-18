@@ -39,27 +39,25 @@ public class PersonalInfo {
     private String introduction;
 
     public static PersonalInfo empty() {
-        return of(null, null, null, null, null, null, null, null, null, null, null);
+        return new PersonalInfo(null, null, null, null, null, null, null, null, null, null, null);
     }
 
-    public static PersonalInfo of(String phone, LocalDate birthDate, String address,
-                                  String githubUrl, String blogUrl, String portfolioUrl,
-                                  String education, String career,
-                                  String desiredJob, String introduction,
-                                  LocalDate jobSearchStartDate) {
-        PersonalInfo info = new PersonalInfo();
-        info.phone = phone;
-        info.birthDate = birthDate;
-        info.address = address;
-        info.githubUrl = githubUrl;
-        info.blogUrl = blogUrl;
-        info.portfolioUrl = portfolioUrl;
-        info.education = education;
-        info.career = career;
-        info.desiredJob = desiredJob;
-        info.introduction = introduction;
-        info.jobSearchStartDate = jobSearchStartDate;
-        return info;
+    public PersonalInfo(String phone, LocalDate birthDate, String address,
+                        String githubUrl, String blogUrl, String portfolioUrl,
+                        String education, String career,
+                        String desiredJob, String introduction,
+                        LocalDate jobSearchStartDate) {
+        this.phone = phone;
+        this.birthDate = birthDate;
+        this.address = address;
+        this.githubUrl = githubUrl;
+        this.blogUrl = blogUrl;
+        this.portfolioUrl = portfolioUrl;
+        this.education = education;
+        this.career = career;
+        this.desiredJob = desiredJob;
+        this.introduction = introduction;
+        this.jobSearchStartDate = jobSearchStartDate;
     }
 
     // 취업 준비 시작일은 비워 둘 수 있지만, 적었다면 오늘보다 뒤일 수 없다.

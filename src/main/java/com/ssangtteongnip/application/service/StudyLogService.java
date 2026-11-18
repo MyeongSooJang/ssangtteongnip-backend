@@ -56,7 +56,7 @@ public class StudyLogService {
     }
 
     public List<StudyLogResponse> findRange(Long userId, LocalDate from, LocalDate to) {
-        StudyPeriod period = StudyPeriod.of(from, to, MAX_LIST_DAYS);
+        StudyPeriod period = StudyPeriod.createWithin(from, to, MAX_LIST_DAYS);
         return studyLogRepository
                 .findInPeriod(userId, period.from(), period.to())
                 .stream().map(StudyLogResponse::convert).toList();
@@ -71,7 +71,7 @@ public class StudyLogService {
     }
 
     public List<HeatmapDayResponse> heatmap(Long userId, LocalDate from, LocalDate to) {
-        StudyPeriod period = StudyPeriod.of(from, to, MAX_HEATMAP_DAYS);
+        StudyPeriod period = StudyPeriod.createWithin(from, to, MAX_HEATMAP_DAYS);
         StudyLogs logs = new StudyLogs(studyLogRepository
                 .findInPeriod(userId, period.from(), period.to()));
         return logs.dailySummaries().stream().map(HeatmapDayResponse::convert).toList();
@@ -81,7 +81,7 @@ public class StudyLogService {
         LocalDate today = today();
         YearMonth month = YearMonth.from(today);
 
-        StudyStreak streak = StudyStreak.of(studyLogRepository.findStudyDatesByUserId(userId));
+        StudyStreak streak = new StudyStreak(studyLogRepository.findStudyDatesByUserId(userId));
         StudyLogs todayLogs = new StudyLogs(studyLogRepository
                 .findInPeriod(userId, today, today));
         long monthWrittenDays = studyLogRepository

@@ -39,7 +39,7 @@ class ProfileRepositoryTest {
     void 프로필의_인적_사항을_저장하고_조회한다() {
         User user = saveUser();
         Profile profile = profileRepository.save(Profile.create(user));
-        profile.reviseNameAndInfo("홍길순", PersonalInfo.of("010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
+        profile.reviseNameAndInfo("홍길순", new PersonalInfo("010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
                 "https://github.com/hong", null, null, "OO대", "인턴", "백엔드", "안녕하세요", null),
                 LocalDate.of(2026, 11, 17));
         flushAndClear();

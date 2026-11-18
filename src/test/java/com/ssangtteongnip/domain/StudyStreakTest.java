@@ -13,12 +13,12 @@ class StudyStreakTest {
     private static final LocalDate TODAY = LocalDate.of(2026, 11, 3);
 
     private StudyStreak streakOf(int... daysAgo) {
-        return StudyStreak.of(java.util.Arrays.stream(daysAgo).mapToObj(TODAY::minusDays).toList());
+        return new StudyStreak(java.util.Arrays.stream(daysAgo).mapToObj(TODAY::minusDays).toList());
     }
 
     @Test
     void 기록이_없으면_연속_작성일은_0이다() {
-        assertThat(StudyStreak.of(List.of()).current(TODAY)).isZero();
+        assertThat(new StudyStreak(List.of()).current(TODAY)).isZero();
     }
 
     @Test
@@ -43,7 +43,7 @@ class StudyStreakTest {
 
     @Test
     void 월을_넘어서도_이어서_센다() {
-        StudyStreak streak = StudyStreak.of(List.of(
+        StudyStreak streak = new StudyStreak(List.of(
                 LocalDate.of(2026, 11, 2), LocalDate.of(2026, 11, 1),
                 LocalDate.of(2026, 10, 31), LocalDate.of(2026, 10, 30)));
 
@@ -52,7 +52,7 @@ class StudyStreakTest {
 
     @Test
     void 기록이_없으면_최장_연속_작성일은_0이다() {
-        assertThat(StudyStreak.of(List.of()).longest()).isZero();
+        assertThat(new StudyStreak(List.of()).longest()).isZero();
     }
 
     @Test
@@ -73,7 +73,7 @@ class StudyStreakTest {
 
     @Test
     void 월을_넘어서도_최장_연속을_이어서_센다() {
-        StudyStreak streak = StudyStreak.of(List.of(
+        StudyStreak streak = new StudyStreak(List.of(
                 LocalDate.of(2026, 10, 31), LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 2)));
 
         assertThat(streak.longest()).isEqualTo(3);

@@ -21,7 +21,7 @@ public record ProfileRequest(
         LocalDate jobSearchStartDate) {
 
     public PersonalInfo toPersonalInfo() {
-        return PersonalInfo.of(phone, birthDate, address, githubUrl, blogUrl, portfolioUrl,
+        return new PersonalInfo(phone, birthDate, address, githubUrl, blogUrl, portfolioUrl,
                 education, career, desiredJob, introduction, jobSearchStartDate);
     }
 }

@@ -8,12 +8,8 @@ public class StudyStreak {
 
     private final Set<LocalDate> writtenDates;
 
-    private StudyStreak(Set<LocalDate> writtenDates) {
-        this.writtenDates = writtenDates;
-    }
-
-    public static StudyStreak of(Collection<LocalDate> writtenDates) {
-        return new StudyStreak(Set.copyOf(writtenDates));
+    public StudyStreak(Collection<LocalDate> writtenDates) {
+        this.writtenDates = Set.copyOf(writtenDates);
     }
 
     // 오늘 아직 쓰지 않았어도 어제까지 이어졌다면 끊긴 것으로 보지 않는다.
