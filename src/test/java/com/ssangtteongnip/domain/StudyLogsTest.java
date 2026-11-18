@@ -23,13 +23,13 @@ class StudyLogsTest {
     void 같은_날_여러_글의_공부_시간은_합산한다() {
         StudyLogs logs = new StudyLogs(List.of(log(0, 60), log(0, 30), log(1, 45)));
 
-        assertThat(logs.minutesOn(TODAY)).isEqualTo(90);
-        assertThat(logs.minutesOn(TODAY.minusDays(1))).isEqualTo(45);
+        assertThat(logs.calculateMinutesOn(TODAY)).isEqualTo(90);
+        assertThat(logs.calculateMinutesOn(TODAY.minusDays(1))).isEqualTo(45);
     }
 
     @Test
     void 글이_없는_날의_공부_시간은_0이다() {
-        assertThat(new StudyLogs(List.of()).minutesOn(TODAY)).isEqualTo(0);
+        assertThat(new StudyLogs(List.of()).calculateMinutesOn(TODAY)).isEqualTo(0);
     }
 
     @Test

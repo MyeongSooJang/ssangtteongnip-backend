@@ -5,6 +5,6 @@ import com.ssangtteongnip.domain.image.StudyImage;
 public record StudyImageResponse(String url) {
 
     public static StudyImageResponse convert(StudyImage image) {
-        return new StudyImageResponse(image.publicPath());
+        return new StudyImageResponse(image.createPublicPath());
     }
 }

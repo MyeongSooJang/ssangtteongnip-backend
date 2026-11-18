@@ -57,7 +57,7 @@ public class GmailMailSender implements MailSender {
     @Override
     public void sendVerificationCode(Email email, VerificationCode code) {
         try {
-            String raw = encode(verificationMessage(email, code));
+            String raw = encode(createVerificationMessage(email, code));
             SendResponse response = restClient.post()
                     .uri(SEND_URL)
                     .header("Authorization", "Bearer " + fetchAccessToken())
@@ -91,7 +91,7 @@ public class GmailMailSender implements MailSender {
         return response.accessToken();
     }
 
-    private MimeMessage verificationMessage(Email email, VerificationCode code) throws MessagingException {
+    private MimeMessage createVerificationMessage(Email email, VerificationCode code) throws MessagingException {
         MimeMessage message = new MimeMessage(Session.getInstance(new Properties()));
         message.setFrom(new InternetAddress(from));
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(email.value()));

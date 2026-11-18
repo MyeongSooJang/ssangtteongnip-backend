@@ -90,11 +90,11 @@ public class StudyImage {
     }
 
     public PresignedUrl createViewUrl(FileStorage storage) {
-        return storage.presignedViewUrl(objectKey);
+        return storage.createViewUrl(objectKey);
     }
 
     // 본문(마크다운)에 저장하는 주소. 도메인이 바뀌어도 깨지지 않도록 경로만 둔다.
-    public String publicPath() {
+    public String createPublicPath() {
         return PUBLIC_PATH_PREFIX + publicId;
     }
 

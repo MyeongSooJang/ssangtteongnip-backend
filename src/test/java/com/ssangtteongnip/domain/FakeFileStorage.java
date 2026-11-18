@@ -54,12 +54,12 @@ public class FakeFileStorage implements FileStorage {
     }
 
     @Override
-    public PresignedUrl presignedViewUrl(String key) {
+    public PresignedUrl createViewUrl(String key) {
         return new PresignedUrl("https://fake-storage/" + key, EXPIRES_AT);
     }
 
     @Override
-    public PresignedUrl presignedDownloadUrl(String key, String fileName) {
+    public PresignedUrl createDownloadUrl(String key, String fileName) {
         return new PresignedUrl("https://fake-storage/" + key + "?fileName=" + fileName, EXPIRES_AT);
     }
 }

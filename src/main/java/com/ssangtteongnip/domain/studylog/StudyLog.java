@@ -98,7 +98,7 @@ public class StudyLog {
         return studyDate.equals(date);
     }
 
-    public int minutesOn(LocalDate date) {
+    public int calculateMinutesOn(LocalDate date) {
         return isOn(date) ? studyMinutes : 0;
     }
 }

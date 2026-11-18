@@ -82,7 +82,7 @@ class StudyImageServiceTest {
     @Test
     void 아무_글도_쓰지_않는_내_이미지는_행과_저장소_객체를_모두_지운다() {
         StudyImage image = uploaded(USER_ID);
-        given(studyLogRepository.existsByContentContaining(image.publicPath())).willReturn(false);
+        given(studyLogRepository.existsByContentContaining(image.createPublicPath())).willReturn(false);
 
         studyImageService.deleteUnused(USER_ID, Set.of(image.getPublicId()));
 
@@ -93,7 +93,7 @@ class StudyImageServiceTest {
     @Test
     void 다른_글이_아직_쓰는_이미지는_지우지_않는다() {
         StudyImage image = uploaded(USER_ID);
-        given(studyLogRepository.existsByContentContaining(image.publicPath())).willReturn(true);
+        given(studyLogRepository.existsByContentContaining(image.createPublicPath())).willReturn(true);
 
         studyImageService.deleteUnused(USER_ID, Set.of(image.getPublicId()));
 
@@ -126,8 +126,8 @@ class StudyImageServiceTest {
     void 여러_이미지_중_아무_글도_쓰지_않는_것만_지운다() {
         StudyImage unused = uploaded(USER_ID);
         StudyImage stillUsed = uploaded(USER_ID);
-        given(studyLogRepository.existsByContentContaining(unused.publicPath())).willReturn(false);
-        given(studyLogRepository.existsByContentContaining(stillUsed.publicPath())).willReturn(true);
+        given(studyLogRepository.existsByContentContaining(unused.createPublicPath())).willReturn(false);
+        given(studyLogRepository.existsByContentContaining(stillUsed.createPublicPath())).willReturn(true);
 
         studyImageService.deleteUnused(USER_ID, new LinkedHashSet<>(List.of(unused.getPublicId(), stillUsed.getPublicId())));
 
@@ -140,7 +140,7 @@ class StudyImageServiceTest {
     @Test
     void 저장소_객체_삭제가_실패해도_예외로_번지지_않고_행은_지운다() {
         StudyImage image = uploaded(USER_ID);
-        given(studyLogRepository.existsByContentContaining(image.publicPath())).willReturn(false);
+        given(studyLogRepository.existsByContentContaining(image.createPublicPath())).willReturn(false);
         storage.failOnDelete();
 
         studyImageService.deleteUnused(USER_ID, Set.of(image.getPublicId()));

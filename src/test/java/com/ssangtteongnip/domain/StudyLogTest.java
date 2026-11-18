@@ -208,7 +208,7 @@ class StudyLogTest {
     void 기록한_날짜의_공부_시간만_알려준다() {
         StudyLog studyLog = studyLog();
 
-        assertThat(studyLog.minutesOn(TODAY)).isEqualTo(90);
-        assertThat(studyLog.minutesOn(TODAY.minusDays(1))).isZero();
+        assertThat(studyLog.calculateMinutesOn(TODAY)).isEqualTo(90);
+        assertThat(studyLog.calculateMinutesOn(TODAY.minusDays(1))).isZero();
     }
 }
