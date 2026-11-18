@@ -4,7 +4,7 @@ package com.ssangtteongnip.domain.jobapplication;
 public record JobSiteStatistics(JobSite jobSite, long applicationCount, long documentPassedCount) {
 
     // 0.0 ~ 1.0. 지원이 없으면 0이다.
-    public double documentPassRate() {
+    public double calculateDocumentPassRate() {
         if (applicationCount == 0) {
             return 0;
         }

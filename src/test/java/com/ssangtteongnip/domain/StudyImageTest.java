@@ -80,7 +80,7 @@ class StudyImageTest {
     void 본문에_넣는_주소는_도메인_없이_공개_아이디_경로만_가진다() {
         StudyImage image = StudyImage.upload(USER_ID, PNG, storage);
 
-        assertThat(image.publicPath()).isEqualTo("/api/images/" + image.getPublicId());
+        assertThat(image.createPublicPath()).isEqualTo("/api/images/" + image.getPublicId());
     }
 
     @Test
@@ -143,7 +143,7 @@ class StudyImageTest {
     void 본문에서_이미지_주소의_공개_아이디를_모두_찾는다() {
         StudyImage first = StudyImage.upload(USER_ID, PNG, storage);
         StudyImage second = StudyImage.upload(USER_ID, PNG, storage);
-        String markdown = "## 제목\n![](" + first.publicPath() + ")\n설명\n![그림](" + second.publicPath() + ")";
+        String markdown = "## 제목\n![](" + first.createPublicPath() + ")\n설명\n![그림](" + second.createPublicPath() + ")";
 
         assertThat(StudyImage.findReferencedIds(markdown)).containsExactlyInAnyOrder(first.getPublicId(), second.getPublicId());
     }
@@ -152,7 +152,7 @@ class StudyImageTest {
     void 같은_이미지를_여러_번_써도_한_번만_센다() {
         StudyImage image = StudyImage.upload(USER_ID, PNG, storage);
 
-        Set<UUID> ids = StudyImage.findReferencedIds(image.publicPath() + " 그리고 " + image.publicPath());
+        Set<UUID> ids = StudyImage.findReferencedIds(image.createPublicPath() + " 그리고 " + image.createPublicPath());
 
         assertThat(ids).containsExactly(image.getPublicId());
     }

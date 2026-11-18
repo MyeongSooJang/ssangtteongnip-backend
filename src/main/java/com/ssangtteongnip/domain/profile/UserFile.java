@@ -78,7 +78,7 @@ public class UserFile {
     }
 
     public PresignedUrl createDownloadUrl(FileStorage storage) {
-        return storage.presignedDownloadUrl(objectKey, fileName);
+        return storage.createDownloadUrl(objectKey, fileName);
     }
 
     public void delete(FileStorage storage) {

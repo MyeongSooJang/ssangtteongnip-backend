@@ -54,13 +54,13 @@ class StudyImageRepositoryTest {
     @Test
     void 다시_찾은_이미지의_본문_경로와_저장소_주소는_저장_전과_같다() {
         StudyImage original = studyImageRepository.save(StudyImage.upload(USER_ID, PNG, storage));
-        String path = original.publicPath();
+        String path = original.createPublicPath();
         em.flush();
         em.clear();
 
         StudyImage found = studyImageRepository.findByPublicId(original.getPublicId()).orElseThrow();
 
-        assertThat(found.publicPath()).isEqualTo(path);
+        assertThat(found.createPublicPath()).isEqualTo(path);
         assertThat(found.createViewUrl(storage).url()).isEqualTo("https://fake-storage/" + found.getObjectKey());
     }
 

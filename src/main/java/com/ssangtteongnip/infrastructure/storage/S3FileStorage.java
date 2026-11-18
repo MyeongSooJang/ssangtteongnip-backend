@@ -57,7 +57,7 @@ public class S3FileStorage implements FileStorage {
     }
 
     @Override
-    public PresignedUrl presignedDownloadUrl(String key, String fileName) {
+    public PresignedUrl createDownloadUrl(String key, String fileName) {
         GetObjectRequest request = GetObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)
@@ -76,7 +76,7 @@ public class S3FileStorage implements FileStorage {
     }
 
     @Override
-    public PresignedUrl presignedViewUrl(String key) {
+    public PresignedUrl createViewUrl(String key) {
         GetObjectRequest request = GetObjectRequest.builder()
                 .bucket(properties.bucket())
                 .key(key)

@@ -8,6 +8,6 @@ public record JobSiteStatisticsResponse(JobSite jobSite, long applicationCount, 
 
     public static JobSiteStatisticsResponse convert(JobSiteStatistics statistics) {
         return new JobSiteStatisticsResponse(statistics.jobSite(), statistics.applicationCount(),
-                statistics.documentPassedCount(), statistics.documentPassRate());
+                statistics.documentPassedCount(), statistics.calculateDocumentPassRate());
     }
 }

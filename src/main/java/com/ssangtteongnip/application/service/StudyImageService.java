@@ -39,7 +39,7 @@ public class StudyImageService {
         for (UUID publicId : candidates) {
             studyImageRepository.findByPublicId(publicId)
                     .filter(image -> image.isOwnedBy(userId))
-                    .filter(image -> !studyLogRepository.existsByContentContaining(image.publicPath()))
+                    .filter(image -> !studyLogRepository.existsByContentContaining(image.createPublicPath()))
                     .ifPresent(this::delete);
         }
     }

@@ -38,7 +38,7 @@ public class StudyLogService {
     @Transactional
     public StudyLogResponse create(Long userId, StudyLogCreateRequest request) {
         StudyLog created = StudyLog.create(userId, request.studyDate(), request.title(), request.content(),
-                request.studyMinutes(), today());
+                request.studyMinutes(), findToday());
         return StudyLogResponse.convert(studyLogRepository.save(created));
     }
 
@@ -78,7 +78,7 @@ public class StudyLogService {
     }
 
     public StudyStatsResponse findStats(Long userId) {
-        LocalDate today = today();
+        LocalDate today = findToday();
         YearMonth month = YearMonth.from(today);
 
         StudyStreak streak = new StudyStreak(studyLogRepository.findStudyDatesByUserId(userId));
@@ -88,7 +88,7 @@ public class StudyLogService {
                 .countStudyDatesBetween(userId, month.atDay(1), month.atEndOfMonth());
 
         return new StudyStatsResponse(streak.calculateCurrent(today), streak.calculateLongest(),
-                (int) monthWrittenDays, todayLogs.minutesOn(today));
+                (int) monthWrittenDays, todayLogs.calculateMinutesOn(today));
     }
 
     private StudyLog findOrThrow(Long userId, Long id) {
@@ -96,7 +96,7 @@ public class StudyLogService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_LOG_NOT_FOUND));
     }
 
-    private LocalDate today() {
+    private LocalDate findToday() {
         return LocalDate.now(clock);
     }
 }
