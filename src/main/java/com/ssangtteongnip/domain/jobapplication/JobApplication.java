@@ -93,7 +93,7 @@ public class JobApplication {
         return Objects.equals(this.userId, userId);
     }
 
-    public void verifyOwner(Long userId) {
+    public void validateOwner(Long userId) {
         if (!isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.APPLICATION_NOT_FOUND);
         }

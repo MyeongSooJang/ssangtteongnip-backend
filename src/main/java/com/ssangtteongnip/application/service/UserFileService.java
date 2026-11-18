@@ -32,7 +32,7 @@ public class UserFileService {
     public UserFileResponse upload(Long userId, FileType type, String fileName, byte[] content) {
         User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        UserFile.ensureCanAdd(userFileRepository.countByUserId(userId));
+        UserFile.validateCanAdd(userFileRepository.countByUserId(userId));
         UserFile file = userFileRepository.save(UserFile.upload(user, type, fileName, content, fileStorage));
         return UserFileResponse.describe(file);
     }

@@ -50,7 +50,7 @@ public class ScheduleService {
     public Schedule updateAddress(Long userId, Long id, String address) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
-        schedule.verifyOwner(userId);
+        schedule.validateOwner(userId);
         schedule.changeAddress(address);
         return schedule;
     }

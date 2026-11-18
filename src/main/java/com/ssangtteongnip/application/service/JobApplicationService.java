@@ -52,7 +52,7 @@ public class JobApplicationService {
     public JobApplication findById(Long userId, Long id) {
         JobApplication application = jobApplicationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.APPLICATION_NOT_FOUND));
-        application.verifyOwner(userId);
+        application.validateOwner(userId);
         return application;
     }
 
