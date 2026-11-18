@@ -37,12 +37,12 @@ class StudyLogTest {
 
         StudyLog studyLog = studyLogWith("앞 " + image(first) + " 뒤 " + image(second));
 
-        assertThat(studyLog.imageIds()).containsExactlyInAnyOrder(first, second);
+        assertThat(studyLog.findImageIds()).containsExactlyInAnyOrder(first, second);
     }
 
     @Test
     void 이미지가_없는_글은_이미지가_없다() {
-        assertThat(studyLog().imageIds()).isEmpty();
+        assertThat(studyLog().findImageIds()).isEmpty();
     }
 
     @Test
@@ -51,7 +51,7 @@ class StudyLogTest {
         UUID removed = UUID.randomUUID();
         StudyLog studyLog = studyLogWith(image(kept) + image(removed));
 
-        assertThat(studyLog.imageIdsRemovedBy("새 글 " + image(kept))).containsExactly(removed);
+        assertThat(studyLog.findRemovedImageIds("새 글 " + image(kept))).containsExactly(removed);
     }
 
     @Test
@@ -59,14 +59,14 @@ class StudyLogTest {
         UUID id = UUID.randomUUID();
         StudyLog studyLog = studyLogWith(image(id));
 
-        assertThat(studyLog.imageIdsRemovedBy("다른 말 " + image(id))).isEmpty();
+        assertThat(studyLog.findRemovedImageIds("다른 말 " + image(id))).isEmpty();
     }
 
     @Test
     void 새_본문에_새_이미지만_더해지면_빠지는_이미지가_없다() {
         StudyLog studyLog = studyLogWith("글");
 
-        assertThat(studyLog.imageIdsRemovedBy("글 " + image(UUID.randomUUID()))).isEmpty();
+        assertThat(studyLog.findRemovedImageIds("글 " + image(UUID.randomUUID()))).isEmpty();
     }
 
     @Test
@@ -75,7 +75,7 @@ class StudyLogTest {
         UUID second = UUID.randomUUID();
         StudyLog studyLog = studyLogWith(image(first) + image(second));
 
-        assertThat(studyLog.imageIdsRemovedBy("이미지 없음")).containsExactlyInAnyOrder(first, second);
+        assertThat(studyLog.findRemovedImageIds("이미지 없음")).containsExactlyInAnyOrder(first, second);
     }
 
     @Test
@@ -83,9 +83,9 @@ class StudyLogTest {
         UUID id = UUID.randomUUID();
         StudyLog studyLog = studyLogWith(image(id));
 
-        studyLog.imageIdsRemovedBy("이미지 없음");
+        studyLog.findRemovedImageIds("이미지 없음");
 
-        assertThat(studyLog.imageIds()).containsExactly(id);
+        assertThat(studyLog.findImageIds()).containsExactly(id);
     }
 
     @Test

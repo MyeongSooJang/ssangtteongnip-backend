@@ -47,12 +47,12 @@ public class StudyImageService {
     // DB 행은 이 트랜잭션에서 지우고, S3 객체는 커밋된 뒤에 지운다. 객체 삭제가 실패해도 글 삭제는 성공시킨다.
     private void delete(StudyImage image) {
         studyImageRepository.delete(image);
-        AfterCommit.runQuietly("학습 이미지 객체 삭제", () -> image.deleteFrom(fileStorage));
+        AfterCommit.runQuietly("학습 이미지 객체 삭제", () -> image.delete(fileStorage));
     }
 
     public PresignedUrl findViewUrl(UUID publicId) {
         return studyImageRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND))
-                .viewUrl(fileStorage);
+                .createViewUrl(fileStorage);
     }
 }

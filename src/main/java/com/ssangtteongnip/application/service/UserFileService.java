@@ -45,7 +45,7 @@ public class UserFileService {
 
     public FileDownload findDownload(Long userId, Long fileId) {
         UserFile file = findFile(userId, fileId);
-        PresignedUrl link = file.downloadUrl(fileStorage);
+        PresignedUrl link = file.createDownloadUrl(fileStorage);
         return new FileDownload(link.url(), file.getFileName(), link.expiresAt());
     }
 
@@ -53,7 +53,7 @@ public class UserFileService {
     public void delete(Long userId, Long fileId) {
         UserFile file = findFile(userId, fileId);
         userFileRepository.delete(file);
-        AfterCommit.runQuietly("파일 객체 삭제", () -> file.deleteFrom(fileStorage));
+        AfterCommit.runQuietly("파일 객체 삭제", () -> file.delete(fileStorage));
     }
 
     private UserFile findFile(Long userId, Long fileId) {

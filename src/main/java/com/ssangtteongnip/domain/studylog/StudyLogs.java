@@ -19,7 +19,7 @@ public class StudyLogs {
     }
 
     // 글이 있는 날만, 오래된 날짜부터 글 수와 공부 시간 합계를 요약한다.
-    public List<DailyStudySummary> dailySummaries() {
+    public List<DailyStudySummary> summarizeDaily() {
         return logs.stream()
                 .map(StudyLog::getStudyDate)
                 .collect(Collectors.toCollection(TreeSet::new))

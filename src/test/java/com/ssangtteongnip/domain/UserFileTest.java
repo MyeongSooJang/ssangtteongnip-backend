@@ -164,7 +164,7 @@ class UserFileTest {
     void 올린_파일은_저장소의_내려받기_주소를_만든다() {
         UserFile file = upload(FileType.CERTIFICATE, "정보처리기사.pdf", pdf("cert"));
 
-        PresignedUrl link = file.downloadUrl(storage);
+        PresignedUrl link = file.createDownloadUrl(storage);
 
         assertThat(link.url()).contains(file.getObjectKey()).contains("정보처리기사.pdf");
         assertThat(link.expiresAt()).isEqualTo(FakeFileStorage.EXPIRES_AT);
@@ -174,7 +174,7 @@ class UserFileTest {
     void 저장소에서_지우면_해당_객체가_사라진다() {
         UserFile file = upload(FileType.RESUME, "이력서.pdf", pdf("resume"));
 
-        file.deleteFrom(storage);
+        file.delete(storage);
 
         assertThat(storage.contains(file.getObjectKey())).isFalse();
     }

@@ -45,7 +45,7 @@ public class StudyLogService {
     @Transactional
     public StudyLogResponse rewrite(Long userId, Long id, StudyLogRequest request) {
         StudyLog studyLog = findOrThrow(userId, id);
-        Set<UUID> removedImages = studyLog.imageIdsRemovedBy(request.content());
+        Set<UUID> removedImages = studyLog.findRemovedImageIds(request.content());
         studyLog.write(request.title(), request.content(), request.studyMinutes());
         studyImageService.deleteUnused(userId, removedImages);
         return StudyLogResponse.convert(studyLog);
@@ -65,7 +65,7 @@ public class StudyLogService {
     @Transactional
     public void delete(Long userId, Long id) {
         StudyLog studyLog = findOrThrow(userId, id);
-        Set<UUID> images = studyLog.imageIds();
+        Set<UUID> images = studyLog.findImageIds();
         studyLogRepository.delete(studyLog);
         studyImageService.deleteUnused(userId, images);
     }
@@ -74,7 +74,7 @@ public class StudyLogService {
         StudyPeriod period = StudyPeriod.createWithin(from, to, MAX_HEATMAP_DAYS);
         StudyLogs logs = new StudyLogs(studyLogRepository
                 .findInPeriod(userId, period.from(), period.to()));
-        return logs.dailySummaries().stream().map(HeatmapDayResponse::convert).toList();
+        return logs.summarizeDaily().stream().map(HeatmapDayResponse::convert).toList();
     }
 
     public StudyStatsResponse findStats(Long userId) {
@@ -87,7 +87,7 @@ public class StudyLogService {
         long monthWrittenDays = studyLogRepository
                 .countStudyDatesBetween(userId, month.atDay(1), month.atEndOfMonth());
 
-        return new StudyStatsResponse(streak.current(today), streak.longest(),
+        return new StudyStatsResponse(streak.calculateCurrent(today), streak.calculateLongest(),
                 (int) monthWrittenDays, todayLogs.minutesOn(today));
     }
 

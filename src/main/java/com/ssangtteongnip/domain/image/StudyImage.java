@@ -69,7 +69,7 @@ public class StudyImage {
     }
 
     // 본문(마크다운)이 가리키는 이미지의 공개 아이디들. 본문에 주소를 적는 형식(publicPath)을 한곳에서만 안다.
-    public static Set<UUID> referencedIn(String markdown) {
+    public static Set<UUID> findReferencedIds(String markdown) {
         Set<UUID> ids = new LinkedHashSet<>();
         if (markdown == null) {
             return ids;
@@ -85,11 +85,11 @@ public class StudyImage {
         return this.userId.equals(userId);
     }
 
-    public void deleteFrom(FileStorage storage) {
+    public void delete(FileStorage storage) {
         storage.delete(objectKey);
     }
 
-    public PresignedUrl viewUrl(FileStorage storage) {
+    public PresignedUrl createViewUrl(FileStorage storage) {
         return storage.presignedViewUrl(objectKey);
     }
 
