@@ -87,7 +87,7 @@ class StudyImageTest {
     void 보여_줄_주소는_저장소가_만든_inline_주소를_돌려준다() {
         StudyImage image = StudyImage.upload(USER_ID, PNG, storage);
 
-        PresignedUrl link = image.viewUrl(storage);
+        PresignedUrl link = image.createViewUrl(storage);
 
         assertThat(link.url()).isEqualTo("https://fake-storage/" + image.getObjectKey());
     }
@@ -145,14 +145,14 @@ class StudyImageTest {
         StudyImage second = StudyImage.upload(USER_ID, PNG, storage);
         String markdown = "## 제목\n![](" + first.publicPath() + ")\n설명\n![그림](" + second.publicPath() + ")";
 
-        assertThat(StudyImage.referencedIn(markdown)).containsExactlyInAnyOrder(first.getPublicId(), second.getPublicId());
+        assertThat(StudyImage.findReferencedIds(markdown)).containsExactlyInAnyOrder(first.getPublicId(), second.getPublicId());
     }
 
     @Test
     void 같은_이미지를_여러_번_써도_한_번만_센다() {
         StudyImage image = StudyImage.upload(USER_ID, PNG, storage);
 
-        Set<UUID> ids = StudyImage.referencedIn(image.publicPath() + " 그리고 " + image.publicPath());
+        Set<UUID> ids = StudyImage.findReferencedIds(image.publicPath() + " 그리고 " + image.publicPath());
 
         assertThat(ids).containsExactly(image.getPublicId());
     }
@@ -161,15 +161,15 @@ class StudyImageTest {
     void 도메인이_붙은_주소나_HTML_태그_안의_주소도_찾는다() {
         UUID id = UUID.randomUUID();
 
-        assertThat(StudyImage.referencedIn("![](https://api.example.com/api/images/" + id + ")")).containsExactly(id);
-        assertThat(StudyImage.referencedIn("<img src=\"/api/images/" + id + "\">")).containsExactly(id);
+        assertThat(StudyImage.findReferencedIds("![](https://api.example.com/api/images/" + id + ")")).containsExactly(id);
+        assertThat(StudyImage.findReferencedIds("<img src=\"/api/images/" + id + "\">")).containsExactly(id);
     }
 
     @Test
     void 대문자로_적힌_아이디도_같은_이미지로_본다() {
         UUID id = UUID.randomUUID();
 
-        assertThat(StudyImage.referencedIn("/api/images/" + id.toString().toUpperCase())).containsExactly(id);
+        assertThat(StudyImage.findReferencedIds("/api/images/" + id.toString().toUpperCase())).containsExactly(id);
     }
 
     @ParameterizedTest
@@ -181,12 +181,12 @@ class StudyImageTest {
             "그냥 글",
             ""})
     void 이미지_주소_형식이_아니면_이미지로_보지_않는다(String markdown) {
-        assertThat(StudyImage.referencedIn(markdown)).isEmpty();
+        assertThat(StudyImage.findReferencedIds(markdown)).isEmpty();
     }
 
     @Test
     void 본문이_null이면_이미지가_없다() {
-        assertThat(StudyImage.referencedIn(null)).isEmpty();
+        assertThat(StudyImage.findReferencedIds(null)).isEmpty();
     }
 
     @Test
@@ -202,7 +202,7 @@ class StudyImageTest {
         StudyImage image = StudyImage.upload(USER_ID, PNG, storage);
         assertThat(storage.contains(image.getObjectKey())).isTrue();
 
-        image.deleteFrom(storage);
+        image.delete(storage);
 
         assertThat(storage.contains(image.getObjectKey())).isFalse();
     }

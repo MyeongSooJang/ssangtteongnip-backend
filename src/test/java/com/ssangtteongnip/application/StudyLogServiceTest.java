@@ -248,7 +248,7 @@ class StudyLogServiceTest {
         given(studyLogRepository.countStudyDatesBetween(
                 USER_ID, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30))).willReturn(2L);
 
-        StudyStatsResponse stats = studyLogService.stats(USER_ID);
+        StudyStatsResponse stats = studyLogService.findStats(USER_ID);
 
         assertThat(stats.currentStreak()).isEqualTo(2);
         assertThat(stats.longestStreak()).isEqualTo(4);
@@ -264,7 +264,7 @@ class StudyLogServiceTest {
         given(studyLogRepository.countStudyDatesBetween(
                 USER_ID, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 30))).willReturn(0L);
 
-        StudyStatsResponse stats = studyLogService.stats(USER_ID);
+        StudyStatsResponse stats = studyLogService.findStats(USER_ID);
 
         assertThat(stats.todayMinutes()).isZero();
         assertThat(stats.currentStreak()).isZero();
@@ -278,7 +278,7 @@ class StudyLogServiceTest {
         given(studyLogRepository.findInPeriod(USER_ID, from, TODAY))
                 .willReturn(List.of(log(TODAY, 60), log(TODAY, 30), log(twoDaysAgo, 20)));
 
-        List<HeatmapDayResponse> heatmap = studyLogService.heatmap(USER_ID, from, TODAY);
+        List<HeatmapDayResponse> heatmap = studyLogService.findHeatmap(USER_ID, from, TODAY);
 
         assertThat(heatmap).containsExactly(
                 new HeatmapDayResponse(twoDaysAgo, 1, 20),
@@ -288,7 +288,7 @@ class StudyLogServiceTest {
     @Test
     void 잔디_조회는_400일을_넘으면_거부한다() {
         assertErrorCode(
-                () -> studyLogService.heatmap(USER_ID, TODAY.minusDays(400), TODAY),
+                () -> studyLogService.findHeatmap(USER_ID, TODAY.minusDays(400), TODAY),
                 ErrorCode.INVALID_STUDY_RANGE);
     }
 
@@ -298,6 +298,6 @@ class StudyLogServiceTest {
         given(studyLogRepository.findInPeriod(USER_ID, from, TODAY))
                 .willReturn(List.of());
 
-        assertThat(studyLogService.heatmap(USER_ID, from, TODAY)).isEmpty();
+        assertThat(studyLogService.findHeatmap(USER_ID, from, TODAY)).isEmpty();
     }
 }

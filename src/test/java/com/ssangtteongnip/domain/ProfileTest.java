@@ -31,7 +31,7 @@ class ProfileTest {
     @Test
     void 이름과_인적_사항을_함께_수정한다() {
         Profile profile = Profile.create(user);
-        PersonalInfo info = PersonalInfo.of("010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
+        PersonalInfo info = new PersonalInfo("010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
                 "https://github.com/hong", null, null, "OO대 컴퓨터공학", "인턴 6개월", "백엔드 개발자", "안녕하세요",
                 LocalDate.of(2025, 3, 1));
 
@@ -47,7 +47,7 @@ class ProfileTest {
     @Test
     void 취업_준비_시작일을_비우면_null이_된다() {
         Profile profile = Profile.create(user);
-        profile.reviseNameAndInfo("홍길동", PersonalInfo.of(null, null, null, null, null, null, null, null, null, null,
+        profile.reviseNameAndInfo("홍길동", new PersonalInfo(null, null, null, null, null, null, null, null, null, null,
                 LocalDate.of(2025, 3, 1)), TODAY);
 
         profile.reviseNameAndInfo("홍길동", PersonalInfo.empty(), TODAY);
@@ -75,6 +75,6 @@ class ProfileTest {
     }
 
     private PersonalInfo infoStartedOn(LocalDate jobSearchStartDate) {
-        return PersonalInfo.of(null, null, null, null, null, null, null, null, null, null, jobSearchStartDate);
+        return new PersonalInfo(null, null, null, null, null, null, null, null, null, null, jobSearchStartDate);
     }
 }

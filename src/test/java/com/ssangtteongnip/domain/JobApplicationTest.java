@@ -207,14 +207,14 @@ class JobApplicationTest {
     void 소유자는_소유권_검증을_통과한다() {
         JobApplication app = applicationInResumeSubmitted();
 
-        assertThatCode(() -> app.verifyOwner(OWNER_ID)).doesNotThrowAnyException();
+        assertThatCode(() -> app.validateOwner(OWNER_ID)).doesNotThrowAnyException();
     }
 
     @Test
     void 다른_사용자의_지원은_존재하지_않는_것으로_취급한다() {
         JobApplication app = applicationInResumeSubmitted();
 
-        assertErrorCode(() -> app.verifyOwner(OTHER_USER_ID), ErrorCode.APPLICATION_NOT_FOUND);
+        assertErrorCode(() -> app.validateOwner(OTHER_USER_ID), ErrorCode.APPLICATION_NOT_FOUND);
     }
 
     @Test

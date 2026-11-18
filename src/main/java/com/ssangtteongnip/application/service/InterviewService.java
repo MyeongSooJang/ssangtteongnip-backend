@@ -41,7 +41,7 @@ public class InterviewService {
         return interview;
     }
 
-    public List<Interview> findByApplicationId(Long userId, Long applicationId) {
+    public List<Interview> findInterviews(Long userId, Long applicationId) {
         jobApplicationService.findById(userId, applicationId);
         return interviewRepository.findByApplicationId(applicationId);
     }

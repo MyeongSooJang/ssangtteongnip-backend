@@ -61,7 +61,7 @@ class StudyImageRepositoryTest {
         StudyImage found = studyImageRepository.findByPublicId(original.getPublicId()).orElseThrow();
 
         assertThat(found.publicPath()).isEqualTo(path);
-        assertThat(found.viewUrl(storage).url()).isEqualTo("https://fake-storage/" + found.getObjectKey());
+        assertThat(found.createViewUrl(storage).url()).isEqualTo("https://fake-storage/" + found.getObjectKey());
     }
 
     @Test

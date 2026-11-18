@@ -39,20 +39,20 @@ public class JobApplicationService {
         return jobApplicationRepository.findByUserId(userId);
     }
 
-    public List<JobApplication> findByStatus(Long userId, JobApplicationStatus status) {
+    public List<JobApplication> findAll(Long userId, JobApplicationStatus status) {
         return jobApplicationRepository.findByUserIdAndStatus(userId, status);
     }
 
     public List<JobSiteStatisticsResponse> summarizeByJobSite(Long userId) {
         return jobApplicationRepository.summarizeByJobSite(userId).stream()
-                .map(JobSiteStatisticsResponse::from)
+                .map(JobSiteStatisticsResponse::convert)
                 .toList();
     }
 
     public JobApplication findById(Long userId, Long id) {
         JobApplication application = jobApplicationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.APPLICATION_NOT_FOUND));
-        application.verifyOwner(userId);
+        application.validateOwner(userId);
         return application;
     }
 
@@ -80,7 +80,7 @@ public class JobApplicationService {
     @Transactional
     public JobApplication decideResult(Long userId, Long id, JobApplicationStatus status) {
         JobApplication application = findById(userId, id);
-        status.applyTo(application);
+        status.apply(application);
         return application;
     }
 

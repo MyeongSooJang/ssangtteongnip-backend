@@ -62,7 +62,7 @@ class GmailMailSenderTest {
                 .andExpect(request -> sentBody.set(((MockClientHttpRequest) request).getBodyAsString()))
                 .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-        mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456"));
+        mailSender.sendVerificationCode(new Email("hong@example.com"), new VerificationCode("123456"));
 
         server.verify();
         MimeMessage sent = decode(sentBody.get());
@@ -76,7 +76,7 @@ class GmailMailSenderTest {
         server.expect(requestTo(TOKEN_URL)).andRespond(withStatus(HttpStatus.UNAUTHORIZED));
 
         assertErrorCode(
-                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456")),
+                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), new VerificationCode("123456")),
                 ErrorCode.MAIL_SEND_FAILED);
     }
 
@@ -85,7 +85,7 @@ class GmailMailSenderTest {
         server.expect(requestTo(TOKEN_URL)).andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
         assertErrorCode(
-                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456")),
+                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), new VerificationCode("123456")),
                 ErrorCode.MAIL_SEND_FAILED);
     }
 
@@ -96,7 +96,7 @@ class GmailMailSenderTest {
         server.expect(requestTo(SEND_URL)).andRespond(withStatus(HttpStatus.FORBIDDEN));
 
         assertErrorCode(
-                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), VerificationCode.of("123456")),
+                () -> mailSender.sendVerificationCode(new Email("hong@example.com"), new VerificationCode("123456")),
                 ErrorCode.MAIL_SEND_FAILED);
     }
 

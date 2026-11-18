@@ -26,7 +26,7 @@ public class ReviewService {
     public Review write(Long userId, Long id, ReviewRequest request) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
-        review.verifyOwner(userId);
+        review.validateOwner(userId);
         review.compose(request.content(), request.rating(), request.difficulty(), request.atmosphere(),
                 request.route(), request.questions());
         return review;

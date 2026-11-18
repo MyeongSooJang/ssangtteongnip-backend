@@ -16,22 +16,22 @@ class VerificationCodeTest {
 
     @Test
     void 같은_값을_입력하면_일치한다() {
-        assertThat(VerificationCode.of("123456").matches("123456")).isTrue();
+        assertThat(new VerificationCode("123456").matches("123456")).isTrue();
     }
 
     @Test
     void 다른_값을_입력하면_일치하지_않는다() {
-        assertThat(VerificationCode.of("123456").matches("654321")).isFalse();
+        assertThat(new VerificationCode("123456").matches("654321")).isFalse();
     }
 
     @Test
     void 입력이_없으면_일치하지_않는다() {
-        assertThat(VerificationCode.of("123456").matches(null)).isFalse();
+        assertThat(new VerificationCode("123456").matches(null)).isFalse();
     }
 
     @Test
     void 시도가_5번째까지는_허용되고_6번째부터는_거절된다() {
-        VerificationCode code = VerificationCode.of("123456");
+        VerificationCode code = new VerificationCode("123456");
 
         assertThat(code.hasAttemptLeft(5)).isTrue();
         assertThat(code.hasAttemptLeft(6)).isFalse();
@@ -39,11 +39,11 @@ class VerificationCodeTest {
 
     @Test
     void 틀린_횟수가_4회까지는_소진되지_않는다() {
-        assertThat(VerificationCode.of("123456").isExhausted(4)).isFalse();
+        assertThat(new VerificationCode("123456").isExhausted(4)).isFalse();
     }
 
     @Test
     void 틀린_횟수가_5회가_되면_소진된다() {
-        assertThat(VerificationCode.of("123456").isExhausted(5)).isTrue();
+        assertThat(new VerificationCode("123456").isExhausted(5)).isTrue();
     }
 }

@@ -69,7 +69,7 @@ public class Review {
         return review;
     }
 
-    public void verifyOwner(Long userId) {
+    public void validateOwner(Long userId) {
         if (!application.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.REVIEW_NOT_FOUND);
         }
@@ -78,14 +78,14 @@ public class Review {
     // 후기 작성 한 번에 평점·내용과 면접 상세를 함께 확정한다. 어느 하나라도 잘못되면 아무것도 바꾸지 않는다.
     public void compose(String content, int rating, Integer difficulty, InterviewAtmosphere atmosphere,
                         ApplyRoute route, List<String> questions) {
-        requireValidRating(rating);
-        requireValidDifficulty(difficulty);
+        validateRating(rating);
+        validateDifficulty(difficulty);
         write(content, rating);
         describeInterview(difficulty, atmosphere, route, questions);
     }
 
     public void write(String content, int rating) {
-        requireValidRating(rating);
+        validateRating(rating);
         this.content = content;
         this.rating = rating;
     }
@@ -93,7 +93,7 @@ public class Review {
     // 면접 상세는 전부 선택값이다. 다시 기록하면 이전 값은 통째로 교체된다.
     public void describeInterview(Integer difficulty, InterviewAtmosphere atmosphere,
                                   ApplyRoute route, List<String> questions) {
-        requireValidDifficulty(difficulty);
+        validateDifficulty(difficulty);
         this.difficulty = difficulty;
         this.atmosphere = atmosphere;
         this.route = route;
@@ -107,13 +107,13 @@ public class Review {
         }
     }
 
-    private static void requireValidRating(int rating) {
+    private static void validateRating(int rating) {
         if (rating < MIN_RATING || rating > MAX_RATING) {
             throw new BusinessException(ErrorCode.INVALID_RATING);
         }
     }
 
-    private static void requireValidDifficulty(Integer difficulty) {
+    private static void validateDifficulty(Integer difficulty) {
         if (difficulty != null && (difficulty < MIN_DIFFICULTY || difficulty > MAX_DIFFICULTY)) {
             throw new BusinessException(ErrorCode.INVALID_DIFFICULTY);
         }

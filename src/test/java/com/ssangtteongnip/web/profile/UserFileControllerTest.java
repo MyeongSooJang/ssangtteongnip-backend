@@ -113,7 +113,7 @@ class UserFileControllerTest {
 
     @Test
     void GET_me_files_목록을_종류와_함께_반환한다() throws Exception {
-        given(userFileService.list(1L)).willReturn(List.of(
+        given(userFileService.findAll(1L)).willReturn(List.of(
                 new UserFileResponse(6L, FileType.CERTIFICATE, "자격증.pdf", 20, LocalDateTime.of(2026, 11, 13, 11, 0)),
                 new UserFileResponse(5L, FileType.RESUME, "이력서.pdf", 10, LocalDateTime.of(2026, 11, 13, 10, 0))));
 
@@ -127,7 +127,7 @@ class UserFileControllerTest {
 
     @Test
     void GET_me_files_id_내려받기_주소를_JSON으로_반환한다() throws Exception {
-        given(userFileService.download(1L, 5L)).willReturn(new FileDownload(
+        given(userFileService.findDownload(1L, 5L)).willReturn(new FileDownload(
                 "https://test-bucket.s3.amazonaws.com/files/1/a.pdf?X-Amz-Signature=x",
                 "이력서.pdf",
                 Instant.parse("2026-11-05T01:05:00Z")));
@@ -142,7 +142,7 @@ class UserFileControllerTest {
 
     @Test
     void GET_me_files_id_파일이_없으면_404를_반환한다() throws Exception {
-        given(userFileService.download(1L, 5L)).willThrow(new BusinessException(ErrorCode.FILE_NOT_FOUND));
+        given(userFileService.findDownload(1L, 5L)).willThrow(new BusinessException(ErrorCode.FILE_NOT_FOUND));
 
         mockMvc.perform(get("/api/me/files/5").header("Authorization", BEARER))
                 .andExpect(status().isNotFound())

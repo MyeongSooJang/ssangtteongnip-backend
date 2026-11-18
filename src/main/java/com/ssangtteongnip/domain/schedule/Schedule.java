@@ -45,7 +45,7 @@ public class Schedule {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public void verifyOwner(Long userId) {
+    public void validateOwner(Long userId) {
         if (!application.isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND);
         }

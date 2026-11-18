@@ -82,7 +82,7 @@ class StudyImageControllerTest {
     @Test
     void GET_images_토큰이_없어도_저장소_주소로_302_리다이렉트한다() throws Exception {
         UUID id = UUID.randomUUID();
-        given(studyImageService.view(id))
+        given(studyImageService.findViewUrl(id))
                 .willReturn(new PresignedUrl("https://bucket.example/study-images/1/a.png?sig=1", Instant.now()));
 
         mockMvc.perform(get("/api/images/" + id))
@@ -94,7 +94,7 @@ class StudyImageControllerTest {
     @Test
     void GET_images_없는_이미지는_404를_반환한다() throws Exception {
         UUID id = UUID.randomUUID();
-        given(studyImageService.view(id)).willThrow(new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
+        given(studyImageService.findViewUrl(id)).willThrow(new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
 
         mockMvc.perform(get("/api/images/" + id))
                 .andExpect(status().isNotFound())

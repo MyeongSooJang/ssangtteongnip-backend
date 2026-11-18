@@ -6,16 +6,12 @@ public final class VerificationCode {
 
     private final String value;
 
-    private VerificationCode(String value) {
+    public VerificationCode(String value) {
         this.value = value;
     }
 
     public static VerificationCode issue(CodeGenerator generator) {
         return new VerificationCode(generator.generate());
-    }
-
-    public static VerificationCode of(String value) {
-        return new VerificationCode(value);
     }
 
     public boolean matches(String input) {

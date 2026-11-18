@@ -25,7 +25,7 @@ public class ProfileService {
     private final UserFileRepository userFileRepository;
     private final Clock clock;
 
-    public ProfileResponse getMyProfile(Long userId) {
+    public ProfileResponse findMyProfile(Long userId) {
         return toResponse(userId, findProfile(userId));
     }
 
@@ -43,8 +43,8 @@ public class ProfileService {
 
     private ProfileResponse toResponse(Long userId, Profile profile) {
         List<UserFileResponse> files = userFileRepository.findUserFilesNewestFirst(userId).stream()
-                .map(UserFileResponse::describe)
+                .map(UserFileResponse::convert)
                 .toList();
-        return ProfileResponse.of(profile, files);
+        return ProfileResponse.convert(profile, files);
     }
 }

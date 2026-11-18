@@ -28,7 +28,7 @@ public class StudyImageService {
     @Transactional
     public StudyImageResponse upload(Long userId, byte[] content) {
         StudyImage image = studyImageRepository.save(StudyImage.upload(userId, content, fileStorage));
-        return StudyImageResponse.from(image);
+        return StudyImageResponse.convert(image);
     }
 
     // 글에서 빠졌거나 글과 함께 사라진 이미지 중, 아무 글도 더는 쓰지 않는 내 이미지를 지운다.
@@ -47,12 +47,12 @@ public class StudyImageService {
     // DB 행은 이 트랜잭션에서 지우고, S3 객체는 커밋된 뒤에 지운다. 객체 삭제가 실패해도 글 삭제는 성공시킨다.
     private void delete(StudyImage image) {
         studyImageRepository.delete(image);
-        AfterCommit.runQuietly("학습 이미지 객체 삭제", () -> image.deleteFrom(fileStorage));
+        AfterCommit.runQuietly("학습 이미지 객체 삭제", () -> image.delete(fileStorage));
     }
 
-    public PresignedUrl view(UUID publicId) {
+    public PresignedUrl findViewUrl(UUID publicId) {
         return studyImageRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND))
-                .viewUrl(fileStorage);
+                .createViewUrl(fileStorage);
     }
 }

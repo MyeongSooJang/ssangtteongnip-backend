@@ -63,7 +63,7 @@ class ProfileServiceTest {
         given(profileRepository.findByUserId(USER_ID)).willReturn(Optional.of(profile()));
         given(userFileRepository.findUserFilesNewestFirst(USER_ID)).willReturn(List.of());
 
-        ProfileResponse response = profileService.getMyProfile(USER_ID);
+        ProfileResponse response = profileService.findMyProfile(USER_ID);
 
         assertThat(response.email()).isEqualTo("hong@example.com");
         assertThat(response.name()).isEqualTo("홍길동");
@@ -80,7 +80,7 @@ class ProfileServiceTest {
         given(profileRepository.findByUserId(USER_ID)).willReturn(Optional.of(profile));
         given(userFileRepository.findUserFilesNewestFirst(USER_ID)).willReturn(List.of(portfolio, resume));
 
-        ProfileResponse response = profileService.getMyProfile(USER_ID);
+        ProfileResponse response = profileService.findMyProfile(USER_ID);
 
         assertThat(response.files()).extracting(UserFileResponse::fileName)
                 .containsExactly("포트폴리오.pdf", "이력서.pdf");
@@ -93,7 +93,7 @@ class ProfileServiceTest {
     void 프로필이_없으면_조회할_수_없다() {
         given(profileRepository.findByUserId(USER_ID)).willReturn(Optional.empty());
 
-        assertErrorCode(() -> profileService.getMyProfile(USER_ID), ErrorCode.PROFILE_NOT_FOUND);
+        assertErrorCode(() -> profileService.findMyProfile(USER_ID), ErrorCode.PROFILE_NOT_FOUND);
     }
 
     @Test

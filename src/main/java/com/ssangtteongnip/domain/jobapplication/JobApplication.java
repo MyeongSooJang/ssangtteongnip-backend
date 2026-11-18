@@ -93,7 +93,7 @@ public class JobApplication {
         return Objects.equals(this.userId, userId);
     }
 
-    public void verifyOwner(Long userId) {
+    public void validateOwner(Long userId) {
         if (!isOwnedBy(userId)) {
             throw new BusinessException(ErrorCode.APPLICATION_NOT_FOUND);
         }
@@ -117,7 +117,7 @@ public class JobApplication {
 
     // 면접 일정이나 면접 기록이 등록됐을 때 호출한다. 서류 제출 상태일 때만 면접으로 전이하며 서류 통과 시점을 한 번만 기록한다.
     public void startInterview(LocalDateTime now) {
-        if (this.status.canAdvanceTo(JobApplicationStatus.INTERVIEW)) {
+        if (this.status.canChangeStatus(JobApplicationStatus.INTERVIEW)) {
             this.status = JobApplicationStatus.INTERVIEW;
             this.documentPassedAt = now;
         }
@@ -125,12 +125,14 @@ public class JobApplication {
 
     // 최종 합격. 면접 중인 지원만 합격할 수 있다.
     public void accept() {
-        moveTo(JobApplicationStatus.ACCEPTED);
+        validateStatusChange(JobApplicationStatus.ACCEPTED);
+        this.status = JobApplicationStatus.ACCEPTED;
     }
 
     // 불합격. 서류 탈락(서류 제출 상태)과 면접 후 불합격(면접 상태) 모두 가능하다.
     public void reject() {
-        moveTo(JobApplicationStatus.REJECTED);
+        validateStatusChange(JobApplicationStatus.REJECTED);
+        this.status = JobApplicationStatus.REJECTED;
     }
 
     // 서류 제출 상태로 마감일의 한 달 뒤 날짜가 지난 지원을 자동 불합격으로 바꾼다.
@@ -139,7 +141,7 @@ public class JobApplication {
         if (!isDeadlineExpired(now.toLocalDate())) {
             return false;
         }
-        moveTo(JobApplicationStatus.REJECTED);
+        reject();
         this.autoRejectedAt = now;
         return true;
     }
@@ -150,10 +152,9 @@ public class JobApplication {
                 && today.isAfter(deadline.plusMonths(1));
     }
 
-    private void moveTo(JobApplicationStatus next) {
-        if (!this.status.canAdvanceTo(next)) {
+    private void validateStatusChange(JobApplicationStatus next) {
+        if (!this.status.canChangeStatus(next)) {
             throw new BusinessException(ErrorCode.INVALID_STATUS_TRANSITION);
         }
-        this.status = next;
     }
 }

@@ -40,7 +40,7 @@ public class RedisEmailVerificationStore implements EmailVerificationStore {
 
     @Override
     public Optional<VerificationCode> findCode(Email email) {
-        return Optional.ofNullable(redis.opsForValue().get(key("code", email))).map(VerificationCode::of);
+        return Optional.ofNullable(redis.opsForValue().get(key("code", email))).map(VerificationCode::new);
     }
 
     @Override

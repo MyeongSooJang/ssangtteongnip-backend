@@ -57,14 +57,14 @@ public class StudyLogController {
     }
 
     @GetMapping("/heatmap")
-    public ApiResponse<List<HeatmapDayResponse>> heatmap(@AuthenticationPrincipal Long userId,
+    public ApiResponse<List<HeatmapDayResponse>> findHeatmap(@AuthenticationPrincipal Long userId,
                                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        return ApiResponse.ok(studyLogService.heatmap(userId, from, to));
+        return ApiResponse.ok(studyLogService.findHeatmap(userId, from, to));
     }
 
     @GetMapping("/stats")
-    public ApiResponse<StudyStatsResponse> stats(@AuthenticationPrincipal Long userId) {
-        return ApiResponse.ok(studyLogService.stats(userId));
+    public ApiResponse<StudyStatsResponse> findStats(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(studyLogService.findStats(userId));
     }
 }

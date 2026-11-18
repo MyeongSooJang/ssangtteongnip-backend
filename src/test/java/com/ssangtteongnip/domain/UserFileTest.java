@@ -147,24 +147,24 @@ class UserFileTest {
 
     @Test
     void 한도_미만이면_더_올릴_수_있다() {
-        UserFile.ensureCanAdd(UserFile.MAX_FILES_PER_USER - 1);
+        UserFile.validateCanAdd(UserFile.MAX_FILES_PER_USER - 1);
     }
 
     @Test
     void 한도에_도달하면_더_올릴_수_없다() {
-        assertErrorCode(() -> UserFile.ensureCanAdd(UserFile.MAX_FILES_PER_USER), ErrorCode.FILE_LIMIT_EXCEEDED);
+        assertErrorCode(() -> UserFile.validateCanAdd(UserFile.MAX_FILES_PER_USER), ErrorCode.FILE_LIMIT_EXCEEDED);
     }
 
     @Test
     void 한도를_넘긴_상태에서도_올릴_수_없다() {
-        assertErrorCode(() -> UserFile.ensureCanAdd(UserFile.MAX_FILES_PER_USER + 1), ErrorCode.FILE_LIMIT_EXCEEDED);
+        assertErrorCode(() -> UserFile.validateCanAdd(UserFile.MAX_FILES_PER_USER + 1), ErrorCode.FILE_LIMIT_EXCEEDED);
     }
 
     @Test
     void 올린_파일은_저장소의_내려받기_주소를_만든다() {
         UserFile file = upload(FileType.CERTIFICATE, "정보처리기사.pdf", pdf("cert"));
 
-        PresignedUrl link = file.downloadUrl(storage);
+        PresignedUrl link = file.createDownloadUrl(storage);
 
         assertThat(link.url()).contains(file.getObjectKey()).contains("정보처리기사.pdf");
         assertThat(link.expiresAt()).isEqualTo(FakeFileStorage.EXPIRES_AT);
@@ -174,7 +174,7 @@ class UserFileTest {
     void 저장소에서_지우면_해당_객체가_사라진다() {
         UserFile file = upload(FileType.RESUME, "이력서.pdf", pdf("resume"));
 
-        file.deleteFrom(storage);
+        file.delete(storage);
 
         assertThat(storage.contains(file.getObjectKey())).isFalse();
     }

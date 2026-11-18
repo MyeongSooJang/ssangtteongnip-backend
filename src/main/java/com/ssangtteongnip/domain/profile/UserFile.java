@@ -71,17 +71,17 @@ public class UserFile {
     }
 
     // 현재 개수가 한도에 이미 닿았으면 더 올릴 수 없다.
-    public static void ensureCanAdd(long currentCount) {
+    public static void validateCanAdd(long currentCount) {
         if (currentCount >= MAX_FILES_PER_USER) {
             throw new BusinessException(ErrorCode.FILE_LIMIT_EXCEEDED);
         }
     }
 
-    public PresignedUrl downloadUrl(FileStorage storage) {
+    public PresignedUrl createDownloadUrl(FileStorage storage) {
         return storage.presignedDownloadUrl(objectKey, fileName);
     }
 
-    public void deleteFrom(FileStorage storage) {
+    public void delete(FileStorage storage) {
         storage.delete(objectKey);
     }
 

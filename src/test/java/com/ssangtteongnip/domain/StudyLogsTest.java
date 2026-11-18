@@ -36,7 +36,7 @@ class StudyLogsTest {
     void 날짜별로_글_수와_공부_시간_합계를_오래된_날짜부터_요약한다() {
         StudyLogs logs = new StudyLogs(List.of(log(0, 60), log(2, 20), log(0, 30)));
 
-        assertThat(logs.dailySummaries()).containsExactly(
+        assertThat(logs.summarizeDaily()).containsExactly(
                 new DailyStudySummary(TODAY.minusDays(2), 1, 20),
                 new DailyStudySummary(TODAY, 2, 90));
     }
@@ -45,11 +45,11 @@ class StudyLogsTest {
     void 공부_시간이_0분인_글도_글_수에는_포함한다() {
         StudyLogs logs = new StudyLogs(List.of(log(0, 0)));
 
-        assertThat(logs.dailySummaries()).containsExactly(new DailyStudySummary(TODAY, 1, 0));
+        assertThat(logs.summarizeDaily()).containsExactly(new DailyStudySummary(TODAY, 1, 0));
     }
 
     @Test
     void 글이_없으면_요약도_비어_있다() {
-        assertThat(new StudyLogs(List.of()).dailySummaries()).isEmpty();
+        assertThat(new StudyLogs(List.of()).summarizeDaily()).isEmpty();
     }
 }

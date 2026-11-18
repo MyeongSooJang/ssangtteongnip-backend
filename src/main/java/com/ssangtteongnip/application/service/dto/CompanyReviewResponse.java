@@ -22,7 +22,7 @@ public record CompanyReviewResponse(
         List<String> questions,
         LocalDateTime createdAt) {
 
-    public static CompanyReviewResponse from(Review review) {
+    public static CompanyReviewResponse convert(Review review) {
         JobApplication application = review.getApplication();
         return new CompanyReviewResponse(
                 review.getId(),

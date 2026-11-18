@@ -68,7 +68,7 @@ class StudyImageServiceTest {
         StudyImage image = StudyImage.upload(USER_ID, PNG, storage);
         given(studyImageRepository.findByPublicId(image.getPublicId())).willReturn(Optional.of(image));
 
-        PresignedUrl link = studyImageService.view(image.getPublicId());
+        PresignedUrl link = studyImageService.findViewUrl(image.getPublicId());
 
         assertThat(link.url()).contains(image.getObjectKey());
     }
@@ -160,6 +160,6 @@ class StudyImageServiceTest {
         UUID unknown = UUID.randomUUID();
         given(studyImageRepository.findByPublicId(unknown)).willReturn(Optional.empty());
 
-        assertErrorCode(() -> studyImageService.view(unknown), ErrorCode.IMAGE_NOT_FOUND);
+        assertErrorCode(() -> studyImageService.findViewUrl(unknown), ErrorCode.IMAGE_NOT_FOUND);
     }
 }

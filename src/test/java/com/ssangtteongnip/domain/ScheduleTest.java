@@ -50,13 +50,13 @@ class ScheduleTest {
     void 소유자는_소유권_검증을_통과한다() {
         Schedule schedule = interviewSchedule();
 
-        assertThatCode(() -> schedule.verifyOwner(OWNER_ID)).doesNotThrowAnyException();
+        assertThatCode(() -> schedule.validateOwner(OWNER_ID)).doesNotThrowAnyException();
     }
 
     @Test
     void 다른_사용자의_일정은_존재하지_않는_것으로_취급한다() {
         Schedule schedule = interviewSchedule();
 
-        assertErrorCode(() -> schedule.verifyOwner(OTHER_USER_ID), ErrorCode.SCHEDULE_NOT_FOUND);
+        assertErrorCode(() -> schedule.validateOwner(OTHER_USER_ID), ErrorCode.SCHEDULE_NOT_FOUND);
     }
 }

@@ -32,13 +32,13 @@ public class UserFileController {
     }
 
     @GetMapping
-    public ApiResponse<List<UserFileResponse>> list(@AuthenticationPrincipal Long userId) {
-        return ApiResponse.ok(userFileService.list(userId));
+    public ApiResponse<List<UserFileResponse>> findAll(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(userFileService.findAll(userId));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<FileDownload> download(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
-        return ApiResponse.ok(userFileService.download(userId, id));
+    public ApiResponse<FileDownload> findDownload(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
+        return ApiResponse.ok(userFileService.findDownload(userId, id));
     }
 
     @DeleteMapping("/{id}")

@@ -36,7 +36,7 @@ class JobApplicationStatusTest {
             "REJECTED,         REJECTED,         false"
     })
     void 상태_전이_규칙을_따른다(JobApplicationStatus from, JobApplicationStatus to, boolean allowed) {
-        assertThat(from.canAdvanceTo(to)).isEqualTo(allowed);
+        assertThat(from.canChangeStatus(to)).isEqualTo(allowed);
     }
 
     private JobApplication applicationInResumeSubmitted() {
@@ -54,7 +54,7 @@ class JobApplicationStatusTest {
     void 합격을_요청하면_면접_중인_지원이_합격이_된다() {
         JobApplication app = applicationInInterview();
 
-        JobApplicationStatus.ACCEPTED.applyTo(app);
+        JobApplicationStatus.ACCEPTED.apply(app);
 
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.ACCEPTED);
     }
@@ -63,7 +63,7 @@ class JobApplicationStatusTest {
     void 불합격을_요청하면_지원이_불합격이_된다() {
         JobApplication app = applicationInResumeSubmitted();
 
-        JobApplicationStatus.REJECTED.applyTo(app);
+        JobApplicationStatus.REJECTED.apply(app);
 
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.REJECTED);
     }
@@ -72,7 +72,7 @@ class JobApplicationStatusTest {
     void 면접으로는_직접_요청할_수_없고_면접_일정을_등록해야_한다() {
         JobApplication app = applicationInResumeSubmitted();
 
-        assertErrorCode(() -> JobApplicationStatus.INTERVIEW.applyTo(app), ErrorCode.INTERVIEW_SCHEDULE_REQUIRED);
+        assertErrorCode(() -> JobApplicationStatus.INTERVIEW.apply(app), ErrorCode.INTERVIEW_SCHEDULE_REQUIRED);
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.RESUME_SUBMITTED);
         assertThat(app.isDocumentPassed()).isFalse();
     }
@@ -81,7 +81,7 @@ class JobApplicationStatusTest {
     void 서류_제출_상태로는_되돌릴_수_없다() {
         JobApplication app = applicationInInterview();
 
-        assertErrorCode(() -> JobApplicationStatus.RESUME_SUBMITTED.applyTo(app), ErrorCode.INVALID_STATUS_TRANSITION);
+        assertErrorCode(() -> JobApplicationStatus.RESUME_SUBMITTED.apply(app), ErrorCode.INVALID_STATUS_TRANSITION);
         assertThat(app.getStatus()).isEqualTo(JobApplicationStatus.INTERVIEW);
     }
 }

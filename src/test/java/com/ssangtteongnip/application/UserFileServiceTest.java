@@ -128,7 +128,7 @@ class UserFileServiceTest {
         UserFile older = storedFile(FileType.RESUME, "옛것.pdf");
         given(userFileRepository.findUserFilesNewestFirst(USER_ID)).willReturn(List.of(newer, older));
 
-        List<UserFileResponse> responses = userFileService.list(USER_ID);
+        List<UserFileResponse> responses = userFileService.findAll(USER_ID);
 
         assertThat(responses).extracting(UserFileResponse::fileName).containsExactly("새것.pdf", "옛것.pdf");
         assertThat(responses).extracting(UserFileResponse::type)
@@ -140,7 +140,7 @@ class UserFileServiceTest {
         UserFile file = storedFile(FileType.CERTIFICATE, "자격증.pdf");
         given(userFileRepository.findByIdAndUserId(FILE_ID, USER_ID)).willReturn(Optional.of(file));
 
-        FileDownload download = userFileService.download(USER_ID, FILE_ID);
+        FileDownload download = userFileService.findDownload(USER_ID, FILE_ID);
 
         assertThat(download.fileName()).isEqualTo("자격증.pdf");
         assertThat(download.url()).contains(file.getObjectKey());
@@ -151,7 +151,7 @@ class UserFileServiceTest {
     void 내_파일이_아니거나_없으면_내려받을_수_없다() {
         given(userFileRepository.findByIdAndUserId(FILE_ID, USER_ID)).willReturn(Optional.empty());
 
-        assertErrorCode(() -> userFileService.download(USER_ID, FILE_ID), ErrorCode.FILE_NOT_FOUND);
+        assertErrorCode(() -> userFileService.findDownload(USER_ID, FILE_ID), ErrorCode.FILE_NOT_FOUND);
     }
 
     @Test

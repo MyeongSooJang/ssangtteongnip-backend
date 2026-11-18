@@ -126,14 +126,14 @@ class ReviewTest {
     void 소유자는_소유권_검증을_통과한다() {
         Review review = review();
 
-        assertThatCode(() -> review.verifyOwner(OWNER_ID)).doesNotThrowAnyException();
+        assertThatCode(() -> review.validateOwner(OWNER_ID)).doesNotThrowAnyException();
     }
 
     @Test
     void 다른_사용자의_후기는_존재하지_않는_것으로_취급한다() {
         Review review = review();
 
-        assertErrorCode(() -> review.verifyOwner(OTHER_USER_ID), ErrorCode.REVIEW_NOT_FOUND);
+        assertErrorCode(() -> review.validateOwner(OTHER_USER_ID), ErrorCode.REVIEW_NOT_FOUND);
     }
 
     @Test

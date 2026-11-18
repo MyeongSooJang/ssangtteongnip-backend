@@ -83,14 +83,14 @@ public class StudyLog {
     }
 
     // 본문이 쓰는 이미지들
-    public Set<UUID> imageIds() {
-        return StudyImage.referencedIn(content);
+    public Set<UUID> findImageIds() {
+        return StudyImage.findReferencedIds(content);
     }
 
     // 새 본문으로 바꾸면 더는 쓰지 않게 되는 이미지들 (바꾸기 전에 물어본다)
-    public Set<UUID> imageIdsRemovedBy(String newContent) {
-        Set<UUID> removed = new LinkedHashSet<>(imageIds());
-        removed.removeAll(StudyImage.referencedIn(newContent));
+    public Set<UUID> findRemovedImageIds(String newContent) {
+        Set<UUID> removed = new LinkedHashSet<>(findImageIds());
+        removed.removeAll(StudyImage.findReferencedIds(newContent));
         return removed;
     }
 

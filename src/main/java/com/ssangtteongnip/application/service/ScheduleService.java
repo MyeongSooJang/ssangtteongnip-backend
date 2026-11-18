@@ -50,7 +50,7 @@ public class ScheduleService {
     public Schedule updateAddress(Long userId, Long id, String address) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
-        schedule.verifyOwner(userId);
+        schedule.validateOwner(userId);
         schedule.changeAddress(address);
         return schedule;
     }
@@ -59,7 +59,7 @@ public class ScheduleService {
         return scheduleRepository.findByApplicationUserId(userId);
     }
 
-    public List<Schedule> findByPeriod(Long userId, LocalDateTime from, LocalDateTime to) {
+    public List<Schedule> findAll(Long userId, LocalDateTime from, LocalDateTime to) {
         return scheduleRepository.findInPeriod(userId, from, to);
     }
 }

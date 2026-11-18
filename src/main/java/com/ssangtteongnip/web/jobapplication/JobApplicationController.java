@@ -33,7 +33,7 @@ public class JobApplicationController {
                                                      @RequestParam(required = false) JobApplicationStatus status) {
         List<JobApplication> applications = status == null
                 ? jobApplicationService.findAll(userId)
-                : jobApplicationService.findByStatus(userId, status);
+                : jobApplicationService.findAll(userId, status);
         return ApiResponse.ok(applications);
     }
 

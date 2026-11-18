@@ -32,20 +32,20 @@ public class UserFileService {
     public UserFileResponse upload(Long userId, FileType type, String fileName, byte[] content) {
         User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        UserFile.ensureCanAdd(userFileRepository.countByUserId(userId));
+        UserFile.validateCanAdd(userFileRepository.countByUserId(userId));
         UserFile file = userFileRepository.save(UserFile.upload(user, type, fileName, content, fileStorage));
-        return UserFileResponse.describe(file);
+        return UserFileResponse.convert(file);
     }
 
-    public List<UserFileResponse> list(Long userId) {
+    public List<UserFileResponse> findAll(Long userId) {
         return userFileRepository.findUserFilesNewestFirst(userId).stream()
-                .map(UserFileResponse::describe)
+                .map(UserFileResponse::convert)
                 .toList();
     }
 
-    public FileDownload download(Long userId, Long fileId) {
+    public FileDownload findDownload(Long userId, Long fileId) {
         UserFile file = findFile(userId, fileId);
-        PresignedUrl link = file.downloadUrl(fileStorage);
+        PresignedUrl link = file.createDownloadUrl(fileStorage);
         return new FileDownload(link.url(), file.getFileName(), link.expiresAt());
     }
 
@@ -53,7 +53,7 @@ public class UserFileService {
     public void delete(Long userId, Long fileId) {
         UserFile file = findFile(userId, fileId);
         userFileRepository.delete(file);
-        AfterCommit.runQuietly("파일 객체 삭제", () -> file.deleteFrom(fileStorage));
+        AfterCommit.runQuietly("파일 객체 삭제", () -> file.delete(fileStorage));
     }
 
     private UserFile findFile(Long userId, Long fileId) {

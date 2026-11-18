@@ -179,7 +179,7 @@ class InterviewServiceTest {
         willThrow(new BusinessException(ErrorCode.APPLICATION_NOT_FOUND))
                 .given(jobApplicationService).findById(OTHER_USER_ID, APPLICATION_ID);
 
-        assertErrorCode(() -> interviewService.findByApplicationId(OTHER_USER_ID, APPLICATION_ID),
+        assertErrorCode(() -> interviewService.findInterviews(OTHER_USER_ID, APPLICATION_ID),
                 ErrorCode.APPLICATION_NOT_FOUND);
         verifyNoInteractions(interviewRepository);
     }

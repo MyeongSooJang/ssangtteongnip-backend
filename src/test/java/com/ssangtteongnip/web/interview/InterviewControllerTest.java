@@ -100,7 +100,7 @@ class InterviewControllerTest {
 
     @Test
     void 지원_건의_면접_목록을_조회한다() throws Exception {
-        given(interviewService.findByApplicationId(1L, 1L)).willReturn(List.of(interview()));
+        given(interviewService.findInterviews(1L, 1L)).willReturn(List.of(interview()));
 
         mockMvc.perform(get("/api/applications/1/interviews").header("Authorization", BEARER))
                 .andExpect(status().isOk())

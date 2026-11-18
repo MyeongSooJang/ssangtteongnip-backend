@@ -59,7 +59,7 @@ class ProfileControllerTest {
     void GET_me_profile_내_프로필과_파일_목록을_종류와_함께_조회한다() throws Exception {
         UserFileResponse file = new UserFileResponse(3L, FileType.RESUME, "이력서.pdf", 1024,
                 LocalDateTime.of(2026, 11, 1, 10, 0));
-        given(profileService.getMyProfile(1L)).willReturn(profileResponse(List.of(file)));
+        given(profileService.findMyProfile(1L)).willReturn(profileResponse(List.of(file)));
 
         mockMvc.perform(get("/api/me/profile").header("Authorization", BEARER))
                 .andExpect(status().isOk())
@@ -75,7 +75,7 @@ class ProfileControllerTest {
 
     @Test
     void GET_me_profile_파일이_없으면_files가_빈_배열이다() throws Exception {
-        given(profileService.getMyProfile(1L)).willReturn(profileResponse(List.of()));
+        given(profileService.findMyProfile(1L)).willReturn(profileResponse(List.of()));
 
         mockMvc.perform(get("/api/me/profile").header("Authorization", BEARER))
                 .andExpect(status().isOk())
@@ -181,7 +181,7 @@ class ProfileControllerTest {
         ArgumentCaptor<ProfileRequest> captor = ArgumentCaptor.forClass(ProfileRequest.class);
         verify(profileService).reviseMyProfile(eq(1L), captor.capture());
         assertThat(captor.getValue().name()).isEqualTo("홍길동");
-        assertThat(captor.getValue().toPersonalInfo()).usingRecursiveComparison().isEqualTo(PersonalInfo.of(
+        assertThat(captor.getValue().toPersonalInfo()).usingRecursiveComparison().isEqualTo(new PersonalInfo(
                 "010-1234-5678", LocalDate.of(1998, 4, 27), "서울시",
                 "https://github.com/hong", "https://blog.example.com", "https://portfolio.example.com",
                 "OO대 컴퓨터공학", "인턴 6개월", "백엔드 개발자", "안녕하세요",
