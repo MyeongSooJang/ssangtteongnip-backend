@@ -80,7 +80,7 @@ public class JobApplicationService {
     @Transactional
     public JobApplication decideResult(Long userId, Long id, JobApplicationStatus status) {
         JobApplication application = findById(userId, id);
-        status.applyTo(application);
+        status.apply(application);
         return application;
     }
 
