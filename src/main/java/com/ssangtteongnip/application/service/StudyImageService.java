@@ -50,7 +50,7 @@ public class StudyImageService {
         AfterCommit.runQuietly("학습 이미지 객체 삭제", () -> image.deleteFrom(fileStorage));
     }
 
-    public PresignedUrl view(UUID publicId) {
+    public PresignedUrl findViewUrl(UUID publicId) {
         return studyImageRepository.findByPublicId(publicId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND))
                 .viewUrl(fileStorage);

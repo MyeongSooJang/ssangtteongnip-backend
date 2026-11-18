@@ -17,8 +17,8 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
-    public ApiResponse<ProfileResponse> getMyProfile(@AuthenticationPrincipal Long userId) {
-        return ApiResponse.ok(profileService.getMyProfile(userId));
+    public ApiResponse<ProfileResponse> findMyProfile(@AuthenticationPrincipal Long userId) {
+        return ApiResponse.ok(profileService.findMyProfile(userId));
     }
 
     @PutMapping

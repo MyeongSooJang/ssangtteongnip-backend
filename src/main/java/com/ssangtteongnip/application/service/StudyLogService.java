@@ -70,14 +70,14 @@ public class StudyLogService {
         studyImageService.deleteUnused(userId, images);
     }
 
-    public List<HeatmapDayResponse> heatmap(Long userId, LocalDate from, LocalDate to) {
+    public List<HeatmapDayResponse> findHeatmap(Long userId, LocalDate from, LocalDate to) {
         StudyPeriod period = StudyPeriod.createWithin(from, to, MAX_HEATMAP_DAYS);
         StudyLogs logs = new StudyLogs(studyLogRepository
                 .findInPeriod(userId, period.from(), period.to()));
         return logs.dailySummaries().stream().map(HeatmapDayResponse::convert).toList();
     }
 
-    public StudyStatsResponse stats(Long userId) {
+    public StudyStatsResponse findStats(Long userId) {
         LocalDate today = today();
         YearMonth month = YearMonth.from(today);
 

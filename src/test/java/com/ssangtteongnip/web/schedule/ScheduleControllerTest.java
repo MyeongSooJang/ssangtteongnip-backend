@@ -89,7 +89,7 @@ class ScheduleControllerTest {
     void 기간을_지정하면_해당_기간의_일정만_조회한다() throws Exception {
         LocalDateTime from = LocalDateTime.of(2026, 11, 1, 0, 0);
         LocalDateTime to = LocalDateTime.of(2026, 11, 30, 23, 59);
-        given(scheduleService.findByPeriod(1L, from, to)).willReturn(List.of(schedule("판교")));
+        given(scheduleService.findAll(1L, from, to)).willReturn(List.of(schedule("판교")));
 
         mockMvc.perform(get("/api/schedules")
                         .header("Authorization", BEARER)

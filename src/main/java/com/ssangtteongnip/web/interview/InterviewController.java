@@ -30,7 +30,7 @@ public class InterviewController {
 
     @GetMapping
     public ApiResponse<List<Interview>> findAll(@AuthenticationPrincipal Long userId, @PathVariable Long applicationId) {
-        return ApiResponse.ok(interviewService.findByApplicationId(userId, applicationId));
+        return ApiResponse.ok(interviewService.findInterviews(userId, applicationId));
     }
 
     @PatchMapping("/{interviewId}/score")

@@ -189,7 +189,7 @@ class StudyLogControllerTest {
 
     @Test
     void GET_stats는_연속_작성일과_최장_연속과_오늘_공부_시간을_반환한다() throws Exception {
-        given(studyLogService.stats(1L)).willReturn(new StudyStatsResponse(3, 21, 5, 90));
+        given(studyLogService.findStats(1L)).willReturn(new StudyStatsResponse(3, 21, 5, 90));
 
         mockMvc.perform(get("/api/me/study-logs/stats").header("Authorization", BEARER))
                 .andExpect(status().isOk())
@@ -203,7 +203,7 @@ class StudyLogControllerTest {
 
     @Test
     void GET_heatmap은_글이_있는_날의_글_수와_공부_시간을_반환한다() throws Exception {
-        given(studyLogService.heatmap(1L, LocalDate.of(2025, 11, 3), DATE))
+        given(studyLogService.findHeatmap(1L, LocalDate.of(2025, 11, 3), DATE))
                 .willReturn(List.of(new HeatmapDayResponse(DATE, 2, 90)));
 
         mockMvc.perform(get("/api/me/study-logs/heatmap")
@@ -219,7 +219,7 @@ class StudyLogControllerTest {
 
     @Test
     void GET_heatmap은_기간이_상한을_넘으면_400을_반환한다() throws Exception {
-        given(studyLogService.heatmap(1L, LocalDate.of(2020, 1, 1), DATE))
+        given(studyLogService.findHeatmap(1L, LocalDate.of(2020, 1, 1), DATE))
                 .willThrow(new BusinessException(ErrorCode.INVALID_STUDY_RANGE));
 
         mockMvc.perform(get("/api/me/study-logs/heatmap")

@@ -25,7 +25,7 @@ public class ProfileService {
     private final UserFileRepository userFileRepository;
     private final Clock clock;
 
-    public ProfileResponse getMyProfile(Long userId) {
+    public ProfileResponse findMyProfile(Long userId) {
         return toResponse(userId, findProfile(userId));
     }
 

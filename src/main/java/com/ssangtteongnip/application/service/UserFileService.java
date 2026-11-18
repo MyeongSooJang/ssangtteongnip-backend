@@ -37,13 +37,13 @@ public class UserFileService {
         return UserFileResponse.convert(file);
     }
 
-    public List<UserFileResponse> list(Long userId) {
+    public List<UserFileResponse> findAll(Long userId) {
         return userFileRepository.findUserFilesNewestFirst(userId).stream()
                 .map(UserFileResponse::convert)
                 .toList();
     }
 
-    public FileDownload download(Long userId, Long fileId) {
+    public FileDownload findDownload(Long userId, Long fileId) {
         UserFile file = findFile(userId, fileId);
         PresignedUrl link = file.downloadUrl(fileStorage);
         return new FileDownload(link.url(), file.getFileName(), link.expiresAt());

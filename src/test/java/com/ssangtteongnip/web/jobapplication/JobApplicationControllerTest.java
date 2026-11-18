@@ -151,7 +151,7 @@ class JobApplicationControllerTest {
     void GET_applications_status로_면접_단계_지원_건만_조회한다() throws Exception {
         JobApplication app = sampleApplication();
         app.startInterview(java.time.LocalDateTime.of(2026, 11, 5, 10, 0));
-        given(jobApplicationService.findByStatus(1L, JobApplicationStatus.INTERVIEW)).willReturn(java.util.List.of(app));
+        given(jobApplicationService.findAll(1L, JobApplicationStatus.INTERVIEW)).willReturn(java.util.List.of(app));
 
         mockMvc.perform(get("/api/applications")
                         .header("Authorization", BEARER).param("status", "INTERVIEW"))

@@ -39,7 +39,7 @@ public class JobApplicationService {
         return jobApplicationRepository.findByUserId(userId);
     }
 
-    public List<JobApplication> findByStatus(Long userId, JobApplicationStatus status) {
+    public List<JobApplication> findAll(Long userId, JobApplicationStatus status) {
         return jobApplicationRepository.findByUserIdAndStatus(userId, status);
     }
 

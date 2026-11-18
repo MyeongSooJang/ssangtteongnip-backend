@@ -37,8 +37,8 @@ public class StudyImageController {
 
     // <img src>는 Authorization 헤더를 보낼 수 없으므로 인증 없이 열어 둔다. 주소(UUID)를 아는 사람만 볼 수 있다.
     @GetMapping("/images/{publicId}")
-    public ResponseEntity<Void> view(@PathVariable UUID publicId) {
-        PresignedUrl link = studyImageService.view(publicId);
+    public ResponseEntity<Void> findViewUrl(@PathVariable UUID publicId) {
+        PresignedUrl link = studyImageService.findViewUrl(publicId);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, link.url())
                 .cacheControl(CacheControl.maxAge(REDIRECT_CACHE).cachePrivate())

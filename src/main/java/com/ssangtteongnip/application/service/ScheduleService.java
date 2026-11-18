@@ -59,7 +59,7 @@ public class ScheduleService {
         return scheduleRepository.findByApplicationUserId(userId);
     }
 
-    public List<Schedule> findByPeriod(Long userId, LocalDateTime from, LocalDateTime to) {
+    public List<Schedule> findAll(Long userId, LocalDateTime from, LocalDateTime to) {
         return scheduleRepository.findInPeriod(userId, from, to);
     }
 }
