@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -16,8 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Import(JpaConfig.class)
 class CompanyCatalogRepositoryTest {
-
-    private static final PageRequest TOP_10 = PageRequest.of(0, 10);
 
     @Autowired CompanyCatalogJpaRepository catalogRepository;
 
@@ -29,7 +26,7 @@ class CompanyCatalogRepositoryTest {
     }
 
     private List<String> search(String keyword) {
-        return catalogRepository.findClosestMatches(CompanyCatalogEntry.normalizeSearchText(keyword), TOP_10)
+        return catalogRepository.findClosestTenMatches(CompanyCatalogEntry.normalizeSearchText(keyword))
                 .stream().map(CompanyCatalogEntry::getName).toList();
     }
 
@@ -79,7 +76,7 @@ class CompanyCatalogRepositoryTest {
             save("카카오" + i, null, true);
         }
 
-        List<CompanyCatalogEntry> found = catalogRepository.findClosestMatches("카카오", TOP_10);
+        List<CompanyCatalogEntry> found = catalogRepository.findClosestTenMatches("카카오");
 
         assertThat(found).hasSize(10);
     }

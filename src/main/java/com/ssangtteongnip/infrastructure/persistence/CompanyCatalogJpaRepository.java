@@ -2,7 +2,6 @@ package com.ssangtteongnip.infrastructure.persistence;
 
 import com.ssangtteongnip.domain.company.CompanyCatalogEntry;
 import com.ssangtteongnip.domain.company.CompanyCatalogRepository;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +21,7 @@ public interface CompanyCatalogJpaRepository extends JpaRepository<CompanyCatalo
                          else 2
                      end,
                      e.listed desc, length(e.searchName), e.searchName
+            limit 10
             """)
-    List<CompanyCatalogEntry> findClosestMatches(@Param("keyword") String keyword, Pageable pageable);
+    List<CompanyCatalogEntry> findClosestTenMatches(@Param("keyword") String keyword);
 }

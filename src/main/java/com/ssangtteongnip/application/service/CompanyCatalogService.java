@@ -8,7 +8,6 @@ import com.ssangtteongnip.domain.company.CompanyCatalogSource;
 import com.ssangtteongnip.domain.company.CompanyRepository;
 import com.ssangtteongnip.domain.company.RegisteredCompanies;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CompanyCatalogService {
-
-    private static final int MAX_CANDIDATES = 10;
 
     private final CompanyCatalogRepository catalogRepository;
     private final CompanyCatalogSource catalogSource;
@@ -31,8 +28,7 @@ public class CompanyCatalogService {
         if (searchText == null) {
             return List.of();
         }
-        List<CompanyCatalogEntry> matches = catalogRepository.findClosestMatches(
-                searchText, PageRequest.of(0, MAX_CANDIDATES));
+        List<CompanyCatalogEntry> matches = catalogRepository.findClosestTenMatches(searchText);
         List<String> names = matches.stream().map(CompanyCatalogEntry::getName).toList();
         RegisteredCompanies registered = new RegisteredCompanies(companyRepository.findByNameIn(names));
         return matches.stream()

@@ -18,8 +18,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -45,7 +43,7 @@ class CompanyCatalogServiceTest {
 
     @Test
     void 이미_등록된_회사는_회사_id와_함께_후보로_반환한다() {
-        given(catalogRepository.findClosestMatches(eq("카카오"), any())).willReturn(List.of(
+        given(catalogRepository.findClosestTenMatches("카카오")).willReturn(List.of(
                 CompanyCatalogEntry.create("00000001", "카카오", null, true),
                 CompanyCatalogEntry.create("00000002", "카카오뱅크", null, true)));
         given(companyRepository.findByNameIn(List.of("카카오", "카카오뱅크")))
@@ -60,7 +58,7 @@ class CompanyCatalogServiceTest {
 
     @Test
     void 검색어는_법인_형태와_공백을_뺀_값으로_조회한다() {
-        given(catalogRepository.findClosestMatches(eq("카카오"), any())).willReturn(List.of(
+        given(catalogRepository.findClosestTenMatches("카카오")).willReturn(List.of(
                 CompanyCatalogEntry.create("00000001", "카카오", null, true)));
         given(companyRepository.findByNameIn(List.of("카카오"))).willReturn(List.of());
 
