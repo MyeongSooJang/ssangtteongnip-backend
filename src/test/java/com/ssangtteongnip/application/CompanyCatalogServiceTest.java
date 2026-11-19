@@ -1,33 +1,80 @@
 package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.CompanyCatalogService;
+import com.ssangtteongnip.application.service.dto.CompanyCandidateResponse;
+import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.company.CompanyCatalogEntry;
 import com.ssangtteongnip.domain.company.CompanyCatalogRepository;
 import com.ssangtteongnip.domain.company.CompanyCatalogSource;
+import com.ssangtteongnip.domain.company.CompanyRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyCatalogServiceTest {
 
     @Mock CompanyCatalogRepository catalogRepository;
     @Mock CompanyCatalogSource catalogSource;
+    @Mock CompanyRepository companyRepository;
 
     @Captor ArgumentCaptor<Iterable<CompanyCatalogEntry>> savedCaptor;
 
     private CompanyCatalogService service() {
-        return new CompanyCatalogService(catalogRepository, catalogSource);
+        return new CompanyCatalogService(catalogRepository, catalogSource, companyRepository);
+    }
+
+    private Company registeredCompany(Long id, String name) {
+        Company company = Company.create(name, null, null);
+        ReflectionTestUtils.setField(company, "id", id);
+        return company;
+    }
+
+    @Test
+    void 이미_등록된_회사는_회사_id와_함께_후보로_반환한다() {
+        given(catalogRepository.findClosestMatches(eq("카카오"), any())).willReturn(List.of(
+                CompanyCatalogEntry.create("00000001", "카카오", null, true),
+                CompanyCatalogEntry.create("00000002", "카카오뱅크", null, true)));
+        given(companyRepository.findByNameIn(List.of("카카오", "카카오뱅크")))
+                .willReturn(List.of(registeredCompany(7L, "카카오")));
+
+        List<CompanyCandidateResponse> candidates = service().findCandidates("카카오");
+
+        assertThat(candidates).containsExactly(
+                new CompanyCandidateResponse("카카오", true, 7L),
+                new CompanyCandidateResponse("카카오뱅크", true, null));
+    }
+
+    @Test
+    void 검색어는_법인_형태와_공백을_뺀_값으로_조회한다() {
+        given(catalogRepository.findClosestMatches(eq("카카오"), any())).willReturn(List.of(
+                CompanyCatalogEntry.create("00000001", "카카오", null, true)));
+        given(companyRepository.findByNameIn(List.of("카카오"))).willReturn(List.of());
+
+        List<CompanyCandidateResponse> candidates = service().findCandidates("(주) 카카오 ");
+
+        assertThat(candidates).extracting(CompanyCandidateResponse::name).containsExactly("카카오");
+    }
+
+    @Test
+    void 지울_것만_있는_검색어는_조회하지_않고_빈_목록을_반환한다() {
+        List<CompanyCandidateResponse> candidates = service().findCandidates(" % ");
+
+        assertThat(candidates).isEmpty();
+        verifyNoInteractions(catalogRepository, companyRepository);
     }
 
     private CompanyCatalogEntry entry(String corpCode, String name) {
