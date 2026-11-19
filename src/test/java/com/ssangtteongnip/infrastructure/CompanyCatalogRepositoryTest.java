@@ -25,6 +25,12 @@ class CompanyCatalogRepositoryTest {
         catalogRepository.saveAndFlush(CompanyCatalogEntry.create(corpCode, name, engName, listed));
     }
 
+    private void saveSameKeywordCompanies(String keyword, int count) {
+        for (int i = 0; i < count; i++) {
+            save(keyword + i, null, true);
+        }
+    }
+
     private List<String> search(String keyword) {
         return catalogRepository.findClosestTenMatches(CompanyCatalogEntry.normalizeSearchText(keyword))
                 .stream().map(CompanyCatalogEntry::getName).toList();
@@ -71,14 +77,10 @@ class CompanyCatalogRepositoryTest {
     }
 
     @Test
-    void 요청한_개수까지만_반환한다() {
-        for (int i = 0; i < 12; i++) {
-            save("카카오" + i, null, true);
-        }
+    void 후보는_최대_10건까지만_반환한다() {
+        saveSameKeywordCompanies("카카오", 12);
 
-        List<CompanyCatalogEntry> found = catalogRepository.findClosestTenMatches("카카오");
-
-        assertThat(found).hasSize(10);
+        assertThat(search("카카오")).hasSize(10);
     }
 
     @Test

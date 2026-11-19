@@ -87,7 +87,7 @@ class CompanyControllerTest {
     }
 
     @Test
-    void GET_companies_candidates_입력한_글자와_가까운_회사_후보를_조회한다() throws Exception {
+    void 입력한_글자와_가까운_회사_후보를_조회한다() throws Exception {
         given(companyCatalogService.findCandidates("카카오")).willReturn(List.of(
                 new CompanyCandidateResponse("카카오", true, 7L),
                 new CompanyCandidateResponse("카카오뱅크", true, null)));
@@ -104,7 +104,7 @@ class CompanyControllerTest {
     }
 
     @Test
-    void GET_companies_candidates_검색어가_없으면_빈_문자열로_조회한다() throws Exception {
+    void 검색어가_없으면_빈_문자열로_후보를_조회한다() throws Exception {
         given(companyCatalogService.findCandidates("")).willReturn(List.of());
 
         mockMvc.perform(get("/api/companies/candidates")
@@ -114,7 +114,7 @@ class CompanyControllerTest {
     }
 
     @Test
-    void GET_companies_candidates_토큰이_없으면_401을_반환한다() throws Exception {
+    void 후보_조회는_토큰이_없으면_401을_반환한다() throws Exception {
         mockMvc.perform(get("/api/companies/candidates").param("keyword", "카카오"))
                 .andExpect(status().isUnauthorized());
     }
