@@ -94,33 +94,6 @@ class CompanyCatalogServiceTest {
     }
 
     @Test
-    void 이미_있는_회사는_최신_정보로_고친다() {
-        CompanyCatalogEntry saved = entry("00000001", "카카오");
-        given(catalogRepository.findAll()).willReturn(List.of(saved));
-        given(catalogSource.findAll()).willReturn(List.of(
-                CompanyCatalogEntry.create("00000001", "카카오", "Kakao Corp.", true)));
-
-        int added = service().refresh();
-
-        assertThat(saved.isListed()).isTrue();
-        assertThat(saved.getSearchEngName()).isEqualTo("kakaocorp");
-        assertThat(added).isZero();
-    }
-
-    @Test
-    void 금융_목적_법인은_저장하지_않는다() {
-        given(catalogRepository.findAll()).willReturn(List.of());
-        given(catalogSource.findAll()).willReturn(List.of(
-                entry("00000001", "드림라인제일차유동화전문유한회사"), entry("00000002", "쿠팡")));
-
-        int added = service().refresh();
-
-        verify(catalogRepository).saveAll(savedCaptor.capture());
-        assertThat(savedCaptor.getValue()).extracting(CompanyCatalogEntry::getName).containsExactly("쿠팡");
-        assertThat(added).isEqualTo(1);
-    }
-
-    @Test
     void 카탈로그가_비어_있는지_알려준다() {
         given(catalogRepository.count()).willReturn(0L);
 

@@ -2,6 +2,7 @@ package com.ssangtteongnip.application.service;
 
 import com.ssangtteongnip.application.service.dto.CompanyCandidateResponse;
 import com.ssangtteongnip.domain.company.Company;
+import com.ssangtteongnip.domain.company.CompanyCatalog;
 import com.ssangtteongnip.domain.company.CompanyCatalogEntry;
 import com.ssangtteongnip.domain.company.CompanyCatalogRepository;
 import com.ssangtteongnip.domain.company.CompanyCatalogSource;
@@ -11,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -44,23 +44,11 @@ public class CompanyCatalogService {
                 .toList();
     }
 
-    // 목록에 없는 회사는 추가하고 이미 있는 회사는 최신 정보로 고친다. 새로 추가한 개수를 반환한다.
+    // 새로 추가한 회사 수를 반환한다.
     @Transactional
     public int refresh() {
-        Map<String, CompanyCatalogEntry> saved = catalogRepository.findAll().stream()
-                .collect(Collectors.toMap(CompanyCatalogEntry::getCorpCode, Function.identity()));
-        List<CompanyCatalogEntry> added = new ArrayList<>();
-        for (CompanyCatalogEntry latest : catalogSource.findAll()) {
-            if (!latest.isJobTarget()) {
-                continue;
-            }
-            CompanyCatalogEntry existing = saved.get(latest.getCorpCode());
-            if (existing == null) {
-                added.add(latest);
-            } else {
-                existing.reviseInfo(latest);
-            }
-        }
+        CompanyCatalog catalog = new CompanyCatalog(catalogRepository.findAll());
+        List<CompanyCatalogEntry> added = catalog.refreshWith(catalogSource.findAll());
         catalogRepository.saveAll(added);
         return added.size();
     }
