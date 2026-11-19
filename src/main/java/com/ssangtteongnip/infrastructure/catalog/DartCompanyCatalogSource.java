@@ -47,7 +47,7 @@ public class DartCompanyCatalogSource implements CompanyCatalogSource {
         }
         List<Row> rows = parse(unzip(download()));
         return keepBestPerName(rows).stream()
-                .map(Row::convert)
+                .map(Row::createEntry)
                 .toList();
     }
 
@@ -94,7 +94,7 @@ public class DartCompanyCatalogSource implements CompanyCatalogSource {
                         fields.put(element, reader.getElementText().trim());
                     }
                 } else if (event == XMLStreamConstants.END_ELEMENT && reader.getLocalName().equals("list")) {
-                    rows.add(Row.from(fields));
+                    rows.add(Row.readFields(fields));
                 }
             }
         } catch (XMLStreamException | IOException e) {
@@ -117,7 +117,7 @@ public class DartCompanyCatalogSource implements CompanyCatalogSource {
 
     private record Row(String corpCode, String name, String engName, String stockCode, String modifyDate) {
 
-        static Row from(Map<String, String> fields) {
+        static Row readFields(Map<String, String> fields) {
             return new Row(
                     fields.getOrDefault("corp_code", ""),
                     fields.getOrDefault("corp_name", ""),
@@ -137,7 +137,7 @@ public class DartCompanyCatalogSource implements CompanyCatalogSource {
             return modifyDate.compareTo(other.modifyDate) > 0;
         }
 
-        CompanyCatalogEntry convert() {
+        CompanyCatalogEntry createEntry() {
             return CompanyCatalogEntry.create(corpCode, name, engName.isEmpty() ? null : engName, isListed());
         }
     }
