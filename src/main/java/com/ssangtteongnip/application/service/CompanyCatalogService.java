@@ -1,21 +1,18 @@
 package com.ssangtteongnip.application.service;
 
 import com.ssangtteongnip.application.service.dto.CompanyCandidateResponse;
-import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.company.CompanyCatalog;
 import com.ssangtteongnip.domain.company.CompanyCatalogEntry;
 import com.ssangtteongnip.domain.company.CompanyCatalogRepository;
 import com.ssangtteongnip.domain.company.CompanyCatalogSource;
 import com.ssangtteongnip.domain.company.CompanyRepository;
+import com.ssangtteongnip.domain.company.RegisteredCompanies;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +34,12 @@ public class CompanyCatalogService {
         List<CompanyCatalogEntry> matches = catalogRepository.findClosestMatches(
                 searchText, PageRequest.of(0, MAX_CANDIDATES));
         List<String> names = matches.stream().map(CompanyCatalogEntry::getName).toList();
-        Map<String, Long> registeredIds = companyRepository.findByNameIn(names).stream()
-                .collect(Collectors.toMap(Company::getName, Company::getId));
+        RegisteredCompanies registered = new RegisteredCompanies(companyRepository.findByNameIn(names));
         return matches.stream()
-                .map(entry -> CompanyCandidateResponse.attachCompanyId(entry, registeredIds.get(entry.getName())))
+                .map(entry -> {
+                    Long companyId = registered.findCompanyId(entry);
+                    return CompanyCandidateResponse.attachCompanyId(entry, companyId);
+                })
                 .toList();
     }
 
