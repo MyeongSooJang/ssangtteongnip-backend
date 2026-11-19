@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.text.Normalizer;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -54,18 +55,23 @@ public class CompanyCatalogEntry {
         this.listed = listed;
     }
 
-    // 유동화전문회사·사모펀드처럼 취업 대상이 아닌 금융 목적 법인인지 판단한다.
-    public boolean isJobTarget() {
-        return !FINANCIAL_VEHICLE.matcher(name).find();
+    public void reviseInfo(CompanyCatalogEntry latest) {
+        reviseInfo(latest.name, latest.engName, latest.listed);
     }
 
-    // 법인 형태, 공백, 기호를 지우고 소문자로 맞춘다. 사용자가 입력한 검색어도 같은 규칙으로 맞춘다.
-    // 지원하지 않는 문자(%, _ 포함)가 지워지므로 LIKE 검색어에 그대로 쓸 수 있다.
+    // 유동화전문회사·사모펀드처럼 취업 대상이 아닌 금융 목적 법인이거나, 한글·영문·숫자가 없어 검색할 수 없는 이름이면 false다.
+    public boolean isJobTarget() {
+        return searchName != null && !FINANCIAL_VEHICLE.matcher(name).find();
+    }
+
+    // 전각 문자를 반각으로 맞추고 법인 형태, 공백, 기호를 지운 뒤 소문자로 바꾼다. 사용자가 입력한 검색어도 같은 규칙으로 맞춘다.
+    // 지원하지 않는 문자(%, _ 포함)가 지워지므로 LIKE 검색어에 그대로 쓸 수 있다. 남는 글자가 없으면 null이다.
     public static String normalizeSearchText(String text) {
         if (text == null) {
             return null;
         }
-        String withoutForm = CORPORATE_FORM.matcher(text.toLowerCase(Locale.ROOT)).replaceAll("");
+        String compatible = Normalizer.normalize(text, Normalizer.Form.NFKC);
+        String withoutForm = CORPORATE_FORM.matcher(compatible.toLowerCase(Locale.ROOT)).replaceAll("");
         String normalized = NON_SEARCHABLE.matcher(withoutForm).replaceAll("");
         return normalized.isEmpty() ? null : normalized;
     }

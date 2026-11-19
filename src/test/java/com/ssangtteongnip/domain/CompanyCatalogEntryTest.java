@@ -46,6 +46,16 @@ class CompanyCatalogEntryTest {
     }
 
     @Test
+    void 전각_문자는_반각으로_맞춰_검색용_이름에_저장한다() {
+        assertThat(entry("ＡＢＣ코리아").getSearchName()).isEqualTo("abc코리아");
+    }
+
+    @Test
+    void 한글_영문_숫자가_없어_검색할_수_없는_이름은_취업_대상이_아니다() {
+        assertThat(entry("株式會社").isJobTarget()).isFalse();
+    }
+
+    @Test
     void 정보를_고치면_검색용_이름도_함께_바뀐다() {
         CompanyCatalogEntry entry = entry("카카오");
 

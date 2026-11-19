@@ -36,6 +36,9 @@ app:
       client-id: ${GMAIL_CLIENT_ID}
       client-secret: ${GMAIL_CLIENT_SECRET}
       refresh-token: ${GMAIL_REFRESH_TOKEN}
+  # 회사 이름 자동완성용 기업 목록(OpenDART). 키가 없으면 목록을 받지 않을 뿐 기동은 정상이다.
+  dart:
+    api-key: ${DART_API_KEY:}
   storage:
     bucket: ${S3_BUCKET}
     region: ${AWS_REGION:ap-northeast-2}

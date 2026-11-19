@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface CompanyCatalogRepository {
     List<CompanyCatalogEntry> findAll();
+    long count();
     <S extends CompanyCatalogEntry> List<S> saveAll(Iterable<S> entries);
 
     // keyword는 CompanyCatalogEntry.normalizeSearchText로 정규화한 값이어야 한다.
