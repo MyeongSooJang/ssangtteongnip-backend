@@ -85,6 +85,7 @@ MAIL_FROM=
 GMAIL_CLIENT_ID=
 GMAIL_CLIENT_SECRET=
 GMAIL_REFRESH_TOKEN=
+DART_API_KEY=
 
 S3_BUCKET=
 AWS_REGION=ap-northeast-2
@@ -111,4 +112,4 @@ swapon --show
 # Ubuntu 공식 AMI는 SSM 에이전트가 snap 으로 들어 있다.
 (snap list amazon-ssm-agent 2>/dev/null || systemctl status amazon-ssm-agent --no-pager 2>/dev/null | head -3) || echo "SSM 에이전트 상태를 확인하세요"
 echo
-echo "완료. 다음: $APP_DIR/.env 의 빈 항목(MAIL_FROM, GMAIL_*, S3_BUCKET)을 채운 뒤 배포하세요."
+echo "완료. 다음: $APP_DIR/.env 의 빈 항목(MAIL_FROM, GMAIL_*, DART_API_KEY, S3_BUCKET)을 채운 뒤 배포하세요."

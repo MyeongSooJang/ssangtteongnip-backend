@@ -58,6 +58,15 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    company_catalog {
+        bigint id PK
+        varchar corp_code UK "DART 고유번호 8자리"
+        varchar name "법인명"
+        varchar eng_name "영문 법인명"
+        varchar search_name "검색용 법인명(법인 형태·공백·기호 제거, 소문자)"
+        varchar search_eng_name "검색용 영문명"
+        boolean listed "상장 여부"
+    }
     applications {
         bigint id PK
         bigint user_id "FK 없음"
@@ -133,6 +142,7 @@ erDiagram
 - `applications.user_id`, `study_logs.user_id`는 값 컬럼이고 DB FK가 없다. 소유자 검증은 서비스에서 한다.
 - `profiles`는 `PersonalInfo`(@Embeddable)가 같은 테이블에 펼쳐진 구조다.
 - `review_questions`는 `Review.questions`(@ElementCollection)의 컬렉션 테이블이고, `question_order`는 @OrderColumn이다.
+- `company_catalog`는 DART 기업 목록을 담은 회사 검색용 카탈로그다. `companies`와 FK 없이 분리되어 있고, 회사 이름이 같으면 같은 회사로 본다.
 - 마이그레이션 도구가 없고 `ddl-auto: update`는 컬럼 추가만 하므로, 변경 사항은 운영 DB에 DDL로 직접 반영해야 할 수 있다.
 - `user_files.user_id`는 유니크가 아니다. 사용자당 최대 개수는 `UserFile.MAX_FILES_PER_USER`이고, 업로드 시 사용자 행을 잠근 뒤 개수를 확인해 지킨다.
 - `applications.resume_view`는 `not null default 'NOT_VIEWED'`로 추가되어 기존 행이 미열람으로 채워진다.

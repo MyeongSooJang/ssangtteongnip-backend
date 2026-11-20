@@ -1,7 +1,9 @@
 package com.ssangtteongnip.web.company;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssangtteongnip.application.service.CompanyCatalogService;
 import com.ssangtteongnip.application.service.CompanyService;
+import com.ssangtteongnip.application.service.dto.CompanyCandidateResponse;
 import com.ssangtteongnip.application.service.dto.CompanyResponse;
 import com.ssangtteongnip.application.service.dto.CompanyReviewResponse;
 import com.ssangtteongnip.application.service.request.CompanyRequest;
@@ -43,6 +45,7 @@ class CompanyControllerTest {
     @MockitoBean TokenProvider tokenProvider;
     @Autowired ObjectMapper objectMapper;
     @MockitoBean CompanyService companyService;
+    @MockitoBean CompanyCatalogService companyCatalogService;
 
     @BeforeEach
     void setUp() {
@@ -81,6 +84,39 @@ class CompanyControllerTest {
                 .andExpect(jsonPath("$.data[0].averageRating").value(4.5))
                 .andExpect(jsonPath("$.data[1].reviewCount").value(0))
                 .andExpect(jsonPath("$.data[1].averageRating").doesNotExist());
+    }
+
+    @Test
+    void 입력한_글자와_가까운_회사_후보를_조회한다() throws Exception {
+        given(companyCatalogService.findCandidates("카카오")).willReturn(List.of(
+                new CompanyCandidateResponse("카카오", true, 7L),
+                new CompanyCandidateResponse("카카오뱅크", true, null)));
+
+        mockMvc.perform(get("/api/companies/candidates")
+                        .param("keyword", "카카오")
+                        .header("Authorization", BEARER))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].name").value("카카오"))
+                .andExpect(jsonPath("$.data[0].listed").value(true))
+                .andExpect(jsonPath("$.data[0].companyId").value(7))
+                .andExpect(jsonPath("$.data[1].companyId").doesNotExist());
+    }
+
+    @Test
+    void 검색어가_없으면_빈_문자열로_후보를_조회한다() throws Exception {
+        given(companyCatalogService.findCandidates("")).willReturn(List.of());
+
+        mockMvc.perform(get("/api/companies/candidates")
+                        .header("Authorization", BEARER))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    void 후보_조회는_토큰이_없으면_401을_반환한다() throws Exception {
+        mockMvc.perform(get("/api/companies/candidates").param("keyword", "카카오"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

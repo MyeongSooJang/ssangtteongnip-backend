@@ -17,6 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Swagger UI: `/swagger-ui.html`
 - DB 설정은 `application.yml`의 환경변수(`PG*`, Railway/Render 배포 기준)를 쓴다. `ddl-auto: update`이며 마이그레이션 도구는 없다.
 - 이메일 인증은 Redis와 Gmail API(HTTPS)를 쓴다. Render 무료 플랜이 SMTP 포트(25/465/587)를 막아서 SMTP는 쓰지 않는다. `GMAIL_REFRESH_TOKEN`은 `gmail.send` 범위이고 동의 화면이 프로덕션 게시 상태여야 만료되지 않는다. `MAIL_FROM`은 토큰을 발급한 Gmail 주소이며, `GMAIL_*`와 `MAIL_FROM`은 기본값이 없어 미설정 시 기동에 실패한다. 로컬 Redis는 `docker run -d -p 6379:6379 redis:7`.
+- 회사 이름 자동완성은 OpenDART 기업 목록(`DART_API_KEY`)을 `company_catalog` 테이블에 적재해 쓴다. 키는 선택이며 없으면 목록만 받지 않고 기동은 정상이다. 카탈로그가 비어 있으면 기동 후 1회, 이후 매주 일요일 07:30에 갱신한다. 운영은 `deploy/docker-compose.prod.yml`이 환경변수를 하나씩 넘기므로 새 환경변수는 `deploy/`의 compose·`.env.example`·`setup-server.sh`에도 함께 추가한다.
 - 테스트 메서드명은 한글(`POST_applications_지원_건을_등록한다`) 스타일을 따른다.
 
 ## 아키텍처

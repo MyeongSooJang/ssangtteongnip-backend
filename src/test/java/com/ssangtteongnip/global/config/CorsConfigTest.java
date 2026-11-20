@@ -1,5 +1,6 @@
 package com.ssangtteongnip.global.config;
 
+import com.ssangtteongnip.application.service.CompanyCatalogService;
 import com.ssangtteongnip.application.service.CompanyService;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.web.company.CompanyController;
@@ -25,6 +26,7 @@ class CorsConfigTest {
     @Autowired MockMvc mockMvc;
     @MockitoBean TokenProvider tokenProvider;
     @MockitoBean CompanyService companyService;
+    @MockitoBean CompanyCatalogService companyCatalogService;
 
     @ParameterizedTest
     @ValueSource(strings = {
