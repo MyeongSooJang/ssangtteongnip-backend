@@ -2,6 +2,7 @@ package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.CompanyService;
 import com.ssangtteongnip.application.service.JobApplicationService;
+import com.ssangtteongnip.application.service.dto.JobApplicationResponse;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.application.service.request.JobApplicationRequest;
 import com.ssangtteongnip.domain.company.Company;
@@ -14,6 +15,7 @@ import com.ssangtteongnip.domain.jobapplication.ResumeView;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +29,7 @@ import static com.ssangtteongnip.support.ErrorCodeAssertions.assertErrorCode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class JobApplicationServiceTest {
@@ -56,13 +59,15 @@ class JobApplicationServiceTest {
         given(companyService.findById(1L)).willReturn(company);
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
-        JobApplication saved = jobApplicationService.register(7L,
+        JobApplicationResponse response = jobApplicationService.register(7L,
                 new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
 
-        assertThat(saved.isOwnedBy(7L)).isTrue();
-        assertThat(saved.getCompany()).isSameAs(company);
-        assertThat(saved.getStatus()).isEqualTo(JobApplicationStatus.RESUME_SUBMITTED);
-        assertThat(saved.getJobSite()).isEqualTo(JobSite.SARAMIN);
+        ArgumentCaptor<JobApplication> saved = ArgumentCaptor.forClass(JobApplication.class);
+        verify(jobApplicationRepository).save(saved.capture());
+        assertThat(saved.getValue().isOwnedBy(7L)).isTrue();
+        assertThat(saved.getValue().getCompany()).isSameAs(company);
+        assertThat(response.status()).isEqualTo(JobApplicationStatus.RESUME_SUBMITTED);
+        assertThat(response.jobSite()).isEqualTo(JobSite.SARAMIN);
     }
 
     @Test
@@ -70,11 +75,11 @@ class JobApplicationServiceTest {
         given(companyService.findById(1L)).willReturn(Company.create("카카오", "IT", "https://kakao.com"));
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
-        JobApplication saved = jobApplicationService.register(7L,
+        JobApplicationResponse response = jobApplicationService.register(7L,
                 new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN, null, null));
 
-        assertThat(saved.getDeadline()).isNull();
-        assertThat(saved.getResumeView()).isEqualTo(ResumeView.NOT_VIEWED);
+        assertThat(response.deadline()).isNull();
+        assertThat(response.resumeView()).isEqualTo(ResumeView.NOT_VIEWED);
     }
 
     @Test
@@ -82,12 +87,12 @@ class JobApplicationServiceTest {
         given(companyService.findById(1L)).willReturn(Company.create("카카오", "IT", "https://kakao.com"));
         given(jobApplicationRepository.save(any(JobApplication.class))).willAnswer(i -> i.getArgument(0));
 
-        JobApplication saved = jobApplicationService.register(7L,
+        JobApplicationResponse response = jobApplicationService.register(7L,
                 new JobApplicationRequest(1L, "백엔드 개발자", LocalDate.of(2026, 11, 1), JobSite.SARAMIN,
                         LocalDate.of(2026, 11, 30), ResumeView.VIEWED));
 
-        assertThat(saved.getDeadline()).isEqualTo(LocalDate.of(2026, 11, 30));
-        assertThat(saved.getResumeView()).isEqualTo(ResumeView.VIEWED);
+        assertThat(response.deadline()).isEqualTo(LocalDate.of(2026, 11, 30));
+        assertThat(response.resumeView()).isEqualTo(ResumeView.VIEWED);
     }
 
     @Test
@@ -166,6 +171,24 @@ class JobApplicationServiceTest {
         JobApplication found = jobApplicationService.findById(OWNER_ID, APPLICATION_ID);
 
         assertThat(found).isSameAs(app);
+    }
+
+    @Test
+    void 소유자는_자신의_지원_건_상세를_회사와_함께_조회할_수_있다() {
+        given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(application()));
+
+        JobApplicationResponse response = jobApplicationService.findDetail(OWNER_ID, APPLICATION_ID);
+
+        assertThat(response.position()).isEqualTo("백엔드 개발자");
+        assertThat(response.company().name()).isEqualTo("카카오");
+    }
+
+    @Test
+    void 다른_사용자의_지원_건은_상세를_조회할_수_없다() {
+        given(jobApplicationRepository.findById(APPLICATION_ID)).willReturn(Optional.of(application()));
+
+        assertErrorCode(() -> jobApplicationService.findDetail(OTHER_USER_ID, APPLICATION_ID),
+                ErrorCode.APPLICATION_NOT_FOUND);
     }
 
     @Test

@@ -1,9 +1,9 @@
 package com.ssangtteongnip.web.jobapplication;
 
 import com.ssangtteongnip.application.service.JobApplicationService;
+import com.ssangtteongnip.application.service.dto.JobApplicationResponse;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.application.service.request.JobApplicationRequest;
-import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -23,15 +23,15 @@ public class JobApplicationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<JobApplication> register(@AuthenticationPrincipal Long userId,
+    public ApiResponse<JobApplicationResponse> register(@AuthenticationPrincipal Long userId,
                                                 @RequestBody @Valid JobApplicationRequest request) {
         return ApiResponse.ok(jobApplicationService.register(userId, request));
     }
 
     @GetMapping
-    public ApiResponse<List<JobApplication>> findAll(@AuthenticationPrincipal Long userId,
+    public ApiResponse<List<JobApplicationResponse>> findAll(@AuthenticationPrincipal Long userId,
                                                      @RequestParam(required = false) JobApplicationStatus status) {
-        List<JobApplication> applications = status == null
+        List<JobApplicationResponse> applications = status == null
                 ? jobApplicationService.findAll(userId)
                 : jobApplicationService.findAll(userId, status);
         return ApiResponse.ok(applications);
@@ -43,33 +43,33 @@ public class JobApplicationController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<JobApplication> findById(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
-        return ApiResponse.ok(jobApplicationService.findById(userId, id));
+    public ApiResponse<JobApplicationResponse> findById(@AuthenticationPrincipal Long userId, @PathVariable Long id) {
+        return ApiResponse.ok(jobApplicationService.findDetail(userId, id));
     }
 
     @PatchMapping("/{id}/job-site")
-    public ApiResponse<JobApplication> changeJobSite(@AuthenticationPrincipal Long userId,
+    public ApiResponse<JobApplicationResponse> changeJobSite(@AuthenticationPrincipal Long userId,
                                                      @PathVariable Long id,
                                                      @RequestBody @Valid JobApplicationJobSiteRequest request) {
         return ApiResponse.ok(jobApplicationService.changeJobSite(userId, id, request.jobSite()));
     }
 
     @PatchMapping("/{id}/deadline")
-    public ApiResponse<JobApplication> changeDeadline(@AuthenticationPrincipal Long userId,
+    public ApiResponse<JobApplicationResponse> changeDeadline(@AuthenticationPrincipal Long userId,
                                                       @PathVariable Long id,
                                                       @RequestBody @Valid JobApplicationDeadlineRequest request) {
         return ApiResponse.ok(jobApplicationService.changeDeadline(userId, id, request.deadline()));
     }
 
     @PatchMapping("/{id}/resume-view")
-    public ApiResponse<JobApplication> changeResumeView(@AuthenticationPrincipal Long userId,
+    public ApiResponse<JobApplicationResponse> changeResumeView(@AuthenticationPrincipal Long userId,
                                                         @PathVariable Long id,
                                                         @RequestBody @Valid JobApplicationResumeViewRequest request) {
         return ApiResponse.ok(jobApplicationService.changeResumeView(userId, id, request.resumeView()));
     }
 
     @PatchMapping("/{id}/status")
-    public ApiResponse<JobApplication> decideResult(@AuthenticationPrincipal Long userId,
+    public ApiResponse<JobApplicationResponse> decideResult(@AuthenticationPrincipal Long userId,
                                                     @PathVariable Long id,
                                                     @RequestBody @Valid JobApplicationStatusRequest request) {
         return ApiResponse.ok(jobApplicationService.decideResult(userId, id, request.status()));
