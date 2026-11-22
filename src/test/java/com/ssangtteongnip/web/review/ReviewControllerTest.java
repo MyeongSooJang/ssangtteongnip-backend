@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.review;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ReviewService;
+import com.ssangtteongnip.application.service.dto.ReviewResponse;
 import com.ssangtteongnip.application.service.request.ReviewRequest;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
@@ -55,7 +56,7 @@ class ReviewControllerTest {
 
     @Test
     void GET_reviews_후기_목록을_조회한다() throws Exception {
-        given(reviewService.findAll(1L)).willReturn(List.of(review()));
+        given(reviewService.findAll(1L)).willReturn(List.of(ReviewResponse.convert(review())));
 
         mockMvc.perform(get("/api/reviews")
                         .header("Authorization", BEARER))
@@ -68,7 +69,7 @@ class ReviewControllerTest {
     void PATCH_reviews_후기를_작성한다() throws Exception {
         Review review = review();
         review.write("분위기가 좋았다", 4);
-        given(reviewService.write(eq(1L), eq(1L), any())).willReturn(review);
+        given(reviewService.write(eq(1L), eq(1L), any())).willReturn(ReviewResponse.convert(review));
 
         mockMvc.perform(patch("/api/reviews/1")
                         .header("Authorization", BEARER)
@@ -85,7 +86,7 @@ class ReviewControllerTest {
         Review review = review();
         review.write("분위기가 좋았다", 4);
         review.describeInterview(3, InterviewAtmosphere.COMFORTABLE, ApplyRoute.REFERRAL, List.of("자기소개"));
-        given(reviewService.write(eq(1L), eq(1L), any())).willReturn(review);
+        given(reviewService.write(eq(1L), eq(1L), any())).willReturn(ReviewResponse.convert(review));
 
         mockMvc.perform(patch("/api/reviews/1")
                         .header("Authorization", BEARER)
@@ -132,7 +133,7 @@ class ReviewControllerTest {
 
     @Test
     void PATCH_reviews_본문_필드를_구분해_서비스에_전달한다() throws Exception {
-        given(reviewService.write(eq(1L), eq(1L), any())).willReturn(review());
+        given(reviewService.write(eq(1L), eq(1L), any())).willReturn(ReviewResponse.convert(review()));
 
         mockMvc.perform(patch("/api/reviews/1")
                         .header("Authorization", BEARER)
