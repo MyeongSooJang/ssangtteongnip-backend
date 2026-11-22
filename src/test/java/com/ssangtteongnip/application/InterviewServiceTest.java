@@ -2,6 +2,7 @@ package com.ssangtteongnip.application;
 
 import com.ssangtteongnip.application.service.InterviewService;
 import com.ssangtteongnip.application.service.JobApplicationService;
+import com.ssangtteongnip.application.service.dto.InterviewResponse;
 import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
 import com.ssangtteongnip.application.service.request.InterviewRequest;
 import com.ssangtteongnip.domain.company.Company;
@@ -14,6 +15,7 @@ import com.ssangtteongnip.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -75,12 +77,14 @@ class InterviewServiceTest {
         given(jobApplicationService.findById(USER_ID, APPLICATION_ID)).willReturn(application);
         given(interviewRepository.save(any(Interview.class))).willAnswer(i -> i.getArgument(0));
 
-        Interview registered = interviewService.register(USER_ID, APPLICATION_ID,
+        InterviewResponse registered = interviewService.register(USER_ID, APPLICATION_ID,
                 new InterviewRequest(1, INTERVIEW_DATE, "판교 본사", "1차 면접", 80));
 
-        assertThat(registered.getApplication()).isSameAs(application);
-        assertThat(registered.getRound()).isEqualTo(1);
-        assertThat(registered.getScore()).isEqualTo(80);
+        ArgumentCaptor<Interview> saved = ArgumentCaptor.forClass(Interview.class);
+        verify(interviewRepository).save(saved.capture());
+        assertThat(saved.getValue().getApplication()).isSameAs(application);
+        assertThat(registered.round()).isEqualTo(1);
+        assertThat(registered.score()).isEqualTo(80);
     }
 
     @Test

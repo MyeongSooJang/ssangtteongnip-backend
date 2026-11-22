@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.interview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.InterviewService;
+import com.ssangtteongnip.application.service.dto.InterviewResponse;
 import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
 import com.ssangtteongnip.application.service.request.InterviewRequest;
 import com.ssangtteongnip.domain.company.Company;
@@ -53,7 +54,7 @@ class InterviewControllerTest {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
         JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.now());
         Interview interview = Interview.create(app, 1, LocalDateTime.now(), "판교", "1차 면접");
-        given(interviewService.register(eq(1L), eq(1L), any())).willReturn(interview);
+        given(interviewService.register(eq(1L), eq(1L), any())).willReturn(InterviewResponse.convert(interview));
 
         mockMvc.perform(post("/api/applications/1/interviews")
                         .header("Authorization", BEARER)
@@ -72,7 +73,7 @@ class InterviewControllerTest {
         JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.now());
         Interview interview = Interview.create(app, 1, LocalDateTime.now(), "판교", "1차 면접");
         interview.evaluate(85);
-        given(interviewService.evaluate(eq(1L), eq(1L), eq(1L), any())).willReturn(interview);
+        given(interviewService.evaluate(eq(1L), eq(1L), eq(1L), any())).willReturn(InterviewResponse.convert(interview));
 
         mockMvc.perform(patch("/api/applications/1/interviews/1/score")
                         .header("Authorization", BEARER)
@@ -100,7 +101,7 @@ class InterviewControllerTest {
 
     @Test
     void 지원_건의_면접_목록을_조회한다() throws Exception {
-        given(interviewService.findInterviews(1L, 1L)).willReturn(List.of(interview()));
+        given(interviewService.findInterviews(1L, 1L)).willReturn(List.of(InterviewResponse.convert(interview())));
 
         mockMvc.perform(get("/api/applications/1/interviews").header("Authorization", BEARER))
                 .andExpect(status().isOk())
@@ -125,7 +126,7 @@ class InterviewControllerTest {
     void 면접에_질문을_추가하면_201과_질문을_반환한다() throws Exception {
         Interview interview = interview();
         interview.addQuestion("자기소개 해주세요", "저는...", "잘 대답했음");
-        given(interviewService.addQuestion(eq(1L), eq(1L), eq(1L), any())).willReturn(interview);
+        given(interviewService.addQuestion(eq(1L), eq(1L), eq(1L), any())).willReturn(InterviewResponse.convert(interview));
 
         mockMvc.perform(post("/api/applications/1/interviews/1/questions")
                         .header("Authorization", BEARER)
@@ -149,7 +150,7 @@ class InterviewControllerTest {
 
     @Test
     void POST_interviews_장소와_메모를_구분해_서비스에_전달한다() throws Exception {
-        given(interviewService.register(eq(1L), eq(1L), any())).willReturn(interview());
+        given(interviewService.register(eq(1L), eq(1L), any())).willReturn(InterviewResponse.convert(interview()));
 
         mockMvc.perform(post("/api/applications/1/interviews")
                         .header("Authorization", BEARER)
@@ -165,7 +166,7 @@ class InterviewControllerTest {
 
     @Test
     void 면접_질문의_질문_답변_메모를_구분해_서비스에_전달한다() throws Exception {
-        given(interviewService.addQuestion(eq(1L), eq(1L), eq(1L), any())).willReturn(interview());
+        given(interviewService.addQuestion(eq(1L), eq(1L), eq(1L), any())).willReturn(InterviewResponse.convert(interview()));
 
         mockMvc.perform(post("/api/applications/1/interviews/1/questions")
                         .header("Authorization", BEARER)

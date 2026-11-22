@@ -1,5 +1,6 @@
 package com.ssangtteongnip.application.service;
 
+import com.ssangtteongnip.application.service.dto.InterviewResponse;
 import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
 import com.ssangtteongnip.application.service.request.InterviewRequest;
 import com.ssangtteongnip.domain.interview.Interview;
@@ -25,32 +26,35 @@ public class InterviewService {
     private final Clock clock;
 
     @Transactional
-    public Interview register(Long userId, Long applicationId, InterviewRequest request) {
+    public InterviewResponse register(Long userId, Long applicationId, InterviewRequest request) {
         JobApplication application = jobApplicationService.findById(userId, applicationId);
         Interview interview = Interview.create(application, request.round(), request.interviewDate(),
                 request.location(), request.note());
         interview.evaluate(request.score());
         application.startInterview(LocalDateTime.now(clock));
-        return interviewRepository.save(interview);
+        return InterviewResponse.convert(interviewRepository.save(interview));
     }
 
     @Transactional
-    public Interview evaluate(Long userId, Long applicationId, Long interviewId, Integer score) {
+    public InterviewResponse evaluate(Long userId, Long applicationId, Long interviewId, Integer score) {
         Interview interview = findInterview(userId, applicationId, interviewId);
         interview.evaluate(score);
-        return interview;
+        return InterviewResponse.convert(interview);
     }
 
-    public List<Interview> findInterviews(Long userId, Long applicationId) {
+    public List<InterviewResponse> findInterviews(Long userId, Long applicationId) {
         jobApplicationService.findById(userId, applicationId);
-        return interviewRepository.findByApplicationId(applicationId);
+        return interviewRepository.findByApplicationId(applicationId).stream()
+                .map(InterviewResponse::convert)
+                .toList();
     }
 
     @Transactional
-    public Interview addQuestion(Long userId, Long applicationId, Long interviewId, InterviewQuestionRequest request) {
+    public InterviewResponse addQuestion(Long userId, Long applicationId, Long interviewId,
+                                         InterviewQuestionRequest request) {
         Interview interview = findInterview(userId, applicationId, interviewId);
         interview.addQuestion(request.question(), request.answer(), request.memo());
-        return interview;
+        return InterviewResponse.convert(interview);
     }
 
     private Interview findInterview(Long userId, Long applicationId, Long interviewId) {

@@ -1,9 +1,9 @@
 package com.ssangtteongnip.web.interview;
 
 import com.ssangtteongnip.application.service.InterviewService;
+import com.ssangtteongnip.application.service.dto.InterviewResponse;
 import com.ssangtteongnip.application.service.request.InterviewQuestionRequest;
 import com.ssangtteongnip.application.service.request.InterviewRequest;
-import com.ssangtteongnip.domain.interview.Interview;
 import com.ssangtteongnip.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,19 +22,19 @@ public class InterviewController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<Interview> register(@AuthenticationPrincipal Long userId,
+    public ApiResponse<InterviewResponse> register(@AuthenticationPrincipal Long userId,
                                            @PathVariable Long applicationId,
                                            @RequestBody @Valid InterviewRequest request) {
         return ApiResponse.ok(interviewService.register(userId, applicationId, request));
     }
 
     @GetMapping
-    public ApiResponse<List<Interview>> findAll(@AuthenticationPrincipal Long userId, @PathVariable Long applicationId) {
+    public ApiResponse<List<InterviewResponse>> findAll(@AuthenticationPrincipal Long userId, @PathVariable Long applicationId) {
         return ApiResponse.ok(interviewService.findInterviews(userId, applicationId));
     }
 
     @PatchMapping("/{interviewId}/score")
-    public ApiResponse<Interview> evaluate(@AuthenticationPrincipal Long userId,
+    public ApiResponse<InterviewResponse> evaluate(@AuthenticationPrincipal Long userId,
                                            @PathVariable Long applicationId,
                                            @PathVariable Long interviewId,
                                            @RequestBody @Valid InterviewScoreRequest request) {
@@ -43,7 +43,7 @@ public class InterviewController {
 
     @PostMapping("/{interviewId}/questions")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<Interview> addQuestion(@AuthenticationPrincipal Long userId,
+    public ApiResponse<InterviewResponse> addQuestion(@AuthenticationPrincipal Long userId,
                                               @PathVariable Long applicationId,
                                               @PathVariable Long interviewId,
                                               @RequestBody @Valid InterviewQuestionRequest request) {
