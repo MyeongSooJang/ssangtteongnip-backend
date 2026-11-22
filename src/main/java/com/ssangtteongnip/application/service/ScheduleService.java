@@ -1,5 +1,6 @@
 package com.ssangtteongnip.application.service;
 
+import com.ssangtteongnip.application.service.dto.ScheduleResponse;
 import com.ssangtteongnip.application.service.request.ScheduleRequest;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.review.Review;
@@ -27,7 +28,7 @@ public class ScheduleService {
     private final Clock clock;
 
     @Transactional
-    public Schedule register(Long userId, ScheduleRequest request) {
+    public ScheduleResponse register(Long userId, ScheduleRequest request) {
         JobApplication application = jobApplicationService.findById(userId, request.applicationId());
         Schedule schedule = scheduleRepository.save(
                 Schedule.create(application, request.title(), request.scheduledAt(),
@@ -37,7 +38,7 @@ public class ScheduleService {
             application.startInterview(LocalDateTime.now(clock));
             createReviewIfAbsent(application);
         }
-        return schedule;
+        return ScheduleResponse.convert(schedule);
     }
 
     private void createReviewIfAbsent(JobApplication application) {
@@ -47,19 +48,23 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Schedule updateAddress(Long userId, Long id, String address) {
+    public ScheduleResponse updateAddress(Long userId, Long id, String address) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
         schedule.validateOwner(userId);
         schedule.changeAddress(address);
-        return schedule;
+        return ScheduleResponse.convert(schedule);
     }
 
-    public List<Schedule> findAll(Long userId) {
-        return scheduleRepository.findByApplicationUserId(userId);
+    public List<ScheduleResponse> findAll(Long userId) {
+        return scheduleRepository.findByApplicationUserId(userId).stream()
+                .map(ScheduleResponse::convert)
+                .toList();
     }
 
-    public List<Schedule> findAll(Long userId, LocalDateTime from, LocalDateTime to) {
-        return scheduleRepository.findInPeriod(userId, from, to);
+    public List<ScheduleResponse> findAll(Long userId, LocalDateTime from, LocalDateTime to) {
+        return scheduleRepository.findInPeriod(userId, from, to).stream()
+                .map(ScheduleResponse::convert)
+                .toList();
     }
 }

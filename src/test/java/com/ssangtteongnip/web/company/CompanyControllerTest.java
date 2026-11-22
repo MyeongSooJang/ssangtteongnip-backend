@@ -10,6 +10,7 @@ import com.ssangtteongnip.application.service.request.CompanyRequest;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.review.ApplyRoute;
+import com.ssangtteongnip.domain.review.CompanyReviewRating;
 import com.ssangtteongnip.domain.review.InterviewAtmosphere;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.global.config.SecurityConfig;
@@ -55,7 +56,8 @@ class CompanyControllerTest {
     @Test
     void POST_companies_회사를_등록한다() throws Exception {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
-        given(companyService.register(any())).willReturn(company);
+        given(companyService.register(any()))
+                .willReturn(CompanyResponse.attachRating(company, CompanyReviewRating.none(1L)));
 
         mockMvc.perform(post("/api/companies")
                         .header("Authorization", BEARER)

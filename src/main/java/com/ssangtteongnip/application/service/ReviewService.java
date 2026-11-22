@@ -1,5 +1,6 @@
 package com.ssangtteongnip.application.service;
 
+import com.ssangtteongnip.application.service.dto.ReviewResponse;
 import com.ssangtteongnip.application.service.request.ReviewRequest;
 import com.ssangtteongnip.domain.review.Review;
 import com.ssangtteongnip.domain.review.ReviewRepository;
@@ -18,17 +19,19 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    public List<Review> findAll(Long userId) {
-        return reviewRepository.findByApplicationUserId(userId);
+    public List<ReviewResponse> findAll(Long userId) {
+        return reviewRepository.findByApplicationUserId(userId).stream()
+                .map(ReviewResponse::convert)
+                .toList();
     }
 
     @Transactional
-    public Review write(Long userId, Long id, ReviewRequest request) {
+    public ReviewResponse write(Long userId, Long id, ReviewRequest request) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
         review.validateOwner(userId);
         review.compose(request.content(), request.rating(), request.difficulty(), request.atmosphere(),
                 request.route(), request.questions());
-        return review;
+        return ReviewResponse.convert(review);
     }
 }

@@ -1,5 +1,6 @@
 package com.ssangtteongnip.application.service;
 
+import com.ssangtteongnip.application.service.dto.JobApplicationResponse;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.application.service.request.JobApplicationRequest;
 import com.ssangtteongnip.domain.company.Company;
@@ -27,20 +28,25 @@ public class JobApplicationService {
     private final CompanyService companyService;
 
     @Transactional
-    public JobApplication register(Long userId, JobApplicationRequest request) {
+    public JobApplicationResponse register(Long userId, JobApplicationRequest request) {
         Company company = companyService.findById(request.companyId());
-        return jobApplicationRepository.save(
+        JobApplication saved = jobApplicationRepository.save(
                 JobApplication.create(userId, company, request.position(), request.appliedDate(),
                         request.jobSite(), request.deadline(), request.resumeView())
         );
+        return JobApplicationResponse.convert(saved);
     }
 
-    public List<JobApplication> findAll(Long userId) {
-        return jobApplicationRepository.findByUserId(userId);
+    public List<JobApplicationResponse> findAll(Long userId) {
+        return jobApplicationRepository.findByUserId(userId).stream()
+                .map(JobApplicationResponse::convert)
+                .toList();
     }
 
-    public List<JobApplication> findAll(Long userId, JobApplicationStatus status) {
-        return jobApplicationRepository.findByUserIdAndStatus(userId, status);
+    public List<JobApplicationResponse> findAll(Long userId, JobApplicationStatus status) {
+        return jobApplicationRepository.findByUserIdAndStatus(userId, status).stream()
+                .map(JobApplicationResponse::convert)
+                .toList();
     }
 
     public List<JobSiteStatisticsResponse> summarizeByJobSite(Long userId) {
@@ -56,32 +62,36 @@ public class JobApplicationService {
         return application;
     }
 
+    public JobApplicationResponse findDetail(Long userId, Long id) {
+        return JobApplicationResponse.convert(findById(userId, id));
+    }
+
     @Transactional
-    public JobApplication changeJobSite(Long userId, Long id, JobSite jobSite) {
+    public JobApplicationResponse changeJobSite(Long userId, Long id, JobSite jobSite) {
         JobApplication application = findById(userId, id);
         application.changeJobSite(jobSite);
-        return application;
+        return JobApplicationResponse.convert(application);
     }
 
     @Transactional
-    public JobApplication changeDeadline(Long userId, Long id, LocalDate deadline) {
+    public JobApplicationResponse changeDeadline(Long userId, Long id, LocalDate deadline) {
         JobApplication application = findById(userId, id);
         application.changeDeadline(deadline);
-        return application;
+        return JobApplicationResponse.convert(application);
     }
 
     @Transactional
-    public JobApplication changeResumeView(Long userId, Long id, ResumeView resumeView) {
+    public JobApplicationResponse changeResumeView(Long userId, Long id, ResumeView resumeView) {
         JobApplication application = findById(userId, id);
         application.changeResumeView(resumeView);
-        return application;
+        return JobApplicationResponse.convert(application);
     }
 
     @Transactional
-    public JobApplication decideResult(Long userId, Long id, JobApplicationStatus status) {
+    public JobApplicationResponse decideResult(Long userId, Long id, JobApplicationStatus status) {
         JobApplication application = findById(userId, id);
         status.apply(application);
-        return application;
+        return JobApplicationResponse.convert(application);
     }
 
     // 마감일 + 1달이 지난 서류 제출 건을 불합격으로 바꾸고, 바꾼 건 수를 돌려준다.

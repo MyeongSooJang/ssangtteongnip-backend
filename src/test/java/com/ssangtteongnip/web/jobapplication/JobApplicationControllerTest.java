@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.jobapplication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.JobApplicationService;
+import com.ssangtteongnip.application.service.dto.JobApplicationResponse;
 import com.ssangtteongnip.application.service.dto.JobSiteStatisticsResponse;
 import com.ssangtteongnip.application.service.request.JobApplicationRequest;
 import com.ssangtteongnip.domain.company.Company;
@@ -56,7 +57,7 @@ class JobApplicationControllerTest {
 
     @Test
     void POST_applications_지원_건을_등록한다() throws Exception {
-        given(jobApplicationService.register(eq(1L), any())).willReturn(sampleApplication());
+        given(jobApplicationService.register(eq(1L), any())).willReturn(JobApplicationResponse.convert(sampleApplication()));
 
         mockMvc.perform(post("/api/applications")
                         .header("Authorization", BEARER)
@@ -71,7 +72,7 @@ class JobApplicationControllerTest {
 
     @Test
     void POST_applications_본문_필드를_구분해_서비스에_전달한다() throws Exception {
-        given(jobApplicationService.register(eq(1L), any())).willReturn(sampleApplication());
+        given(jobApplicationService.register(eq(1L), any())).willReturn(JobApplicationResponse.convert(sampleApplication()));
 
         mockMvc.perform(post("/api/applications")
                         .header("Authorization", BEARER)
@@ -102,7 +103,7 @@ class JobApplicationControllerTest {
     void PATCH_applications_job_site_구직_사이트를_변경한다() throws Exception {
         JobApplication app = sampleApplication();
         app.changeJobSite(JobSite.WANTED);
-        given(jobApplicationService.changeJobSite(eq(1L), eq(1L), any())).willReturn(app);
+        given(jobApplicationService.changeJobSite(eq(1L), eq(1L), any())).willReturn(JobApplicationResponse.convert(app));
 
         mockMvc.perform(patch("/api/applications/1/job-site")
                         .header("Authorization", BEARER)
@@ -136,7 +137,7 @@ class JobApplicationControllerTest {
     void PATCH_applications_status_상태를_전이한다() throws Exception {
         JobApplication app = sampleApplication();
         app.startInterview(java.time.LocalDateTime.of(2026, 11, 5, 10, 0));
-        given(jobApplicationService.decideResult(eq(1L), eq(1L), any())).willReturn(app);
+        given(jobApplicationService.decideResult(eq(1L), eq(1L), any())).willReturn(JobApplicationResponse.convert(app));
 
         mockMvc.perform(patch("/api/applications/1/status")
                         .header("Authorization", BEARER)
@@ -151,7 +152,7 @@ class JobApplicationControllerTest {
     void GET_applications_status로_면접_단계_지원_건만_조회한다() throws Exception {
         JobApplication app = sampleApplication();
         app.startInterview(java.time.LocalDateTime.of(2026, 11, 5, 10, 0));
-        given(jobApplicationService.findAll(1L, JobApplicationStatus.INTERVIEW)).willReturn(java.util.List.of(app));
+        given(jobApplicationService.findAll(1L, JobApplicationStatus.INTERVIEW)).willReturn(java.util.List.of(JobApplicationResponse.convert(app)));
 
         mockMvc.perform(get("/api/applications")
                         .header("Authorization", BEARER).param("status", "INTERVIEW"))
@@ -198,13 +199,23 @@ class JobApplicationControllerTest {
 
     @Test
     void 단건_조회한_지원_건의_상태와_직무를_반환한다() throws Exception {
-        given(jobApplicationService.findById(1L, 1L)).willReturn(sampleApplication());
+        given(jobApplicationService.findDetail(1L, 1L)).willReturn(JobApplicationResponse.convert(sampleApplication()));
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.position").value("백엔드 개발자"))
                 .andExpect(jsonPath("$.data.status").value("RESUME_SUBMITTED"));
+    }
+
+    @Test
+    void 지원_건_응답은_회사를_담고_소유자_식별값은_담지_않는다() throws Exception {
+        given(jobApplicationService.findDetail(1L, 1L)).willReturn(JobApplicationResponse.convert(sampleApplication()));
+
+        mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.company.name").value("카카오"))
+                .andExpect(jsonPath("$.data.userId").doesNotExist());
     }
 
     @Test
@@ -231,7 +242,7 @@ class JobApplicationControllerTest {
     void 지원_건_응답에_서류_통과_시점이_담긴다() throws Exception {
         JobApplication app = sampleApplication();
         app.startInterview(java.time.LocalDateTime.of(2026, 11, 5, 10, 0));
-        given(jobApplicationService.findById(1L, 1L)).willReturn(app);
+        given(jobApplicationService.findDetail(1L, 1L)).willReturn(JobApplicationResponse.convert(app));
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isOk())
@@ -242,7 +253,7 @@ class JobApplicationControllerTest {
 
     @Test
     void 존재하지_않거나_남의_지원_건은_404를_반환한다() throws Exception {
-        given(jobApplicationService.findById(1L, 1L)).willThrow(new BusinessException(ErrorCode.APPLICATION_NOT_FOUND));
+        given(jobApplicationService.findDetail(1L, 1L)).willThrow(new BusinessException(ErrorCode.APPLICATION_NOT_FOUND));
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isNotFound())
@@ -264,7 +275,7 @@ class JobApplicationControllerTest {
         JobApplication app = sampleApplication();
         app.changeDeadline(LocalDate.of(2026, 11, 30));
         given(jobApplicationService.changeDeadline(eq(1L), eq(1L),
-                eq(LocalDate.of(2026, 11, 30)))).willReturn(app);
+                eq(LocalDate.of(2026, 11, 30)))).willReturn(JobApplicationResponse.convert(app));
 
         mockMvc.perform(patch("/api/applications/1/deadline")
                         .header("Authorization", BEARER)
@@ -299,7 +310,7 @@ class JobApplicationControllerTest {
         JobApplication app = sampleApplication();
         app.changeResumeView(ResumeView.VIEWED);
         given(jobApplicationService.changeResumeView(eq(1L), eq(1L),
-                eq(ResumeView.VIEWED))).willReturn(app);
+                eq(ResumeView.VIEWED))).willReturn(JobApplicationResponse.convert(app));
 
         mockMvc.perform(patch("/api/applications/1/resume-view")
                         .header("Authorization", BEARER)
@@ -326,7 +337,7 @@ class JobApplicationControllerTest {
         JobApplication app = JobApplication.create(1L, Company.create("카카오", "IT", "https://kakao.com"), "백엔드 개발자",
                 LocalDate.of(2026, 10, 1), JobSite.SARAMIN, LocalDate.of(2026, 10, 10), ResumeView.NOT_VIEWED);
         app.rejectIfDeadlineExpired(LocalDateTime.of(2026, 11, 11, 7, 0));
-        given(jobApplicationService.findById(1L, 1L)).willReturn(app);
+        given(jobApplicationService.findDetail(1L, 1L)).willReturn(JobApplicationResponse.convert(app));
 
         mockMvc.perform(get("/api/applications/1").header("Authorization", BEARER))
                 .andExpect(status().isOk())
