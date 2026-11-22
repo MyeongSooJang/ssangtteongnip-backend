@@ -6,9 +6,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -17,7 +14,6 @@ import java.util.Objects;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     public static final int MIN_PASSWORD_LENGTH = 8;
@@ -38,11 +34,9 @@ public class User {
     @Column(nullable = false)
     private String passwordHash;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     public static User register(Email email, String name, String rawPassword, PasswordHasher hasher) {
@@ -64,5 +58,17 @@ public class User {
 
     public void changeName(String name) {
         this.name = name;
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void recordModification() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

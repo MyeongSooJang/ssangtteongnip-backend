@@ -4,12 +4,10 @@ import com.ssangtteongnip.domain.FakePasswordHasher;
 import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
-import com.ssangtteongnip.global.config.JpaConfig;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 // 이메일이 임베디드 값 객체라서, 값 객체로 조회하는 파생 쿼리와 email 컬럼의 유니크 제약이 그대로 동작하는지 확인한다.
 @DataJpaTest
-@Import(JpaConfig.class)
 class UserRepositoryTest {
 
     @Autowired UserRepository userRepository;

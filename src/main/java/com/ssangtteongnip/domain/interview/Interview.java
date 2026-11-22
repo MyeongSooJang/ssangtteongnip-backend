@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import java.util.List;
 @Table(name = "interviews")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class Interview {
 
     private static final int MIN_ROUND = 1;
@@ -48,7 +45,6 @@ public class Interview {
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InterviewQuestion> questions = new ArrayList<>();
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -88,5 +84,10 @@ public class Interview {
         if (score != null && (score < MIN_SCORE || score > MAX_SCORE)) {
             throw new BusinessException(ErrorCode.INVALID_INTERVIEW_SCORE);
         }
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        this.createdAt = LocalDateTime.now();
     }
 }

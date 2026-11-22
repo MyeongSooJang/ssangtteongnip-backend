@@ -7,9 +7,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +17,6 @@ import java.util.Objects;
 @Table(name = "reviews")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class Review {
 
     private static final int MIN_RATING = 1;
@@ -56,11 +52,9 @@ public class Review {
     @Column(name = "question", columnDefinition = "TEXT")
     private List<String> questions = new ArrayList<>();
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     public static Review create(JobApplication application) {
@@ -117,5 +111,17 @@ public class Review {
         if (difficulty != null && (difficulty < MIN_DIFFICULTY || difficulty > MAX_DIFFICULTY)) {
             throw new BusinessException(ErrorCode.INVALID_DIFFICULTY);
         }
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void recordModification() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

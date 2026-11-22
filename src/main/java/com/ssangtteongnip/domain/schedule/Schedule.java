@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +14,6 @@ import java.time.LocalDateTime;
 @Table(name = "schedules")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class Schedule {
 
     @Id
@@ -41,7 +38,6 @@ public class Schedule {
 
     private String note;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -69,5 +65,10 @@ public class Schedule {
         schedule.address = address;
         schedule.note = note;
         return schedule;
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        this.createdAt = LocalDateTime.now();
     }
 }

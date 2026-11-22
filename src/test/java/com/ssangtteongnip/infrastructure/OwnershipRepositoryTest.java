@@ -12,13 +12,11 @@ import com.ssangtteongnip.domain.review.ReviewRepository;
 import com.ssangtteongnip.domain.schedule.Schedule;
 import com.ssangtteongnip.domain.schedule.ScheduleRepository;
 import com.ssangtteongnip.domain.schedule.ScheduleType;
-import com.ssangtteongnip.global.config.JpaConfig;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,7 +24,6 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(JpaConfig.class)
 class OwnershipRepositoryTest {
 
     private static final Long OWNER = 1L;

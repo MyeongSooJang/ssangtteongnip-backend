@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -19,7 +17,6 @@ import java.util.UUID;
 @Table(name = "user_files")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class UserFile {
 
     public static final int MAX_FILES_PER_USER = 20;
@@ -52,7 +49,6 @@ public class UserFile {
     @Column(name = "content_type")
     private String contentType;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -109,5 +105,10 @@ public class UserFile {
         String name = fileName.replace('\\', '/');
         name = name.substring(name.lastIndexOf('/') + 1).trim();
         return name.isEmpty() ? DEFAULT_FILE_NAME : name;
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        this.createdAt = LocalDateTime.now();
     }
 }

@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,7 +13,6 @@ import java.time.LocalDateTime;
 @Table(name = "profiles")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class Profile {
 
     @Id
@@ -31,11 +27,9 @@ public class Profile {
     @Embedded
     private PersonalInfo info;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     public static Profile create(User user) {
@@ -54,5 +48,17 @@ public class Profile {
         info.validateJobSearchStartDate(today);
         this.user.changeName(name);
         this.info = info;
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void recordModification() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

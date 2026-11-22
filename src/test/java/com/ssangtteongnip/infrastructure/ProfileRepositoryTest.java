@@ -7,19 +7,16 @@ import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
-import com.ssangtteongnip.global.config.JpaConfig;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(JpaConfig.class)
 class ProfileRepositoryTest {
 
     @Autowired UserRepository userRepository;

@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +11,6 @@ import java.time.LocalDateTime;
 @Table(name = "companies")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class Company {
 
     @Id
@@ -28,11 +24,9 @@ public class Company {
 
     private String website;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     public static Company create(String name, String industry, String website) {
@@ -47,5 +41,17 @@ public class Company {
         this.name = name;
         this.industry = industry;
         this.website = website;
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void recordModification() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

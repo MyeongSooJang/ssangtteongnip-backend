@@ -6,13 +6,12 @@ import com.ssangtteongnip.domain.jobapplication.JobSite;
 import com.ssangtteongnip.domain.jobapplication.ResumeView;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.company.CompanyRepository;
-import com.ssangtteongnip.global.config.JpaConfig;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,7 +20,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(JpaConfig.class)
 class JobApplicationRepositoryTest {
 
     private static final Long USER_ID = 1L;
@@ -46,6 +44,30 @@ class JobApplicationRepositoryTest {
     private JobApplication save(Long userId, String position, LocalDate deadline, ResumeView resumeView) {
         return jobApplicationRepository.save(JobApplication.create(userId, company, position,
                 LocalDate.of(2026, 10, 1), JobSite.SARAMIN, deadline, resumeView));
+    }
+
+    @Test
+    void 저장하면_생성_시각과_수정_시각이_같은_값으로_기록된다() {
+        JobApplication saved = save("백엔드 개발자", DEADLINE);
+        em.flush();
+
+        assertThat(saved.getCreatedAt()).isNotNull();
+        assertThat(saved.getUpdatedAt()).isEqualTo(saved.getCreatedAt());
+    }
+
+    @Test
+    void 수정하면_수정_시각만_다시_기록된다() {
+        JobApplication saved = save("백엔드 개발자", DEADLINE);
+        em.flush();
+        LocalDateTime createdAt = saved.getCreatedAt();
+        LocalDateTime longAgo = LocalDateTime.of(2000, 1, 1, 0, 0);
+        ReflectionTestUtils.setField(saved, "updatedAt", longAgo);
+
+        saved.changeJobSite(JobSite.WANTED);
+        em.flush();
+
+        assertThat(saved.getUpdatedAt()).isAfter(longAgo);
+        assertThat(saved.getCreatedAt()).isEqualTo(createdAt);
     }
 
     @Test

@@ -7,9 +7,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,7 +16,6 @@ import java.util.Objects;
 @Table(name = "applications")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class JobApplication {
 
     @Id
@@ -59,11 +55,9 @@ public class JobApplication {
     // 서류 통과(면접 일정이나 면접 기록이 처음 등록된) 시점. 이후 불합격이 되어도 유지되며, 서류 탈락이면 null이다.
     private LocalDateTime documentPassedAt;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     public static JobApplication create(Long userId, Company company, String position, LocalDate appliedDate) {
@@ -156,5 +150,17 @@ public class JobApplication {
         if (!this.status.canChangeStatus(next)) {
             throw new BusinessException(ErrorCode.INVALID_STATUS_TRANSITION);
         }
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void recordModification() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

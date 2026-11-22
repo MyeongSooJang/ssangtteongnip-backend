@@ -2,12 +2,10 @@ package com.ssangtteongnip.infrastructure;
 
 import com.ssangtteongnip.domain.studylog.StudyLog;
 import com.ssangtteongnip.domain.studylog.StudyLogRepository;
-import com.ssangtteongnip.global.config.JpaConfig;
 import com.ssangtteongnip.infrastructure.persistence.StudyLogJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,7 +13,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(JpaConfig.class)
 class StudyLogRepositoryTest {
 
     private static final Long OWNER = 1L;
