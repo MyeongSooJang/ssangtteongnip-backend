@@ -32,6 +32,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 엔티티는 정적 팩토리 `create(...)`로 생성한다.
 
+### 계층 의존 규칙
+
+의존 방향은 `web → application → domain ← infrastructure`다. 별도 포트/어댑터 패키지나 `XxxPort`·`XxxAdapter` 클래스는 만들지 않는다. 외부 시스템 경계(`FileStorage`, `MailSender` 등)는 이미 도메인의 인터페이스와 `infrastructure` 구현체로 나뉘어 있고, 구현체가 하나뿐이라 그 이상의 추상화는 이득이 없다.
+
+- **도메인은 `jakarta.persistence`까지만 허용하고 Spring은 쓰지 않는다.** JPA 엔티티와 도메인 모델을 나누면 엔티티 수만큼 매핑 클래스가 늘고 Dirty Checking·지연 로딩의 이점을 잃는다. 지금 규모에서 JPA 교체는 확정이 아니므로 이 타협을 택했다. 생성·수정 시각은 Spring Data Auditing 대신 `@PrePersist`/`@PreUpdate`로 채운다.
+- 컨트롤러는 엔티티를 반환하지 않는다. 서비스가 트랜잭션 안에서 `XxxResponse`로 변환해 돌려준다. 다른 서비스가 쓰는 엔티티 조회는 `findById`, 컨트롤러용은 `findDetail`처럼 나눈다.
+- 이 규칙은 `ArchitectureTest`(ArchUnit)가 검사한다. 어기면 `./gradlew test`가 실패한다.
+
 ### Spring Data JPA 메소드 이름
 
 - 파생 쿼리 이름이 **30자 이상**이거나, 조건이 **3개 이상**이거나, `OrderBy`가 붙으면 쓰지 않고 `@Query`와 의미 중심 이름으로 바꾼다. (예: `findInPeriod`, `findRatings`)
