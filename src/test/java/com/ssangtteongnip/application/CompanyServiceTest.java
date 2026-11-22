@@ -56,11 +56,13 @@ class CompanyServiceTest {
         given(companyRepository.existsByName("카카오")).willReturn(false);
         given(companyRepository.save(any(Company.class))).willAnswer(i -> i.getArgument(0));
 
-        Company registered = companyService.register(new CompanyRequest("카카오", "IT", "https://kakao.com"));
+        CompanyResponse registered = companyService.register(new CompanyRequest("카카오", "IT", "https://kakao.com"));
 
-        assertThat(registered.getName()).isEqualTo("카카오");
-        assertThat(registered.getIndustry()).isEqualTo("IT");
-        assertThat(registered.getWebsite()).isEqualTo("https://kakao.com");
+        assertThat(registered.name()).isEqualTo("카카오");
+        assertThat(registered.industry()).isEqualTo("IT");
+        assertThat(registered.website()).isEqualTo("https://kakao.com");
+        assertThat(registered.reviewCount()).isZero();
+        assertThat(registered.averageRating()).isNull();
     }
 
     @Test

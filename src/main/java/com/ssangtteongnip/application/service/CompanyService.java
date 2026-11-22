@@ -25,13 +25,14 @@ public class CompanyService {
     private final ReviewRepository reviewRepository;
 
     @Transactional
-    public Company register(CompanyRequest request) {
+    public CompanyResponse register(CompanyRequest request) {
         if (companyRepository.existsByName(request.name())) {
             throw new BusinessException(ErrorCode.COMPANY_ALREADY_EXISTS);
         }
-        return companyRepository.save(
+        Company saved = companyRepository.save(
                 Company.create(request.name(), request.industry(), request.website())
         );
+        return CompanyResponse.attachRating(saved, CompanyReviewRating.none(saved.getId()));
     }
 
     public List<CompanyResponse> findAll() {
