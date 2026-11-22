@@ -2,6 +2,7 @@ package com.ssangtteongnip.web.schedule;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssangtteongnip.application.service.ScheduleService;
+import com.ssangtteongnip.application.service.dto.ScheduleResponse;
 import com.ssangtteongnip.application.service.request.ScheduleRequest;
 import com.ssangtteongnip.domain.company.Company;
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
@@ -51,7 +52,7 @@ class ScheduleControllerTest {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
         JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.now());
         Schedule schedule = Schedule.create(app, "1차 면접", LocalDateTime.now(), ScheduleType.INTERVIEW, "경기도 성남시 판교역로 166", "");
-        given(scheduleService.register(eq(1L), any())).willReturn(schedule);
+        given(scheduleService.register(eq(1L), any())).willReturn(ScheduleResponse.convert(schedule));
 
         mockMvc.perform(post("/api/schedules")
                         .header("Authorization", BEARER)
@@ -76,7 +77,7 @@ class ScheduleControllerTest {
 
     @Test
     void 기간을_지정하지_않으면_전체_일정을_조회한다() throws Exception {
-        given(scheduleService.findAll(1L)).willReturn(List.of(schedule("판교")));
+        given(scheduleService.findAll(1L)).willReturn(List.of(ScheduleResponse.convert(schedule("판교"))));
 
         mockMvc.perform(get("/api/schedules")
                         .header("Authorization", BEARER))
@@ -89,7 +90,7 @@ class ScheduleControllerTest {
     void 기간을_지정하면_해당_기간의_일정만_조회한다() throws Exception {
         LocalDateTime from = LocalDateTime.of(2026, 11, 1, 0, 0);
         LocalDateTime to = LocalDateTime.of(2026, 11, 30, 23, 59);
-        given(scheduleService.findAll(1L, from, to)).willReturn(List.of(schedule("판교")));
+        given(scheduleService.findAll(1L, from, to)).willReturn(List.of(ScheduleResponse.convert(schedule("판교"))));
 
         mockMvc.perform(get("/api/schedules")
                         .header("Authorization", BEARER)
@@ -102,7 +103,7 @@ class ScheduleControllerTest {
 
     @Test
     void 기간의_한쪽만_지정하면_전체_일정을_조회한다() throws Exception {
-        given(scheduleService.findAll(1L)).willReturn(List.of(schedule("판교")));
+        given(scheduleService.findAll(1L)).willReturn(List.of(ScheduleResponse.convert(schedule("판교"))));
 
         mockMvc.perform(get("/api/schedules")
                         .header("Authorization", BEARER)
@@ -141,7 +142,7 @@ class ScheduleControllerTest {
         Company company = Company.create("카카오", "IT", "https://kakao.com");
         JobApplication app = JobApplication.create(1L, company, "백엔드 개발자", LocalDate.now());
         Schedule schedule = Schedule.create(app, "1차 면접", LocalDateTime.now(), ScheduleType.INTERVIEW, "서울시 강남구", "");
-        given(scheduleService.updateAddress(eq(1L), eq(1L), any())).willReturn(schedule);
+        given(scheduleService.updateAddress(eq(1L), eq(1L), any())).willReturn(ScheduleResponse.convert(schedule));
 
         mockMvc.perform(patch("/api/schedules/1/address")
                         .header("Authorization", BEARER)
@@ -154,7 +155,7 @@ class ScheduleControllerTest {
 
     @Test
     void POST_schedules_제목_주소_메모를_구분해_서비스에_전달한다() throws Exception {
-        given(scheduleService.register(eq(1L), any())).willReturn(schedule("경기도 성남시 판교역로 166"));
+        given(scheduleService.register(eq(1L), any())).willReturn(ScheduleResponse.convert(schedule("경기도 성남시 판교역로 166")));
 
         mockMvc.perform(post("/api/schedules")
                         .header("Authorization", BEARER)
