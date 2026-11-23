@@ -3,12 +3,10 @@ package com.ssangtteongnip.infrastructure;
 import com.ssangtteongnip.domain.FakeFileStorage;
 import com.ssangtteongnip.domain.image.StudyImage;
 import com.ssangtteongnip.domain.image.StudyImageRepository;
-import com.ssangtteongnip.global.config.JpaConfig;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,7 +14,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(JpaConfig.class)
 class StudyImageRepositoryTest {
 
     private static final long USER_ID = 3L;

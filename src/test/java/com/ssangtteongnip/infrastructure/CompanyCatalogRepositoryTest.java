@@ -1,19 +1,16 @@
 package com.ssangtteongnip.infrastructure;
 
 import com.ssangtteongnip.domain.company.CompanyCatalogEntry;
-import com.ssangtteongnip.global.config.JpaConfig;
 import com.ssangtteongnip.infrastructure.persistence.CompanyCatalogJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(JpaConfig.class)
 class CompanyCatalogRepositoryTest {
 
     @Autowired CompanyCatalogJpaRepository catalogRepository;

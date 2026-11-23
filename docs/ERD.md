@@ -2,6 +2,8 @@
 
 운영 DB(PostgreSQL) 테이블 구성. 엔티티가 바뀌면 이 문서도 같은 커밋에서 고친다 (`.claude/hooks/erd-guard.py`가 확인한다).
 
+`created_at`·`updated_at`은 DB 기본값이 아니라 엔티티의 `@PrePersist`/`@PreUpdate`가 채운다. 애플리케이션을 거치지 않고 직접 INSERT할 때는 값을 넣어야 한다.
+
 ```mermaid
 erDiagram
     users ||--o| profiles : "user_id (1:1)"

@@ -7,9 +7,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +19,6 @@ import java.util.UUID;
         indexes = @Index(name = "idx_study_logs_user_date", columnList = "user_id, study_date"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class StudyLog {
 
     private static final int MAX_TITLE_LENGTH = 100;
@@ -48,11 +44,9 @@ public class StudyLog {
     @Column(nullable = false)
     private int studyMinutes;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     public static StudyLog create(Long userId, LocalDate studyDate, String title, String content,
@@ -100,5 +94,17 @@ public class StudyLog {
 
     public int calculateMinutesOn(LocalDate date) {
         return isOn(date) ? studyMinutes : 0;
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void recordModification() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

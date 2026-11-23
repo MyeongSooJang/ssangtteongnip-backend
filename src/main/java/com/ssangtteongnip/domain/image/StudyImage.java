@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -24,7 +22,6 @@ import java.util.regex.Pattern;
 @Table(name = "study_images")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class StudyImage {
 
     public static final int MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -51,7 +48,6 @@ public class StudyImage {
     @Column(nullable = false)
     private long sizeBytes;
 
-    @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
@@ -107,5 +103,10 @@ public class StudyImage {
         }
         return ImageFormat.detect(content)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_IMAGE_TYPE));
+    }
+
+    @PrePersist
+    private void recordCreation() {
+        this.createdAt = LocalDateTime.now();
     }
 }
