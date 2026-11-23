@@ -29,7 +29,8 @@ services:
       S3_BUCKET: ${S3_BUCKET}
       AWS_REGION: ${AWS_REGION:-ap-northeast-2}
       # 2GB 인스턴스에서 DB·Redis와 메모리를 나눠 쓰므로 힙을 제한한다.
-      JAVA_TOOL_OPTIONS: -Xmx768m
+      # -XX:-UseBASE64Intrinsics는 CVE-2026-114938 임시 대응이다. Temurin 21 수정 빌드로 올린 뒤 제거한다.
+      JAVA_TOOL_OPTIONS: -Xmx768m -XX:-UseBASE64Intrinsics
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 8080"]
       interval: 15s
