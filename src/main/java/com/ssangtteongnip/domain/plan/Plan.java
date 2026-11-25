@@ -141,9 +141,13 @@ public class Plan {
         return evidence;
     }
 
-    // 지우고 나면 결과물 없이 완료된 계획이 생길 수 있으므로, 수정할 수 있는 계획에서만 지울 수 있다.
+    // 완료한 계획은 결과물이 1개 이상 남아야 하므로 마지막 하나는 지울 수 없다. 진행 전 계획은 모두 지울 수 있다.
     public PlanEvidence removeEvidence(Long evidenceId, LocalDate today) {
-        validateModifiable(today);
+        if (status == PlanStatus.DONE) {
+            validateOtherEvidenceRemains();
+        } else {
+            validateModifiable(today);
+        }
         PlanEvidence evidence = findEvidence(evidenceId);
         evidences.remove(evidence);
         return evidence;
@@ -160,6 +164,11 @@ public class Plan {
         return Collections.unmodifiableList(evidences);
     }
 
+    private void validateOtherEvidenceRemains() {
+        if (evidences.size() <= 1) {
+            throw new BusinessException(ErrorCode.PLAN_EVIDENCE_REQUIRED);
+        }
+    }
 
     private void validateModifiable(LocalDate today) {
         if (status != PlanStatus.PLANNED || planDate.isBefore(today)) {
@@ -178,7 +187,7 @@ public class Plan {
     }
 
     private static void validateActualMinutes(int actualMinutes) {
-        if (actualMinutes < MIN_ACTUAL_MINUTES) {
+        if (actualMinutes < MIN_ACTUAL_MINUTES || actualMinutes > PlanDetail.MAX_MINUTES) {
             throw new BusinessException(ErrorCode.INVALID_ACTUAL_MINUTES);
         }
     }

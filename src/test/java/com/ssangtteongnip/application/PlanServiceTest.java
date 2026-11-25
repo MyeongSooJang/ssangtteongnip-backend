@@ -34,8 +34,10 @@ import java.util.Optional;
 
 import static com.ssangtteongnip.support.ErrorCodeAssertions.assertErrorCode;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -72,7 +74,7 @@ class PlanServiceTest {
     }
 
     private void givenOwnedPlanForUpdate(Plan plan) {
-        given(planRepository.findByIdAndUserIdForUpdate(PLAN_ID, USER_ID)).willReturn(Optional.of(plan));
+        given(planRepository.findOwnedForUpdate(PLAN_ID, USER_ID)).willReturn(Optional.of(plan));
     }
 
     private static byte[] pdf() {
@@ -124,7 +126,7 @@ class PlanServiceTest {
     void 결과물이_있는_오늘_계획을_완료하면_완료_상태가_된다() {
         Plan plan = planOn(TODAY);
         plan.addLink(LINK, TODAY);
-        givenOwnedPlan(plan);
+        givenOwnedPlanForUpdate(plan);
 
         PlanResponse response = planService.complete(USER_ID, PLAN_ID, new PlanCompleteRequest(45, "집중"));
 
@@ -135,7 +137,7 @@ class PlanServiceTest {
 
     @Test
     void 결과물이_없으면_완료할_수_없다() {
-        givenOwnedPlan(planOn(TODAY));
+        givenOwnedPlanForUpdate(planOn(TODAY));
 
         assertErrorCode(() -> planService.complete(USER_ID, PLAN_ID, new PlanCompleteRequest(45, null)),
                 ErrorCode.PLAN_EVIDENCE_REQUIRED);
@@ -226,6 +228,17 @@ class PlanServiceTest {
 
         assertThat(response.fileName()).isEqualTo("a.pdf");
         assertThat(storage.size()).isEqualTo(1);
+    }
+
+    @Test
+    void 파일을_올린_뒤_DB_반영에_실패하면_올린_파일을_지운다() {
+        givenOwnedPlanForUpdate(planOn(TODAY));
+        willThrow(new IllegalStateException("flush 실패")).given(planRepository).flush();
+
+        assertThatThrownBy(() -> planService.addFile(USER_ID, PLAN_ID, "a.pdf", pdf()))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThat(storage.size()).isZero();
     }
 
     @Test

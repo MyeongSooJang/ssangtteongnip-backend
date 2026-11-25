@@ -17,7 +17,7 @@ public interface PlanJpaRepository extends JpaRepository<Plan, Long>, PlanReposi
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Plan p where p.id = :id and p.userId = :userId")
-    Optional<Plan> findByIdAndUserIdForUpdate(@Param("id") Long id, @Param("userId") Long userId);
+    Optional<Plan> findOwnedForUpdate(@Param("id") Long id, @Param("userId") Long userId);
 
     @Override
     @Query("select distinct p from Plan p left join fetch p.evidences "

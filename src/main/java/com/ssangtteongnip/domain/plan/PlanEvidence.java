@@ -28,6 +28,7 @@ public class PlanEvidence {
 
     public static final int MAX_SIZE_BYTES = 5 * 1024 * 1024;
     static final int MAX_URL_LENGTH = 500;
+    private static final int MAX_FILE_NAME_LENGTH = 255;
     private static final String DEFAULT_FILE_NAME = "file";
     private static final String PDF_CONTENT_TYPE = "application/pdf";
     private static final String PDF_EXTENSION = "pdf";
@@ -146,7 +147,11 @@ public class PlanEvidence {
         }
         String name = fileName.replace('\\', '/');
         name = name.substring(name.lastIndexOf('/') + 1).trim();
-        return name.isEmpty() ? DEFAULT_FILE_NAME : name;
+        if (name.isEmpty()) {
+            return DEFAULT_FILE_NAME;
+        }
+        // 컬럼 길이를 넘으면 저장이 실패하므로, 확장자가 남는 뒤쪽을 살린다.
+        return name.length() > MAX_FILE_NAME_LENGTH ? name.substring(name.length() - MAX_FILE_NAME_LENGTH) : name;
     }
 
     private record FileKind(String contentType, String extension) {}

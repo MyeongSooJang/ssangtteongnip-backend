@@ -19,6 +19,7 @@ public class PlanDetail {
     static final int MAX_CONTENT_LENGTH = 50;
     static final int MAX_DONE_CRITERIA_LENGTH = 200;
     static final int MAX_OPTION_LENGTH = 100;
+    static final int MAX_MINUTES = 24 * 60;
     private static final int MIN_ESTIMATED_MINUTES = 1;
 
     @Column(nullable = false, length = MAX_CONTENT_LENGTH)
@@ -54,7 +55,7 @@ public class PlanDetail {
         if (doneCriteria == null || doneCriteria.isBlank() || doneCriteria.length() > MAX_DONE_CRITERIA_LENGTH) {
             throw new BusinessException(ErrorCode.PLAN_DONE_CRITERIA_REQUIRED);
         }
-        if (estimatedMinutes < MIN_ESTIMATED_MINUTES) {
+        if (estimatedMinutes < MIN_ESTIMATED_MINUTES || estimatedMinutes > MAX_MINUTES) {
             throw new BusinessException(ErrorCode.INVALID_ESTIMATED_MINUTES);
         }
         this.content = content;

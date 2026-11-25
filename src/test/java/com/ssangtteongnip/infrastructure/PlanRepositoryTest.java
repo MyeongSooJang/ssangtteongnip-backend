@@ -64,7 +64,7 @@ class PlanRepositoryTest {
         Plan others = save(OTHER, TODAY, "남의 계획");
 
         assertThat(planRepository.findByIdAndUserId(others.getId(), OWNER)).isEmpty();
-        assertThat(planRepository.findByIdAndUserIdForUpdate(others.getId(), OWNER)).isEmpty();
+        assertThat(planRepository.findOwnedForUpdate(others.getId(), OWNER)).isEmpty();
         assertThat(planRepository.findInPeriod(OWNER, TODAY.minusDays(30), TODAY.plusDays(30))).isEmpty();
     }
 
@@ -72,7 +72,7 @@ class PlanRepositoryTest {
     void 본인의_계획은_잠금_조회로도_찾는다() {
         Plan mine = save(OWNER, TODAY, "내 계획");
 
-        assertThat(planRepository.findByIdAndUserIdForUpdate(mine.getId(), OWNER)).isPresent();
+        assertThat(planRepository.findOwnedForUpdate(mine.getId(), OWNER)).isPresent();
     }
 
     @Test

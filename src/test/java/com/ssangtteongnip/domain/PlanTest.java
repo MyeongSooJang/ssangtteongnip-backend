@@ -153,6 +153,15 @@ class PlanTest {
     }
 
     @Test
+    void 목표_시간이_하루_길이인_1440분을_넘으면_만들_수_없다() {
+        PlanDetail fullDay = new PlanDetail("내용", PlanCategory.LIFE, "기준", 1440, null, null, null);
+
+        assertThat(fullDay.getEstimatedMinutes()).isEqualTo(1440);
+        assertErrorCode(() -> new PlanDetail("내용", PlanCategory.LIFE, "기준", 1441, null, null, null),
+                ErrorCode.INVALID_ESTIMATED_MINUTES);
+    }
+
+    @Test
     void 비어_있는_선택_항목은_null로_저장한다() {
         PlanDetail detail = new PlanDetail("내용", PlanCategory.LIFE, "기준", 30, " ", "", "책상 앞에 앉기");
 
@@ -279,6 +288,11 @@ class PlanTest {
 
         assertThat(zero.getActualMinutes()).isZero();
         assertErrorCode(() -> planWithLink(TODAY).complete(-1, null, NOON), ErrorCode.INVALID_ACTUAL_MINUTES);
+    }
+
+    @Test
+    void 실제_시간이_1440분을_넘으면_완료할_수_없다() {
+        assertErrorCode(() -> planWithLink(TODAY).complete(1441, null, NOON), ErrorCode.INVALID_ACTUAL_MINUTES);
     }
 
     @Test
@@ -515,6 +529,15 @@ class PlanTest {
     }
 
     @Test
+    void 파일_이름이_255자를_넘으면_확장자가_남는_뒤쪽만_저장한다() {
+        String longName = "가".repeat(300) + ".pdf";
+
+        PlanEvidence evidence = planOn(TODAY).addFile(longName, pdf(), storage, TODAY);
+
+        assertThat(evidence.getFileName()).hasSize(255).endsWith(".pdf");
+    }
+
+    @Test
     void 저장소_업로드에_실패하면_결과물이_추가되지_않는다() {
         Plan plan = planOn(TODAY);
         storage.failOnPut();
@@ -570,11 +593,30 @@ class PlanTest {
     }
 
     @Test
-    void 완료한_계획의_결과물은_삭제할_수_없다() {
+    void 완료한_계획의_마지막_결과물은_삭제할_수_없다() {
         Plan plan = doneToday();
 
-        assertErrorCode(() -> plan.removeEvidence(100L, TODAY), ErrorCode.PLAN_NOT_MODIFIABLE);
+        assertErrorCode(() -> plan.removeEvidence(100L, TODAY), ErrorCode.PLAN_EVIDENCE_REQUIRED);
         assertThat(plan.getEvidences()).hasSize(1);
+    }
+
+    @Test
+    void 완료한_계획도_결과물이_둘_이상이면_하나를_삭제할_수_있다() {
+        Plan plan = doneToday();
+        PlanEvidence extra = plan.addLink("https://blog.example.com/post", TODAY);
+        ReflectionTestUtils.setField(extra, "id", 101L);
+
+        plan.removeEvidence(101L, TODAY);
+
+        assertThat(plan.getEvidences()).hasSize(1);
+    }
+
+    @Test
+    void 실패한_계획의_결과물은_삭제할_수_없다() {
+        Plan plan = planWithLink(YESTERDAY);
+        plan.failIfExpired(TODAY);
+
+        assertErrorCode(() -> plan.removeEvidence(100L, TODAY), ErrorCode.PLAN_NOT_MODIFIABLE);
     }
 
     @Test

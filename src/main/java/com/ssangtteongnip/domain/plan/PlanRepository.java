@@ -14,7 +14,7 @@ public interface PlanRepository {
     Optional<Plan> findByIdAndUserId(Long id, Long userId);
 
     // 결과물 개수 한도를 동시 요청이 함께 넘지 못하도록 계획 행을 잠그고 조회한다.
-    Optional<Plan> findByIdAndUserIdForUpdate(Long id, Long userId);
+    Optional<Plan> findOwnedForUpdate(Long id, Long userId);
 
     // 날짜 순, 같은 날은 먼저 만든 계획이 먼저
     List<Plan> findInPeriod(Long userId, LocalDate from, LocalDate to);

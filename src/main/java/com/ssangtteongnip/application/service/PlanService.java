@@ -51,7 +51,8 @@ public class PlanService {
 
     @Transactional
     public PlanResponse complete(Long userId, Long id, PlanCompleteRequest request) {
-        Plan plan = findOrThrow(userId, id);
+        // 결과물 삭제와 동시에 일어나도 결과물 없이 완료되지 않도록 계획 행을 잠그고 확인한다.
+        Plan plan = findForUpdateOrThrow(userId, id);
         plan.complete(request.actualMinutes(), request.memo(), LocalDateTime.now(clock));
         return PlanResponse.convert(plan);
     }
@@ -90,7 +91,7 @@ public class PlanService {
     public PlanEvidenceResponse addFile(Long userId, Long id, String fileName, byte[] content) {
         Plan plan = findForUpdateOrThrow(userId, id);
         PlanEvidence evidence = plan.addFile(fileName, content, fileStorage, findToday());
-        planRepository.flush();
+        flushOrDeleteUploaded(evidence);
         return PlanEvidenceResponse.convert(evidence);
     }
 
@@ -120,6 +121,16 @@ public class PlanService {
         return failed;
     }
 
+    // 저장소에는 이미 올라갔으므로 DB 반영이 실패하면 올린 파일이 고아로 남지 않게 지우고 예외를 다시 던진다.
+    private void flushOrDeleteUploaded(PlanEvidence uploaded) {
+        try {
+            planRepository.flush();
+        } catch (RuntimeException e) {
+            uploaded.deleteFile(fileStorage);
+            throw e;
+        }
+    }
+
     private void deleteFileAfterCommit(PlanEvidence evidence) {
         AfterCommit.runQuietly("결과물 파일 삭제", () -> evidence.deleteFile(fileStorage));
     }
@@ -130,7 +141,7 @@ public class PlanService {
     }
 
     private Plan findForUpdateOrThrow(Long userId, Long id) {
-        return planRepository.findByIdAndUserIdForUpdate(id, userId)
+        return planRepository.findOwnedForUpdate(id, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PLAN_NOT_FOUND));
     }
 
