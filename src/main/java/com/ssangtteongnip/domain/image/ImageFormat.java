@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 // 업로드를 허용하는 이미지 형식. 확장자나 Content-Type은 클라이언트가 속일 수 있으므로 파일 앞부분(매직 바이트)으로 판별한다.
-enum ImageFormat {
+public enum ImageFormat {
     PNG("image/png", "png"),
     JPEG("image/jpeg", "jpg"),
     GIF("image/gif", "gif"),
@@ -27,15 +27,15 @@ enum ImageFormat {
         this.extension = extension;
     }
 
-    String contentType() {
+    public String contentType() {
         return contentType;
     }
 
-    String extension() {
+    public String extension() {
         return extension;
     }
 
-    static Optional<ImageFormat> detect(byte[] content) {
+    public static Optional<ImageFormat> detect(byte[] content) {
         return Arrays.stream(values()).filter(format -> format.matches(content)).findFirst();
     }
 
