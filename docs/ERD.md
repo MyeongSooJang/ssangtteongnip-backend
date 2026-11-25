@@ -10,6 +10,8 @@ erDiagram
     users ||--o{ user_files : "user_id"
     users ||..o{ applications : "user_id (FK 없음)"
     users ||..o{ study_logs : "user_id (FK 없음)"
+    users ||..o{ plans : "user_id (FK 없음)"
+    plans ||--o{ plan_evidences : "plan_id"
     companies ||--o{ applications : "company_id"
     applications ||--o{ schedules : "application_id"
     applications ||--o{ interviews : "application_id"
@@ -137,11 +139,41 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    plans {
+        bigint id PK
+        bigint user_id "FK 없음, idx(user_id, plan_date)"
+        date plan_date "오늘 또는 내일만 생성"
+        varchar content "50자"
+        varchar category "PlanCategory: APPLY, SKILL, OUTPUT, LIFE"
+        varchar done_criteria "완료 기준, 200자"
+        int estimated_minutes "목표 시간, 1 이상"
+        varchar time_slot "선택"
+        varchar place "선택"
+        varchar first_action "선택"
+        varchar status "PlanStatus: PLANNED, DONE, FAILED"
+        int actual_minutes "실제 시간, 선택, 0 이상"
+        varchar miss_reason "MissReason, FAILED일 때만"
+        varchar memo "선택, 200자"
+        timestamp completed_at "완료 시점, 아니면 null"
+        timestamp created_at
+        timestamp updated_at
+    }
+    plan_evidences {
+        bigint id PK
+        bigint plan_id FK
+        varchar type "EvidenceType: URL, FILE"
+        varchar url "URL 종류일 때, 500자"
+        varchar file_name "FILE 종류일 때"
+        varchar object_key "FILE 종류일 때 S3 키"
+        varchar content_type
+        bigint size_bytes
+        timestamp created_at
+    }
 ```
 
 ## 참고
 
-- `applications.user_id`, `study_logs.user_id`는 값 컬럼이고 DB FK가 없다. 소유자 검증은 서비스에서 한다.
+- `applications.user_id`, `study_logs.user_id`, `plans.user_id`는 값 컬럼이고 DB FK가 없다. 소유자 검증은 서비스에서 한다.
 - `profiles`는 `PersonalInfo`(@Embeddable)가 같은 테이블에 펼쳐진 구조다.
 - `review_questions`는 `Review.questions`(@ElementCollection)의 컬렉션 테이블이고, `question_order`는 @OrderColumn이다.
 - `company_catalog`는 DART 기업 목록을 담은 회사 검색용 카탈로그다. `companies`와 FK 없이 분리되어 있고, 회사 이름이 같으면 같은 회사로 본다.
@@ -149,3 +181,5 @@ erDiagram
 - `user_files.user_id`는 유니크가 아니다. 사용자당 최대 개수는 `UserFile.MAX_FILES_PER_USER`이고, 업로드 시 사용자 행을 잠근 뒤 개수를 확인해 지킨다.
 - `applications.resume_view`는 `not null default 'NOT_VIEWED'`로 추가되어 기존 행이 미열람으로 채워진다.
 - 2026-11-10 코드 패키지를 `com.jobtracker`에서 `com.ssangtteongnip`으로 바꿨다. 엔티티 11개가 `package`와 `import` 줄만 바뀌었고 테이블, 컬럼, 관계는 그대로다.
+- `plans`는 하루에 여러 개를 쓸 수 있어 날짜·사용자 유니크 제약이 없다. 내용·카테고리·완료 기준·목표 시간·선택 항목 7개는 `PlanDetail`(@Embeddable)이 같은 테이블에 펼쳐진 구조다. 신규 테이블이라 `ddl-auto: update`로 만들어지고 운영 DB 수동 DDL은 필요 없다.
+- `plan_evidences`는 계획당 최대 `Plan.MAX_EVIDENCES`(5)개이고, 완료하려면 1개 이상이어야 한다. 한도는 계획 행을 잠근 뒤 확인해 지킨다.
