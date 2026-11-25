@@ -6,7 +6,8 @@ import java.util.Optional;
 
 public interface PlanRepository {
     Plan save(Plan plan);
-    Plan saveAndFlush(Plan plan);
+    // 새로 추가한 결과물의 id를 응답에 담을 수 있도록 지금까지의 변경을 DB에 반영한다.
+    void flush();
     void delete(Plan plan);
 
     // 남의 계획은 id를 알아도 찾을 수 없도록 사용자까지 함께 조회한다.
