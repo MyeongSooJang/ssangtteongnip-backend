@@ -17,6 +17,16 @@
         ]
       },
       {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/mark-test.cjs\"",
+            "timeout": 20
+          }
+        ]
+      },
+      {
         "matcher": "Skill",
         "hooks": [
           {

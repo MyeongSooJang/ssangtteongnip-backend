@@ -124,6 +124,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 |---|---|---|
 | `gh pr create` | 현재 커밋(HEAD)에 대한 `/security-review` 기록이 있는가 | 차단 (스킬을 실행한다) |
 | `gh pr merge` | PR 최신 커밋에 대한 `/security-review` 기록이 있는가 | 차단 |
+| 소스(`src/`, Gradle 설정)가 바뀐 `git commit`, `git push`, `gh pr create` | 현재 소스로 `./gradlew test`가 통과한 기록이 있는가 | 차단 (테스트를 다시 실행한다) |
 | `git commit`, `gh pr create` | `commit-and-pr-format` 스킬을 이 세션에서 실행했는가 | 스킬이 설치돼 있으면 차단, 없으면 알리기만 한다 |
 
 - **보안 리뷰는 커밋마다 유효하다.** 리뷰 뒤에 커밋이 하나라도 늘면(테스트·문서 커밋 포함) PR을 만들거나 머지하기 전에 `/security-review`를 다시 실행한다. 그래서 리뷰는 **마지막 커밋 뒤에** 돌린다. 위의 "인증·한도·중복 방지 코드는 PR 전에 `/code-review`(인증이면 `/security-review`)" 규칙과 함께 지킨다.
