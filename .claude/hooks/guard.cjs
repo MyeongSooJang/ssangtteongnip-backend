@@ -6,15 +6,17 @@
 //     머지 전에는 미리보기 개발 서버(previewPort)가 꺼져 있어야 한다.
 //  2. 커밋·PR 스킬: commit-and-pr-format 스킬이 설치돼 있으면, 이 세션에서 실행한 뒤에만 git commit / gh pr create를 허용한다.
 //     설치돼 있지 않으면 막지 않고 알리기만 한다(없는 스킬을 강제하면 모든 커밋이 영원히 막힌다).
-//  3. 보안 리뷰: gh pr create / gh pr merge 전에 현재 커밋(HEAD, 머지는 PR의 최신 커밋)에 대한 /security-review 기록이 있어야 한다.
+//  3. 테스트 통과: 소스(src/, Gradle 설정)가 바뀐 git commit / git push / gh pr create 전에 현재 소스로 ./gradlew test 가 통과한 기록이 있어야 한다.
+//  4. 보안 리뷰: gh pr create / gh pr merge 전에 현재 커밋(HEAD, 머지는 PR의 최신 커밋)에 대한 /security-review 기록이 있어야 한다.
 //
-// 기록(마커)은 mark-skill.js가 스킬 실행 직후 .claude/.state/에 남긴다. 사용자가 직접 입력하는 `! 명령`은 이 훅을 거치지 않는다.
+// 기록(마커)은 mark-skill.cjs(스킬)와 mark-test.cjs(테스트)가 실행 직후 .claude/.state/에 남긴다. 사용자가 직접 입력하는 `! 명령`은 이 훅을 거치지 않는다.
 const fs = require('fs')
 const os = require('os')
 const net = require('net')
 const path = require('path')
 const { execFileSync } = require('child_process')
 const { removeMockFiles, config, ROOT } = require('./cleanup-mock.cjs')
+const { isSourcePath, sourceFingerprint, markerPath } = require('./test-marker.cjs')
 
 const STATE_DIR = path.join(ROOT, '.claude', '.state')
 const COMMIT_SKILL = 'commit-and-pr-format'
@@ -102,6 +104,32 @@ function prHeadSha(number) {
   }
 }
 
+const lines = text => text.split('\n').filter(Boolean)
+
+// 이번 커밋·push·PR에 담기는 소스 파일. 커밋은 스테이징된 파일(-a면 수정된 추적 파일 포함), push·PR은 origin/main과 다른 파일이다.
+function changedSources(flags, code) {
+  if (flags.commit) {
+    const files = lines(run('git', ['diff', '--cached', '--name-only']))
+    if (/\bcommit\b[^\n]*\s-[A-Za-z]*a/.test(code)) files.push(...lines(run('git', ['diff', '--name-only'])))
+    return files.filter(isSourcePath)
+  }
+  try {
+    return lines(run('git', ['diff', '--name-only', 'origin/main...HEAD'])).filter(isSourcePath)
+  } catch {
+    return lines(run('git', ['ls-files'])).filter(isSourcePath) // 기준 브랜치를 모르면 전체를 소스 변경으로 본다
+  }
+}
+
+// 소스가 바뀌었는데 현재 소스로 ./gradlew test 가 통과한 기록이 없으면 막는다. 기록은 mark-test.cjs가 남긴다.
+function testProblem(flags, code) {
+  if (!changedSources(flags, code).length) return null
+  const marker = readJson(markerPath(STATE_DIR))
+  if (marker && marker.fingerprint === sourceFingerprint(ROOT)) return null
+  return marker
+    ? '마지막 테스트 통과 이후 소스가 바뀌었습니다. ./gradlew test 를 다시 실행해 통과한 뒤 진행하세요.'
+    : '이 소스로 ./gradlew test 가 통과한 기록이 없습니다(실패했거나 아직 실행하지 않았습니다). 테스트를 실행해 통과한 뒤 진행하세요.'
+}
+
 function securityProblem(headSha, what) {
   if (!headSha) return `${what}의 최신 커밋을 gh로 확인하지 못해 보안 리뷰 여부를 판단할 수 없습니다. gh 로그인·네트워크를 확인하세요.`
   const marker = readJson(path.join(STATE_DIR, 'security-review.json'))
@@ -147,7 +175,13 @@ async function inspect(input, flags) {
     }
   }
 
-  // 3) 보안 리뷰
+  // 3) 테스트 통과
+  if (flags.commit || flags.push || flags.prCreate) {
+    const problem = testProblem(flags, flags.code)
+    if (problem) problems.push(problem)
+  }
+
+  // 4) 보안 리뷰
   if (flags.prCreate) {
     const problem = securityProblem(run('git', ['rev-parse', 'HEAD']), '현재 HEAD')
     if (problem) problems.push(problem)
@@ -178,8 +212,9 @@ async function main() {
     prCreate: /\bgh\s+pr\s+create\b/.test(code),
     prMerge: merge !== null,
     prNumber: merge && merge[1],
+    code,
   }
-  if (!Object.values(flags).some(Boolean)) return
+  if (!(flags.commit || flags.push || flags.prCreate || flags.prMerge)) return
   if (!isThisRepo(targetDir(noHeredoc, input.cwd))) return
 
   let result

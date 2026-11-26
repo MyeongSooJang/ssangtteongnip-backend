@@ -9,7 +9,7 @@ const os = require('os')
 const path = require('path')
 const { spawnSync, execFileSync } = require('child_process')
 
-const SCRIPTS = ['guard.cjs', 'mark-skill.cjs', 'cleanup-mock.cjs']
+const SCRIPTS = ['guard.cjs', 'mark-skill.cjs', 'cleanup-mock.cjs', 'mark-test.cjs', 'test-marker.cjs']
 const MOCK = ['mock-preview.html', 'src/mock-preview.tsx']
 const tmp = []
 
@@ -41,6 +41,8 @@ function makeRepo(config = { mockFiles: MOCK, previewPort: null }) {
     home,
     hook: (command, extra = {}) => exec('guard.cjs', { tool_name: 'Bash', tool_input: { command }, cwd: dir, session_id: 's1', ...extra }),
     mark: (skill, session = 's1') => exec('mark-skill.cjs', { tool_name: 'Skill', tool_input: { skill }, session_id: session }),
+    markTest: (command, output) => exec('mark-test.cjs', { tool_name: 'Bash', tool_input: { command }, tool_response: { stdout: output }, session_id: 's1' }),
+    stage: () => git(dir, 'add', '-A'),
     write: (file, text = 'x') => {
       fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true })
       fs.writeFileSync(path.join(dir, file), text)
@@ -225,4 +227,85 @@ test('npm run clean:mock 용 스크립트는 mock 파일이 있으면 지우고,
   assert.match(first.stdout, /삭제함: mock-preview\.html/)
   assert.equal(repo.exists('mock-preview.html'), false)
   assert.match(second.stdout, /삭제할 mock 파일이 없습니다/)
+})
+
+const OK = 'BUILD SUCCESSFUL in 3s'
+const FAIL = 'BUILD FAILED in 3s'
+
+test('소스가 바뀐 커밋은 테스트 통과 기록이 없으면 차단된다', () => {
+  const repo = makeRepo()
+  repo.write('src/main/A.java', 'class A {}')
+  repo.stage()
+  const result = repo.hook('git commit -m x')
+  assert.equal(result.status, 2)
+  assert.match(result.stderr, /gradlew test/)
+})
+
+test('같은 소스로 테스트가 통과했으면 커밋·push·PR 생성이 이어서 가능하다', () => {
+  const repo = makeRepo()
+  repo.write('src/main/A.java', 'class A {}')
+  repo.stage()
+  assert.equal(repo.markTest('./gradlew test jacocoTestReport', OK).status, 0)
+  assert.equal(repo.hook('git commit -m x').status, 0)
+  git(repo.dir, 'commit', '-q', '-m', 'x')
+  repo.mark('security-review')
+  assert.equal(repo.hook('git push').status, 0)
+  assert.equal(repo.hook('gh pr create --title x').status, 0)
+})
+
+test('테스트가 통과한 뒤 소스를 고치면 다시 차단된다', () => {
+  const repo = makeRepo()
+  repo.write('src/main/A.java', 'class A {}')
+  repo.stage()
+  repo.markTest('./gradlew test', OK)
+  repo.write('src/main/A.java', 'class A { int x; }')
+  repo.stage()
+  const result = repo.hook('git commit -m x')
+  assert.equal(result.status, 2)
+  assert.match(result.stderr, /소스가 바뀌었/)
+})
+
+test('테스트가 실패하면 이전 통과 기록도 지워져 커밋할 수 없다', () => {
+  const repo = makeRepo()
+  repo.write('src/main/A.java', 'class A {}')
+  repo.stage()
+  repo.markTest('./gradlew test', OK)
+  repo.markTest('./gradlew test', FAIL)
+  assert.equal(repo.hook('git commit -m x').status, 2)
+})
+
+test('일부만 돌렸거나 테스트를 뺀 실행은 통과 기록으로 인정하지 않는다', () => {
+  const repo = makeRepo()
+  repo.write('src/main/A.java', 'class A {}')
+  repo.stage()
+  for (const command of ['./gradlew test --tests FooTest', './gradlew build -x test', './gradlew test --dry-run', './gradlew compileJava']) {
+    repo.markTest(command, OK)
+  }
+  assert.equal(repo.hook('git commit -m x').status, 2)
+})
+
+test('커밋 메시지나 다른 폴더에서 돌린 gradlew는 통과 기록으로 인정하지 않는다', () => {
+  const repo = makeRepo()
+  repo.write('src/main/A.java', 'class A {}')
+  repo.stage()
+  repo.markTest("git commit -F - <<'EOF'\n./gradlew test\nEOF", OK)
+  repo.markTest('cd ../other && ./gradlew test', OK)
+  assert.equal(repo.hook('git commit -m x').status, 2)
+})
+
+test('문서만 바뀐 커밋은 테스트 기록 없이도 가능하다', () => {
+  const repo = makeRepo()
+  repo.write('docs/a.md', 'x')
+  repo.stage()
+  assert.equal(repo.hook('git commit -m x').status, 0)
+})
+
+test('소스가 바뀐 브랜치는 테스트 기록 없이 push할 수 없다', () => {
+  const repo = makeRepo()
+  repo.write('src/main/A.java', 'class A {}')
+  repo.stage()
+  git(repo.dir, 'commit', '-q', '-m', 'x')
+  const result = repo.hook('git push')
+  assert.equal(result.status, 2)
+  assert.match(result.stderr, /gradlew test/)
 })
