@@ -12,6 +12,8 @@ erDiagram
     users ||..o{ study_logs : "user_id (FK 없음)"
     users ||..o{ plans : "user_id (FK 없음)"
     plans ||--o{ plan_evidences : "plan_id"
+    users ||..o{ posts : "user_id (FK 없음)"
+    posts ||--o{ post_images : "post_id"
     companies ||--o{ applications : "company_id"
     applications ||--o{ schedules : "application_id"
     applications ||--o{ interviews : "application_id"
@@ -170,6 +172,23 @@ erDiagram
         bigint size_bytes
         timestamp created_at
     }
+    posts {
+        bigint id PK
+        bigint user_id "작성자, FK 없음"
+        varchar title "100자"
+        text content "5000자"
+        timestamp created_at
+        timestamp updated_at
+    }
+    post_images {
+        bigint id PK
+        bigint post_id FK
+        uuid public_id UK "공개 주소(/api/post-images/{publicId})에 쓰는 값"
+        varchar object_key "S3 키"
+        varchar content_type
+        bigint size_bytes
+        timestamp created_at
+    }
 ```
 
 ## 참고
@@ -185,3 +204,5 @@ erDiagram
 - `plans`는 하루에 여러 개를 쓸 수 있어 날짜·사용자 유니크 제약이 없다. 내용·카테고리·완료 기준·목표 시간·선택 항목 7개는 `PlanDetail`(@Embeddable)이 같은 테이블에 펼쳐진 구조다. 신규 테이블이라 `ddl-auto: update`로 만들어지고 운영 DB 수동 DDL은 필요 없다.
 - `plan_evidences`는 계획당 최대 `Plan.MAX_EVIDENCES`(5)개이고, 완료하려면 1개 이상이어야 한다. 한도는 계획 행을 잠근 뒤 확인해 지킨다.
 - `users.nickname`은 게시판 작성자 표시용이다. 기존 가입자는 null이고 Postgres 유니크는 null이 여럿이어도 허용한다. 컬럼 추가만이라 `ddl-auto: update`로 반영되고 운영 DB 수동 DDL은 필요 없다. 기존 가입자는 `PATCH /api/me/nickname`으로 설정해야 글을 쓸 수 있다.
+- `posts.user_id`는 값 컬럼이고 DB FK가 없다. 작성자 확인은 도메인(`Post.validateWrittenBy`)이 한다. 신규 테이블이라 `ddl-auto: update`로 만들어지고 운영 DB 수동 DDL은 필요 없다.
+- `post_images`는 글당 최대 `Post.MAX_IMAGES`(5)장이다. 글을 지우면(cascade) 행이 함께 지워지고 S3 객체는 커밋 뒤에 지운다. 수정에서 빠진 이미지도 같다.
