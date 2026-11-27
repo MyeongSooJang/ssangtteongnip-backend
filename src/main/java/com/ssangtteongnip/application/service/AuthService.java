@@ -7,6 +7,7 @@ import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.user.Email;
 import com.ssangtteongnip.domain.user.EmailVerificationStore;
+import com.ssangtteongnip.domain.user.Nickname;
 import com.ssangtteongnip.domain.user.PasswordHasher;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.domain.user.User;
@@ -15,6 +16,8 @@ import com.ssangtteongnip.global.exception.BusinessException;
 import com.ssangtteongnip.global.exception.ErrorCode;
 import com.ssangtteongnip.global.transaction.AfterCommit;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.NestedExceptionUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,17 +35,36 @@ public class AuthService {
     @Transactional
     public TokenResponse signup(SignupRequest request) {
         Email email = new Email(request.email());
+        Nickname nickname = new Nickname(request.nickname());
         if (userRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+        // 미리 확인하는 것은 친절한 오류 메시지를 위해서다. 중복을 막는 최종 방어선은 users.nickname 유니크 제약이다.
+        if (userRepository.existsByNickname(nickname)) {
+            throw new BusinessException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
         if (!verificationStore.isVerified(email)) {
             throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
-        User user = userRepository.save(
-                User.register(email, request.name(), request.password(), passwordHasher));
+        User user = saveUnlessNicknameTaken(
+                User.register(email, request.name(), nickname, request.password(), passwordHasher));
         profileRepository.save(Profile.create(user));
         AfterCommit.runQuietly("이메일 인증 상태 삭제", () -> verificationStore.clearVerified(email));
         return new TokenResponse(tokenProvider.issue(user.getId()));
+    }
+
+    // 위의 existsByNickname 확인은 친절한 메시지용이고, 동시 가입이면 둘 다 통과한다.
+    // 최종 방어선은 DB 유니크 제약이므로, 닉네임 제약 위반일 때만 중복 오류로 바꾸고 나머지는 그대로 던진다.
+    private User saveUnlessNicknameTaken(User user) {
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            String cause = NestedExceptionUtils.getMostSpecificCause(e).getMessage();
+            if (cause != null && cause.toLowerCase().contains(User.UNIQUE_NICKNAME_CONSTRAINT)) {
+                throw new BusinessException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+            }
+            throw e;
+        }
     }
 
     public TokenResponse login(LoginRequest request) {

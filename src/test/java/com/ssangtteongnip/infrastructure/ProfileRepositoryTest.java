@@ -5,6 +5,7 @@ import com.ssangtteongnip.domain.profile.PersonalInfo;
 import com.ssangtteongnip.domain.profile.Profile;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.user.Email;
+import com.ssangtteongnip.domain.user.Nickname;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -24,7 +25,7 @@ class ProfileRepositoryTest {
     @Autowired EntityManager em;
 
     private User saveUser() {
-        return userRepository.save(User.register(new Email("hong@example.com"), "홍길동", "password1", new FakePasswordHasher()));
+        return userRepository.save(User.register(new Email("hong@example.com"), "홍길동", new Nickname("길동이"), "password1", new FakePasswordHasher()));
     }
 
     private void flushAndClear() {

@@ -8,6 +8,7 @@ import com.ssangtteongnip.domain.FakeEmailVerificationStore;
 import com.ssangtteongnip.domain.FakePasswordHasher;
 import com.ssangtteongnip.domain.profile.ProfileRepository;
 import com.ssangtteongnip.domain.user.Email;
+import com.ssangtteongnip.domain.user.Nickname;
 import com.ssangtteongnip.domain.user.PasswordHasher;
 import com.ssangtteongnip.domain.user.TokenProvider;
 import com.ssangtteongnip.domain.user.User;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 
@@ -53,7 +55,7 @@ class AuthServiceTest {
         given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
         given(tokenProvider.issue(any())).willReturn("jwt-token");
 
-        TokenResponse response = authService.signup(new SignupRequest(" Hong@Example.com ", "홍길동", "password1"));
+        TokenResponse response = authService.signup(new SignupRequest(" Hong@Example.com ", "홍길동", "길동이", "password1"));
 
         assertThat(response.accessToken()).isEqualTo("jwt-token");
         verify(profileRepository).save(any());
@@ -66,7 +68,7 @@ class AuthServiceTest {
         given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
         given(tokenProvider.issue(any())).willReturn("jwt-token");
 
-        authService.signup(new SignupRequest("hong@example.com", "홍길동", "password1"));
+        authService.signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1"));
 
         assertThat(verificationStore.isVerified(new Email("hong@example.com"))).isFalse();
     }
@@ -75,7 +77,7 @@ class AuthServiceTest {
     void signup_이메일_인증을_받지_않았으면_가입할_수_없다() {
         given(userRepository.existsByEmail(new Email("hong@example.com"))).willReturn(false);
 
-        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "password1")))
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1")))
                 .isInstanceOfSatisfying(BusinessException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.EMAIL_NOT_VERIFIED));
         verify(userRepository, never()).save(any());
@@ -86,7 +88,7 @@ class AuthServiceTest {
     void signup_이미_가입된_이메일이면_예외가_발생한다() {
         given(userRepository.existsByEmail(new Email("hong@example.com"))).willReturn(true);
 
-        assertThatThrownBy(() -> authService.signup(new SignupRequest("Hong@Example.com", "홍길동", "password1")))
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("Hong@Example.com", "홍길동", "길동이", "password1")))
                 .isInstanceOfSatisfying(BusinessException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS));
         verify(userRepository, never()).save(any());
@@ -94,8 +96,58 @@ class AuthServiceTest {
     }
 
     @Test
+    void signup_이미_사용_중인_닉네임이면_예외가_발생한다() {
+        verificationStore.markVerified(new Email("hong@example.com"));
+        given(userRepository.existsByEmail(new Email("hong@example.com"))).willReturn(false);
+        given(userRepository.existsByNickname(new Nickname("길동이"))).willReturn(true);
+
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1")))
+                .isInstanceOfSatisfying(BusinessException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.NICKNAME_ALREADY_EXISTS));
+        verify(userRepository, never()).save(any());
+        verify(profileRepository, never()).save(any());
+    }
+
+    @Test
+    void signup_동시_가입으로_닉네임_유니크_제약이_깨지면_닉네임_중복_오류가_발생한다() {
+        verificationStore.markVerified(new Email("hong@example.com"));
+        given(userRepository.existsByEmail(new Email("hong@example.com"))).willReturn(false);
+        given(userRepository.existsByNickname(new Nickname("길동이"))).willReturn(false);
+        given(userRepository.save(any())).willThrow(new DataIntegrityViolationException(
+                "duplicate key value violates unique constraint \"uk_users_nickname\""));
+
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1")))
+                .isInstanceOfSatisfying(BusinessException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.NICKNAME_ALREADY_EXISTS));
+        verify(profileRepository, never()).save(any());
+        assertThat(verificationStore.isVerified(new Email("hong@example.com"))).isTrue();
+    }
+
+    @Test
+    void signup_닉네임이_아닌_제약이_깨지면_원래_예외를_그대로_던진다() {
+        verificationStore.markVerified(new Email("hong@example.com"));
+        given(userRepository.existsByEmail(new Email("hong@example.com"))).willReturn(false);
+        given(userRepository.existsByNickname(new Nickname("길동이"))).willReturn(false);
+        DataIntegrityViolationException original = new DataIntegrityViolationException(
+                "duplicate key value violates unique constraint \"users_email_key\"");
+        given(userRepository.save(any())).willThrow(original);
+
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1")))
+                .isSameAs(original);
+        verify(profileRepository, never()).save(any());
+    }
+
+    @Test
+    void signup_닉네임_형식이_틀리면_가입할_수_없다() {
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "길", "password1")))
+                .isInstanceOfSatisfying(BusinessException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.INVALID_NICKNAME));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
     void login_올바른_자격_증명이면_토큰을_발급한다() {
-        User user = User.register(new Email("hong@example.com"), "홍길동", "password1", passwordHasher);
+        User user = User.register(new Email("hong@example.com"), "홍길동", new Nickname("길동이"), "password1", passwordHasher);
         given(userRepository.findByEmail(new Email("hong@example.com"))).willReturn(Optional.of(user));
         given(tokenProvider.issue(any())).willReturn("jwt-token");
 
@@ -115,7 +167,7 @@ class AuthServiceTest {
 
     @Test
     void login_비밀번호가_틀리면_토큰을_발급하지_않는다() {
-        User user = User.register(new Email("hong@example.com"), "홍길동", "password1", passwordHasher);
+        User user = User.register(new Email("hong@example.com"), "홍길동", new Nickname("길동이"), "password1", passwordHasher);
         given(userRepository.findByEmail(new Email("hong@example.com"))).willReturn(Optional.of(user));
 
         assertThatThrownBy(() -> authService.login(new LoginRequest("hong@example.com", "wrong-password")))

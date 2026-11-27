@@ -2,13 +2,16 @@ package com.ssangtteongnip.infrastructure;
 
 import com.ssangtteongnip.domain.FakePasswordHasher;
 import com.ssangtteongnip.domain.user.Email;
+import com.ssangtteongnip.domain.user.Nickname;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,7 +24,11 @@ class UserRepositoryTest {
     @Autowired EntityManager em;
 
     private User register(String rawEmail) {
-        return User.register(new Email(rawEmail), "홍길동", "password1", new FakePasswordHasher());
+        return register(rawEmail, "길동이");
+    }
+
+    private User register(String rawEmail, String rawNickname) {
+        return User.register(new Email(rawEmail), "홍길동", new Nickname(rawNickname), "password1", new FakePasswordHasher());
     }
 
     @Test
@@ -51,5 +58,40 @@ class UserRepositoryTest {
             userRepository.save(register("Hong@Example.com"));
             em.flush();
         }).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void 같은_닉네임으로_두_명이_가입할_수_없다() {
+        userRepository.save(register("hong@example.com", "길동이"));
+        em.flush();
+
+        assertThatThrownBy(() -> {
+            userRepository.save(register("kim@example.com", "길동이"));
+            em.flush();
+        }).isInstanceOf(DataIntegrityViolationException.class)
+                .satisfies(e -> assertThat(NestedExceptionUtils.getMostSpecificCause(e).getMessage())
+                        .containsIgnoringCase(User.UNIQUE_NICKNAME_CONSTRAINT));
+    }
+
+    @Test
+    void 닉네임이_없는_기존_사용자는_여럿이어도_된다() {
+        User first = register("hong@example.com", "길동이");
+        User second = register("kim@example.com", "길순이");
+        ReflectionTestUtils.setField(first, "nickname", null);
+        ReflectionTestUtils.setField(second, "nickname", null);
+
+        userRepository.save(first);
+        userRepository.save(second);
+        em.flush();
+
+        assertThat(em.createQuery("select count(u) from User u", Long.class).getSingleResult()).isEqualTo(2L);
+    }
+
+    @Test
+    void 사용_중인_닉네임만_존재한다고_답한다() {
+        userRepository.save(register("hong@example.com", "길동이"));
+
+        assertThat(userRepository.existsByNickname(new Nickname("길동이"))).isTrue();
+        assertThat(userRepository.existsByNickname(new Nickname("길순이"))).isFalse();
     }
 }

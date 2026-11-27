@@ -6,6 +6,7 @@ import com.ssangtteongnip.domain.profile.FileType;
 import com.ssangtteongnip.domain.profile.UserFile;
 import com.ssangtteongnip.domain.profile.UserFileRepository;
 import com.ssangtteongnip.domain.user.Email;
+import com.ssangtteongnip.domain.user.Nickname;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -27,8 +28,11 @@ class UserFileRepositoryTest {
 
     private final FakeFileStorage storage = new FakeFileStorage();
 
+    private int nicknameSequence;
+
     private User saveUser(String email) {
-        return userRepository.save(User.register(new Email(email), "홍길동", "password1", new FakePasswordHasher()));
+        Nickname nickname = new Nickname("길동" + nicknameSequence++);
+        return userRepository.save(User.register(new Email(email), "홍길동", nickname, "password1", new FakePasswordHasher()));
     }
 
     private UserFile saveFile(User user, FileType type, String fileName) {
