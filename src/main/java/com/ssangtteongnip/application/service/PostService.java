@@ -75,7 +75,7 @@ public class PostService {
 
     @Transactional
     public void delete(Long userId, Long id) {
-        Post post = findOrThrow(id);
+        Post post = findForUpdateOrThrow(id);
         post.validateWrittenBy(userId);
         postRepository.delete(post);
         post.getImages().forEach(this::deleteObjectAfterCommit);

@@ -77,6 +77,7 @@ public class Post {
         attach(newImages, storage);
         this.title = title;
         this.content = content;
+        this.updatedAt = LocalDateTime.now();
         images.removeAll(removed);
         return removed;
     }

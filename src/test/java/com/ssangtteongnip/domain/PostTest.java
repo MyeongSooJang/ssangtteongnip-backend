@@ -143,6 +143,28 @@ class PostTest {
     }
 
     @Test
+    void 이미지만_바꿔도_수정_시각이_기록된다() {
+        Post post = writePost(List.of());
+        assertThat(post.getUpdatedAt()).isNull();
+
+        post.rewrite("면접 후기", "분위기가 좋았어요", Set.of(), List.of(PNG), storage);
+
+        assertThat(post.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void 수정이_실패하면_수정_시각은_그대로다() {
+        Post post = writePost(pngs(3));
+        Set<UUID> keepAll = Set.of(post.getImages().get(0).getPublicId(),
+                post.getImages().get(1).getPublicId(), post.getImages().get(2).getPublicId());
+
+        assertErrorCode(() -> post.rewrite("새 제목", "새 내용", keepAll, pngs(3), storage),
+                ErrorCode.POST_IMAGE_LIMIT_EXCEEDED);
+
+        assertThat(post.getUpdatedAt()).isNull();
+    }
+
+    @Test
     void 수정할_때_남기지_않은_이미지는_글에서_빠지고_돌려준다() {
         Post post = writePost(pngs(2));
         PostImage kept = post.getImages().get(0);

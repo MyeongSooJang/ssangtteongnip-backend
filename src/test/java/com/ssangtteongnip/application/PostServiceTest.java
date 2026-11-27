@@ -282,7 +282,7 @@ class PostServiceTest {
 
     @Test
     void 작성자가_아니면_삭제할_수_없고_이미지도_남는다() {
-        existingPost(1);
+        lockedPost(1);
 
         assertErrorCode(() -> postService.delete(OTHER_ID, POST_ID), ErrorCode.POST_NOT_WRITER);
 
@@ -292,7 +292,7 @@ class PostServiceTest {
 
     @Test
     void 삭제하면_글과_이미지_객체를_모두_지운다() {
-        Post post = existingPost(2);
+        Post post = lockedPost(2);
 
         postService.delete(WRITER_ID, POST_ID);
 
@@ -302,7 +302,7 @@ class PostServiceTest {
 
     @Test
     void 이미지_객체_삭제가_실패해도_글_삭제는_성공한다() {
-        Post post = existingPost(1);
+        Post post = lockedPost(1);
         storage.failOnDelete();
 
         assertThatCode(() -> postService.delete(WRITER_ID, POST_ID)).doesNotThrowAnyException();
@@ -312,7 +312,7 @@ class PostServiceTest {
 
     @Test
     void 없는_글은_삭제할_수_없다() {
-        given(postRepository.findById(POST_ID)).willReturn(Optional.empty());
+        given(postRepository.findByIdForUpdate(POST_ID)).willReturn(Optional.empty());
 
         assertErrorCode(() -> postService.delete(WRITER_ID, POST_ID), ErrorCode.POST_NOT_FOUND);
     }
