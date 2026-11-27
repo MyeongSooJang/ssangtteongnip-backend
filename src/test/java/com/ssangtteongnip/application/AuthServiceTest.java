@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 
@@ -104,6 +105,35 @@ class AuthServiceTest {
                 .isInstanceOfSatisfying(BusinessException.class,
                         e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.NICKNAME_ALREADY_EXISTS));
         verify(userRepository, never()).save(any());
+        verify(profileRepository, never()).save(any());
+    }
+
+    @Test
+    void signup_동시_가입으로_닉네임_유니크_제약이_깨지면_닉네임_중복_오류가_발생한다() {
+        verificationStore.markVerified(new Email("hong@example.com"));
+        given(userRepository.existsByEmail(new Email("hong@example.com"))).willReturn(false);
+        given(userRepository.existsByNickname(new Nickname("길동이"))).willReturn(false);
+        given(userRepository.save(any())).willThrow(new DataIntegrityViolationException(
+                "duplicate key value violates unique constraint \"uk_users_nickname\""));
+
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1")))
+                .isInstanceOfSatisfying(BusinessException.class,
+                        e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.NICKNAME_ALREADY_EXISTS));
+        verify(profileRepository, never()).save(any());
+        assertThat(verificationStore.isVerified(new Email("hong@example.com"))).isTrue();
+    }
+
+    @Test
+    void signup_닉네임이_아닌_제약이_깨지면_원래_예외를_그대로_던진다() {
+        verificationStore.markVerified(new Email("hong@example.com"));
+        given(userRepository.existsByEmail(new Email("hong@example.com"))).willReturn(false);
+        given(userRepository.existsByNickname(new Nickname("길동이"))).willReturn(false);
+        DataIntegrityViolationException original = new DataIntegrityViolationException(
+                "duplicate key value violates unique constraint \"users_email_key\"");
+        given(userRepository.save(any())).willThrow(original);
+
+        assertThatThrownBy(() -> authService.signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1")))
+                .isSameAs(original);
         verify(profileRepository, never()).save(any());
     }
 

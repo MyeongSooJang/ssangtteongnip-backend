@@ -11,10 +11,14 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+        uniqueConstraints = @UniqueConstraint(name = User.UNIQUE_NICKNAME_CONSTRAINT, columnNames = "nickname"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
+
+    // 가입 경합으로 닉네임 유니크가 깨졌을 때 DB 오류에서 이 제약을 알아보기 위한 이름이다.
+    public static final String UNIQUE_NICKNAME_CONSTRAINT = "uk_users_nickname";
 
     public static final int MIN_PASSWORD_LENGTH = 8;
 
@@ -30,9 +34,9 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    // 닉네임은 기존 사용자에게 없을 수 있어(null) 비워 둔다. 유니크는 이메일과 같은 방식으로 컬럼에 건다.
+    // 닉네임은 기존 사용자에게 없을 수 있어(null) 비워 둔다. 유니크는 이름을 붙인 테이블 제약으로 건다.
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "nickname", unique = true))
+    @AttributeOverride(name = "value", column = @Column(name = "nickname"))
     private Nickname nickname;
 
     @Getter(AccessLevel.NONE)

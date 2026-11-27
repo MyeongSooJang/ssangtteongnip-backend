@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -67,7 +68,9 @@ class UserRepositoryTest {
         assertThatThrownBy(() -> {
             userRepository.save(register("kim@example.com", "길동이"));
             em.flush();
-        }).isInstanceOf(DataIntegrityViolationException.class);
+        }).isInstanceOf(DataIntegrityViolationException.class)
+                .satisfies(e -> assertThat(NestedExceptionUtils.getMostSpecificCause(e).getMessage())
+                        .containsIgnoringCase(User.UNIQUE_NICKNAME_CONSTRAINT));
     }
 
     @Test
