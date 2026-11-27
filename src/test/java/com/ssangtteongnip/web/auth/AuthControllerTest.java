@@ -103,7 +103,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                Map.of("email", "hong@example.com", "name", "홍길동", "password", "password1"))))
+                                Map.of("email", "hong@example.com", "name", "홍길동", "nickname", "길동이", "password", "password1"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
     }
@@ -115,12 +115,12 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                Map.of("email", "hong@example.com", "name", "홍길동", "password", "password1"))))
+                                Map.of("email", "hong@example.com", "name", "홍길동", "nickname", "길동이", "password", "password1"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").value("jwt-token"));
 
-        verify(authService).signup(new SignupRequest("hong@example.com", "홍길동", "password1"));
+        verify(authService).signup(new SignupRequest("hong@example.com", "홍길동", "길동이", "password1"));
     }
 
     @Test
@@ -130,9 +130,31 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                Map.of("email", "hong@example.com", "name", "홍길동", "password", "password1"))))
+                                Map.of("email", "hong@example.com", "name", "홍길동", "nickname", "길동이", "password", "password1"))))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_EXISTS"));
+    }
+
+    @Test
+    void POST_auth_signup_닉네임이_중복이면_409를_반환한다() throws Exception {
+        given(authService.signup(any())).willThrow(new BusinessException(ErrorCode.NICKNAME_ALREADY_EXISTS));
+
+        mockMvc.perform(post("/api/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("email", "hong@example.com", "name", "홍길동", "nickname", "길동이", "password", "password1"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("NICKNAME_ALREADY_EXISTS"));
+    }
+
+    @Test
+    void POST_auth_signup_닉네임이_없으면_400을_반환한다() throws Exception {
+        mockMvc.perform(post("/api/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("email", "hong@example.com", "name", "홍길동", "password", "password1"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test

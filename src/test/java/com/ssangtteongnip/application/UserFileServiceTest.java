@@ -9,6 +9,7 @@ import com.ssangtteongnip.domain.profile.FileType;
 import com.ssangtteongnip.domain.profile.UserFile;
 import com.ssangtteongnip.domain.profile.UserFileRepository;
 import com.ssangtteongnip.domain.user.Email;
+import com.ssangtteongnip.domain.user.Nickname;
 import com.ssangtteongnip.domain.user.User;
 import com.ssangtteongnip.domain.user.UserRepository;
 import com.ssangtteongnip.global.exception.ErrorCode;
@@ -44,7 +45,7 @@ class UserFileServiceTest {
     private UserFileService userFileService;
 
     private static User registeredUser() {
-        User user = User.register(new Email("hong@example.com"), "홍길동", "password1", new FakePasswordHasher());
+        User user = User.register(new Email("hong@example.com"), "홍길동", new Nickname("길동이"), "password1", new FakePasswordHasher());
         ReflectionTestUtils.setField(user, "id", USER_ID);
         return user;
     }

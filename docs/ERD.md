@@ -23,6 +23,7 @@ erDiagram
         bigint id PK
         varchar email UK
         varchar name
+        varchar nickname UK "null 허용(닉네임 도입 전 가입자). 한글·영문·숫자 2~10자"
         varchar password_hash
         timestamp created_at
         timestamp updated_at
@@ -183,3 +184,4 @@ erDiagram
 - 2026-11-10 코드 패키지를 `com.jobtracker`에서 `com.ssangtteongnip`으로 바꿨다. 엔티티 11개가 `package`와 `import` 줄만 바뀌었고 테이블, 컬럼, 관계는 그대로다.
 - `plans`는 하루에 여러 개를 쓸 수 있어 날짜·사용자 유니크 제약이 없다. 내용·카테고리·완료 기준·목표 시간·선택 항목 7개는 `PlanDetail`(@Embeddable)이 같은 테이블에 펼쳐진 구조다. 신규 테이블이라 `ddl-auto: update`로 만들어지고 운영 DB 수동 DDL은 필요 없다.
 - `plan_evidences`는 계획당 최대 `Plan.MAX_EVIDENCES`(5)개이고, 완료하려면 1개 이상이어야 한다. 한도는 계획 행을 잠근 뒤 확인해 지킨다.
+- `users.nickname`은 게시판 작성자 표시용이다. 기존 가입자는 null이고 Postgres 유니크는 null이 여럿이어도 허용한다. 컬럼 추가만이라 `ddl-auto: update`로 반영되고 운영 DB 수동 DDL은 필요 없다. 기존 가입자는 `PATCH /api/me/nickname`으로 설정해야 글을 쓸 수 있다.
