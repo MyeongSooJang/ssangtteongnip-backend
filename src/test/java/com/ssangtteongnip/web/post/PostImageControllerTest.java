@@ -18,7 +18,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,5 +60,23 @@ class PostImageControllerTest {
     void GET_post_images_형식이_다른_아이디는_400을_반환한다() throws Exception {
         mockMvc.perform(get("/api/post-images/not-a-uuid"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void POST_post_images_토큰이_없으면_401을_반환한다() throws Exception {
+        mockMvc.perform(post("/api/post-images/" + UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void PUT_post_images_토큰이_없으면_401을_반환한다() throws Exception {
+        mockMvc.perform(put("/api/post-images/" + UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void DELETE_post_images_토큰이_없으면_401을_반환한다() throws Exception {
+        mockMvc.perform(delete("/api/post-images/" + UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
     }
 }

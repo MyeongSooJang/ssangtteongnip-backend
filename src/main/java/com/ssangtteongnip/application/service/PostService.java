@@ -88,6 +88,7 @@ public class PostService {
     }
 
     // 저장소에는 이미 올라갔으므로 DB 저장이 실패하면 올린 이미지가 고아로 남지 않게 지우고 예외를 다시 던진다.
+    // 커밋 시점(연결 끊김 등)에 나는 실패는 여기서 잡지 못해 고아 객체가 남을 수 있다(알려진 한계).
     private void saveOrDeleteUploaded(Post post) {
         try {
             postRepository.save(post);
