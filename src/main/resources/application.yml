@@ -29,7 +29,8 @@ spring:
   servlet:
     multipart:
       max-file-size: 5MB
-      max-request-size: 6MB
+      # 게시글 이미지 5장(장당 5MB)과 제목·내용 필드를 한 요청에 받는다.
+      max-request-size: 26MB
 
 app:
   mail:
