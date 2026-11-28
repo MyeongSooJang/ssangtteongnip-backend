@@ -40,9 +40,6 @@ public class ScheduleController {
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
-        if (from != null && to != null) {
-            return ApiResponse.ok(scheduleService.findAll(userId, from, to));
-        }
-        return ApiResponse.ok(scheduleService.findAll(userId));
+        return ApiResponse.ok(scheduleService.findAll(userId, from, to));
     }
 }

@@ -7,8 +7,7 @@ import java.util.Optional;
 public interface ScheduleRepository {
     Schedule save(Schedule schedule);
     Optional<Schedule> findById(Long id);
-    List<Schedule> findByApplicationUserId(Long userId);
 
-    // 소유한 지원 건의 일정 중 from~to(양 끝 포함)에 잡힌 것
+    // 소유한 지원 건의 일정 중 from~to(양 끝 포함)에 잡힌 것. from이나 to가 null이면 그쪽 끝은 제한하지 않는다.
     List<Schedule> findInPeriod(Long userId, LocalDateTime from, LocalDateTime to);
 }

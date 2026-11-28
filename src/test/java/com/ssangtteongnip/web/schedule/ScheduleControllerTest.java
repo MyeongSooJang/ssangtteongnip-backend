@@ -77,7 +77,7 @@ class ScheduleControllerTest {
 
     @Test
     void 기간을_지정하지_않으면_전체_일정을_조회한다() throws Exception {
-        given(scheduleService.findAll(1L)).willReturn(List.of(ScheduleResponse.convert(schedule("판교"))));
+        given(scheduleService.findAll(1L, null, null)).willReturn(List.of(ScheduleResponse.convert(schedule("판교"))));
 
         mockMvc.perform(get("/api/schedules")
                         .header("Authorization", BEARER))
@@ -102,8 +102,9 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void 기간의_한쪽만_지정하면_전체_일정을_조회한다() throws Exception {
-        given(scheduleService.findAll(1L)).willReturn(List.of(ScheduleResponse.convert(schedule("판교"))));
+    void 기간의_한쪽만_지정하면_그쪽_끝만_제한해_조회한다() throws Exception {
+        LocalDateTime from = LocalDateTime.of(2026, 11, 1, 0, 0);
+        given(scheduleService.findAll(1L, from, null)).willReturn(List.of(ScheduleResponse.convert(schedule("판교"))));
 
         mockMvc.perform(get("/api/schedules")
                         .header("Authorization", BEARER)

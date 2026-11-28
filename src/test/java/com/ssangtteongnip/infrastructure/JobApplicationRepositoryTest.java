@@ -2,6 +2,7 @@ package com.ssangtteongnip.infrastructure;
 
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
+import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.jobapplication.JobSite;
 import com.ssangtteongnip.domain.jobapplication.ResumeView;
 import com.ssangtteongnip.domain.company.Company;
@@ -85,6 +86,34 @@ class JobApplicationRepositoryTest {
         List<JobApplication> found = jobApplicationRepository.findPendingWithDeadline();
 
         assertThat(found).extracting(JobApplication::getPosition).containsExactlyInAnyOrder("대기 중", "다른 사용자의 대기 중");
+    }
+
+    @Test
+    void 상태를_주면_그_상태의_지원만_조회한다() {
+        save("서류 제출", DEADLINE);
+        save(OTHER_USER_ID, "다른 사용자의 서류 제출", DEADLINE, ResumeView.NOT_VIEWED);
+        JobApplication interview = save("면접 중", DEADLINE);
+        interview.startInterview(LocalDateTime.of(2026, 10, 20, 10, 0));
+        em.flush();
+        em.clear();
+
+        List<JobApplication> found = jobApplicationRepository.findFilteredByStatus(USER_ID, JobApplicationStatus.INTERVIEW);
+
+        assertThat(found).extracting(JobApplication::getPosition).containsExactly("면접 중");
+    }
+
+    @Test
+    void 상태를_주지_않으면_상태와_상관없이_본인의_지원을_모두_조회한다() {
+        save("서류 제출", DEADLINE);
+        save(OTHER_USER_ID, "다른 사용자의 서류 제출", DEADLINE, ResumeView.NOT_VIEWED);
+        JobApplication interview = save("면접 중", DEADLINE);
+        interview.startInterview(LocalDateTime.of(2026, 10, 20, 10, 0));
+        em.flush();
+        em.clear();
+
+        List<JobApplication> found = jobApplicationRepository.findFilteredByStatus(USER_ID, null);
+
+        assertThat(found).extracting(JobApplication::getPosition).containsExactlyInAnyOrder("서류 제출", "면접 중");
     }
 
     @Test

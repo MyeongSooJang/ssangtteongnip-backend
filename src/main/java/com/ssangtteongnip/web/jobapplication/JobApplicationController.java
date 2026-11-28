@@ -31,10 +31,7 @@ public class JobApplicationController {
     @GetMapping
     public ApiResponse<List<JobApplicationResponse>> findAll(@AuthenticationPrincipal Long userId,
                                                      @RequestParam(required = false) JobApplicationStatus status) {
-        List<JobApplicationResponse> applications = status == null
-                ? jobApplicationService.findAll(userId)
-                : jobApplicationService.findAll(userId, status);
-        return ApiResponse.ok(applications);
+        return ApiResponse.ok(jobApplicationService.findAll(userId, status));
     }
 
     @GetMapping("/stats/job-site")

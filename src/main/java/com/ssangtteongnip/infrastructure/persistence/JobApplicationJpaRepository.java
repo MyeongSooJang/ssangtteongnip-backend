@@ -2,7 +2,6 @@ package com.ssangtteongnip.infrastructure.persistence;
 
 import com.ssangtteongnip.domain.jobapplication.JobApplication;
 import com.ssangtteongnip.domain.jobapplication.JobApplicationRepository;
-import com.ssangtteongnip.domain.jobapplication.JobApplicationStatus;
 import com.ssangtteongnip.domain.jobapplication.JobSiteStatistics;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,11 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface JobApplicationJpaRepository extends JpaRepository<JobApplication, Long>, JobApplicationRepository {
-    List<JobApplication> findByUserId(Long userId);
-
-    List<JobApplication> findByUserIdAndStatus(Long userId, JobApplicationStatus status);
-
+public interface JobApplicationJpaRepository extends JpaRepository<JobApplication, Long>, JobApplicationRepository, JobApplicationQueryRepository {
     @Override
     @Query("""
             select a.jobSite, count(a), count(a.documentPassedAt)
