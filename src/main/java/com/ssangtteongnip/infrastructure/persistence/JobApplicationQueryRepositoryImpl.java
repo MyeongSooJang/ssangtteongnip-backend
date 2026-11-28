@@ -10,15 +10,16 @@ import java.util.List;
 
 import static com.ssangtteongnip.domain.jobapplication.QJobApplication.jobApplication;
 
-// Spring Data가 JobApplicationJpaRepository의 구현으로 인식하는 이름이다 (인터페이스 이름 + Impl).
-public class JobApplicationJpaRepositoryImpl {
+// Spring Data가 JobApplicationQueryRepository의 구현으로 인식하는 이름이다 (인터페이스 이름 + Impl).
+public class JobApplicationQueryRepositoryImpl implements JobApplicationQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public JobApplicationJpaRepositoryImpl(EntityManager entityManager) {
+    public JobApplicationQueryRepositoryImpl(EntityManager entityManager) {
         this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
+    @Override
     public List<JobApplication> findFilteredByStatus(Long userId, JobApplicationStatus status) {
         return queryFactory.selectFrom(jobApplication)
                 .where(jobApplication.userId.eq(userId), statusEquals(status))

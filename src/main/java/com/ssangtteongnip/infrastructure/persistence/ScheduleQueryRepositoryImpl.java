@@ -10,15 +10,16 @@ import java.util.List;
 
 import static com.ssangtteongnip.domain.schedule.QSchedule.schedule;
 
-// Spring Data가 ScheduleJpaRepository의 구현으로 인식하는 이름이다 (인터페이스 이름 + Impl).
-public class ScheduleJpaRepositoryImpl {
+// Spring Data가 ScheduleQueryRepository의 구현으로 인식하는 이름이다 (인터페이스 이름 + Impl).
+public class ScheduleQueryRepositoryImpl implements ScheduleQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public ScheduleJpaRepositoryImpl(EntityManager entityManager) {
+    public ScheduleQueryRepositoryImpl(EntityManager entityManager) {
         this.queryFactory = new JPAQueryFactory(entityManager);
     }
 
+    @Override
     public List<Schedule> findInPeriod(Long userId, LocalDateTime from, LocalDateTime to) {
         return queryFactory.selectFrom(schedule)
                 .where(schedule.application.userId.eq(userId), scheduledAtFrom(from), scheduledAtUntil(to))

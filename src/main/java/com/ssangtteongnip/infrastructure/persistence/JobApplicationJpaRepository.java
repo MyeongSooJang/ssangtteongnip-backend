@@ -9,9 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface JobApplicationJpaRepository extends JpaRepository<JobApplication, Long>, JobApplicationRepository {
-    // findFilteredByStatus는 JobApplicationJpaRepositoryImpl(QueryDSL)이 구현한다.
-
+public interface JobApplicationJpaRepository extends JpaRepository<JobApplication, Long>, JobApplicationRepository, JobApplicationQueryRepository {
     @Override
     @Query("""
             select a.jobSite, count(a), count(a.documentPassedAt)
