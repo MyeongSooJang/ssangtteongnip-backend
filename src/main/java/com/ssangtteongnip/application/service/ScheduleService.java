@@ -56,12 +56,7 @@ public class ScheduleService {
         return ScheduleResponse.convert(schedule);
     }
 
-    public List<ScheduleResponse> findAll(Long userId) {
-        return scheduleRepository.findByApplicationUserId(userId).stream()
-                .map(ScheduleResponse::convert)
-                .toList();
-    }
-
+    // from이나 to가 null이면 그쪽 끝은 제한하지 않는다.
     public List<ScheduleResponse> findAll(Long userId, LocalDateTime from, LocalDateTime to) {
         return scheduleRepository.findInPeriod(userId, from, to).stream()
                 .map(ScheduleResponse::convert)

@@ -37,14 +37,9 @@ public class JobApplicationService {
         return JobApplicationResponse.convert(saved);
     }
 
-    public List<JobApplicationResponse> findAll(Long userId) {
-        return jobApplicationRepository.findByUserId(userId).stream()
-                .map(JobApplicationResponse::convert)
-                .toList();
-    }
-
+    // status가 null이면 상태를 가리지 않고 모두 조회한다.
     public List<JobApplicationResponse> findAll(Long userId, JobApplicationStatus status) {
-        return jobApplicationRepository.findByUserIdAndStatus(userId, status).stream()
+        return jobApplicationRepository.findFilteredByStatus(userId, status).stream()
                 .map(JobApplicationResponse::convert)
                 .toList();
     }

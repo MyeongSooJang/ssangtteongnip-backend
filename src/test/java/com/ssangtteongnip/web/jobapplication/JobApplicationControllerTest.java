@@ -149,6 +149,16 @@ class JobApplicationControllerTest {
     }
 
     @Test
+    void GET_applications_status를_주지_않으면_상태를_가리지_않고_조회한다() throws Exception {
+        given(jobApplicationService.findAll(1L, null)).willReturn(java.util.List.of(JobApplicationResponse.convert(sampleApplication())));
+
+        mockMvc.perform(get("/api/applications")
+                        .header("Authorization", BEARER))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].status").value("RESUME_SUBMITTED"));
+    }
+
+    @Test
     void GET_applications_status로_면접_단계_지원_건만_조회한다() throws Exception {
         JobApplication app = sampleApplication();
         app.startInterview(java.time.LocalDateTime.of(2026, 11, 5, 10, 0));

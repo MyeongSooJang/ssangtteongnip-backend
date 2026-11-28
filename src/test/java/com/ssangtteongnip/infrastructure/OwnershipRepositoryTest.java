@@ -60,10 +60,10 @@ class OwnershipRepositoryTest {
 
     @Test
     void 지원_건은_소유자의_것만_조회한다() {
-        assertThat(jobApplicationRepository.findByUserId(OWNER)).hasSize(1)
+        assertThat(jobApplicationRepository.findFilteredByStatus(OWNER, null)).hasSize(1)
                 .allMatch(application -> application.isOwnedBy(OWNER));
-        assertThat(jobApplicationRepository.findByUserIdAndStatus(OWNER, JobApplicationStatus.RESUME_SUBMITTED)).hasSize(1);
-        assertThat(jobApplicationRepository.findByUserIdAndStatus(OWNER, JobApplicationStatus.INTERVIEW)).isEmpty();
+        assertThat(jobApplicationRepository.findFilteredByStatus(OWNER, JobApplicationStatus.RESUME_SUBMITTED)).hasSize(1);
+        assertThat(jobApplicationRepository.findFilteredByStatus(OWNER, JobApplicationStatus.INTERVIEW)).isEmpty();
     }
 
     private void saveApplication(Long userId, JobSite jobSite, boolean documentPassed) {
@@ -130,7 +130,7 @@ class OwnershipRepositoryTest {
 
     @Test
     void 일정은_소유한_지원_건의_것만_조회한다() {
-        assertThat(scheduleRepository.findByApplicationUserId(OWNER)).hasSize(1);
+        assertThat(scheduleRepository.findInPeriod(OWNER, null, null)).hasSize(1);
         assertThat(scheduleRepository.findInPeriod(
                 OWNER, scheduledAt.minusDays(1), scheduledAt.plusDays(1))).hasSize(1);
         assertThat(scheduleRepository.findInPeriod(
